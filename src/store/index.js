@@ -16,7 +16,6 @@ const state = {
 
 const mutations = {
   clearUser(state, user){
-    console.log(user);
     state.user = user;
   },
   signIn(state, signInUser) {    
@@ -92,8 +91,7 @@ const mutations = {
 };
 
 const actions = {
-  async clearUserAction({commit}, user){
-    console.log('inside clear user action');
+  async clearUserAction({commit}, user){    
     commit("clearUser", user);
   },
   async signInAction({ commit }, user) {
@@ -183,7 +181,7 @@ const actions = {
 
 const getters = {
   getUserName: (state) =>
-    state.user.firstname === undefined
+    state.user.firstname === undefined || state.user.firstname === ""
       ? "Guest"
       : state.user.firstname + " " + state.user.lastname,
   getStoreById: (state) => (id) =>

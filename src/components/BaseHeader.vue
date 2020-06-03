@@ -23,7 +23,7 @@
         </v-list>-->
       </v-menu>
       <v-toolbar-title>
-        <v-btn to="/home">Shopping List</v-btn>
+        <v-btn to="/">Shopping List</v-btn>
       </v-toolbar-title>
       <v-spacer></v-spacer>
       <v-tooltip bottom>
@@ -33,8 +33,8 @@
         <span>{{getUserName}}</span>
       </v-tooltip>
 
-      <v-btn v-if="!this.isUserSignedIn" to="/login">Login</v-btn>
-      <v-btn v-if="this.isUserSignedIn" v-on:click="clearUser" to="/login" >Logout</v-btn>
+      <v-btn v-if="!this.isUserSignedIn()" v-on:click="signInUser" to="/">Login</v-btn>
+      <v-btn v-if="this.isUserSignedIn()" v-on:click="clearUser" to="/login">Logout</v-btn>
       <v-menu left bottom></v-menu>
     </v-app-bar>
   </div>
@@ -44,13 +44,10 @@
 import { mapActions, mapState, mapGetters } from "vuex";
 export default {
   data: () => ({
-    items: [
-      { title: "Manage Categories", path: "/ManageCategories" },
-      { title: "Manage Stores", path: "/ManageStores" },
+    items: [      
       { title: "Manage Items", path: "/ManageItems" },
       { title: "About", path: "/About" }
-    ],
-    
+    ]
   }),
   computed: {
     ...mapState({ currentUser: "user" }),
@@ -58,14 +55,21 @@ export default {
   },
   methods: {
     ...mapActions(["clearUserAction"]),
-    isUserSignedIn: function(){
-      if (this.getUserName){
-        return true
+    isUserSignedIn: function() {
+      if (this.getUserName !== "Guest") {
+        return true;
       }
       return false;
     },
-    clearUser: function(){
-      this.clearUserAction({firstname: "", lastname: "", phone:"", email:""})
+    clearUser: function() {
+      this.clearUserAction({
+        firstname: "",
+        lastname: "",
+        phone: "",
+        email: ""
+      });
+    },
+    signInUser: function() {
     }
   }
 };

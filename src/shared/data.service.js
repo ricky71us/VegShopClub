@@ -4,10 +4,8 @@ import { API } from "./config";
 
 const signIn = async function(user) {
   try {
-    console.log('Sign in user');
     const response = await axios.post(`${API}/authentication/login`, user);
     const userInfo = parseItem(response, 200);
-    console.log(userInfo);
     return userInfo.data;
   } catch (error) {
     console.error(error);
