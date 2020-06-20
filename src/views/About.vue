@@ -2,7 +2,7 @@
   <div class="about">
     <v-spacer/>    
 
-    <h1>This is an application to manage your shopping list</h1>    
+    <h1>Welcome to Vegetable Buying Club!</h1>    
   </div>
 </template>
 

@@ -5,7 +5,7 @@ module.exports = {
   devServer: {
     proxy: {
       '/api': {
-        target: 'http://phpapi.bmgtech.ca/index.php/api/',
+        target: 'http://phpapi1.bmgtech.ca/index.php/api/',
         ws: true,
         changeOrigin: true,
       },

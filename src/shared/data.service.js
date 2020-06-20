@@ -15,15 +15,14 @@ const signIn = async function(user) {
 };
 
 const register = async function(user) {
-  
-  try {
+  try {    
     const response = await axios.post(
       `${API}/authentication/registration`,
       user
     );
-    
+
     const userInfo = parseItem(response, 200);
-    
+
     return userInfo;
   } catch (error) {
     console.error(error);
@@ -31,9 +30,35 @@ const register = async function(user) {
   }
 };
 
-const getStores = async function() {
+const getUserData = async function(id) {
+  try {    
+    const response = await axios.get(
+      `${API}/authentication/user/${id}`);
+
+    const userInfo = parseItem(response, 200);
+    return userInfo;
+  } catch (error) {
+    console.error(error);
+    console.error(error.message);
+  }
+};
+
+const getAllUsers = async function() {
+  try {    
+    const response = await axios.get(
+      `${API}/authentication/users`);
+
+    const userInfo = parseItem(response, 200);
+    return userInfo;
+  } catch (error) {
+    console.error(error);
+    console.error(error.message);
+  }
+};
+//Order Status
+const getOrderStatus = async function() {
   try {
-    const response = await axios.get(`${API}/stores`);
+    const response = await axios.get(`${API}/orderstatus`);
     let data = parseList(response);
     return data;
   } catch (error) {
@@ -42,84 +67,47 @@ const getStores = async function() {
   }
 };
 
-const addStore = async function(store) {
+// Order
+const getOrders = async function() {
+  try {
+    const response = await axios.get(`${API}/orders`);
+    let data = parseList(response);
+    return data;
+  } catch (error) {
+    console.log(error);
+    return error.message;
+  }
+};
+
+const addOrder = async function(order) {
   var response = null;
   try {
-    response = await axios.post(`${API}/stores`, store);
+    response = await axios.post(`${API}/orders`, order);
     console.log(response);
-    const addedStore = parseItem(response, 201);
-    return addedStore;
+    const addedOrder = parseItem(response, 201);
+    return addedOrder;
   } catch (error) {
-    console.log(store);    
-    console.log(error)
-    return error.message;
-  }
-};
-
-const updateStore = async function(store) {
-  try {
-    console.log(store);
-    const response = await axios.put(`${API}/stores?id=${store.id}`, store);
-    parseItem(response, 200);
-    return store;
-  } catch (error) {
+    console.log(order);
     console.log(error);
     return error.message;
   }
 };
 
-const deleteStore = async function(store) {
+const updateOrder = async function(order) {
   try {
-    const response = await axios.delete(`${API}/stores?id=${store.id}`, store);
-    let data = parseList(response);
-    return data;
-  } catch (error) {
-    console.log(error);
-    return [];
-  }
-};
-const getCategories = async function() {
-  try {
-    const response = await axios.get(`${API}/categories`);
-    let data = parseList(response);
-    return data;
-  } catch (error) {
-    console.log(error);
-    return [];
-  }
-};
-
-const addCategory = async function(category) {
-  try {
-    const response = await axios.post(`${API}/categories`, category);
-    const addedCategory = parseItem(response, 201);
-    return addedCategory;
-  } catch (error) {
-    console.error(error);
-    return null;
-  }
-};
-
-const updateCategory = async function(category) {
-  try {
-    const response = await axios.put(
-      `${API}/categories?id=${category.id}`,
-      category
-    );
+    //console.log(order);
+    const response = await axios.put(`${API}/orders?id=${order.id}`, order);
     parseItem(response, 200);
-    return category;
+    return order;
   } catch (error) {
-    console.error(error);
-    return null;
+    console.log(error);
+    return error.message;
   }
 };
 
-const deleteCategory = async function(category) {
+const deleteOrder = async function(order) {
   try {
-    const response = await axios.delete(
-      `${API}/categories?id=${category.id}`,
-      category
-    );
+    const response = await axios.delete(`${API}/orders?id=${order.id}`, order);
     let data = parseList(response);
     return data;
   } catch (error) {
@@ -139,7 +127,7 @@ const getItems = async function() {
 };
 
 const addItem = async function(item) {
-  try {    
+  try {
     const response = await axios.post(`${API}/items`, item);
     const addedItem = parseItem(response, 201);
     return addedItem;
@@ -171,75 +159,64 @@ const deleteItem = async function(item) {
   }
 };
 
-const getCategoryStores = async function() {
+// Purchase Order
+const getPurchaseOrder = async function() {
   try {
-    const response = await axios.get(`${API}/categorystores`);
+    const response = await axios.get(`${API}/purchaseorder`);
     let data = parseList(response);
     return data;
   } catch (error) {
-    console.log(error);
     return [];
   }
 };
 
-const getCatStoreItems = async function() {
+const getPurchaseOrderByOrderId = async function(orderId) {
   try {
-    const response = await axios.get(`${API}/storeitems`);
+    const response = await axios.get(
+      `${API}/purchaseorderbyorderid/${orderId}`
+    );
     let data = parseList(response);
     return data;
   } catch (error) {
-    console.log(error);
     return [];
   }
 };
 
-const addCategoryStore = async function(categoryStore) {
+const addPurchaseOrder = async function(purchaseOrder) {
   try {
-    const response = await axios.post(`${API}/categorystores`, categoryStore);
-    const addedCategoryStore = parseItem(response, 201);
-    return addedCategoryStore;
+    //console.log(purchaseOrder);
+    const response = await axios.post(`${API}/purchaseorder`, purchaseOrder);
+    const addedPurchaseOrder = parseItem(response, 201);
+    // console.log(addedPurchaseOrder);
+    return addedPurchaseOrder;
   } catch (error) {
     console.error(error);
     return null;
   }
 };
 
-const deleteCategoryStore = async function(categoryStore) {
+const updatePurchaseOrder = async function(purchaseOrder) {
   try {
-    //console.log(categoryStore);
-    const response = await axios.delete(
-      `${API}/categorystores?id=${categoryStore.id}`,
-      categoryStore
+    //console.log(purchaseOrder);
+    const response = await axios.put(
+      `${API}/purchaseorder?id=${purchaseOrder.id}`,
+      purchaseOrder
     );
-    let data = parseList(response);
-    //console.log(response);
-    return data;
-  } catch (error) {
-    console.log(error);
-    return [];
-  }
-};
-
-const addStoreItem = async function(storeItem) {
-  try {
-    console.log(storeItem);
-    const response = await axios.post(`${API}/storeitems`, storeItem);
-    const addedStoreItem = parseItem(response, 201);
-    console.log(addedStoreItem);
-    return addedStoreItem;
+    parseItem(response, 200);
+    return purchaseOrder;
   } catch (error) {
     console.error(error);
     return null;
   }
 };
 
-const deleteCatStoreItem = async function(catStoreItem) {
-  try {    
+const deletePurchaseOrder = async function(purchaseOrder) {
+  try {
     const response = await axios.delete(
-      `${API}/storeitems?id=${catStoreItem.id}`,
-      catStoreItem
+      `${API}/purchaseorder?id=${purchaseOrder.id}`,
+      purchaseOrder
     );
-    let data = parseList(response);    
+    let data = parseList(response);
     return data;
   } catch (error) {
     console.log(error);
@@ -247,7 +224,70 @@ const deleteCatStoreItem = async function(catStoreItem) {
   }
 };
 
-const parseList = (response) => {  
+// Bulk Order
+const getBulkOrder = async function() {
+  try {
+    const response = await axios.get(`${API}/bulkorder`);
+    let data = parseList(response);
+    return data;
+  } catch (error) {
+    return [];
+  }
+};
+
+const getBulkOrderByOrderId = async function(orderId) {
+  try {
+    const response = await axios.get(`${API}/bulkorderbyorderid/${orderId}`);
+    let data = parseList(response);
+    return data;
+  } catch (error) {
+    return [];
+  }
+};
+
+const addBulkOrder = async function(bulkOrder) {
+  try {
+    //console.log(bulkOrder);
+    const response = await axios.post(`${API}/bulkorder`, bulkOrder);
+    const addedBulkOrder = parseItem(response, 201);
+    // console.log(addedBulkOrder);
+    return addedBulkOrder;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+
+const updateBulkOrder = async function(bulkOrder) {
+  try {
+    //console.log(bulkOrder);
+    const response = await axios.put(
+      `${API}/bulkorder?id=${bulkOrder.id}`,
+      bulkOrder
+    );
+    parseItem(response, 200);
+    return bulkOrder;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+
+const deleteBulkOrder = async function(bulkOrder) {
+  try {
+    const response = await axios.delete(
+      `${API}/bulkorder?id=${bulkOrder.id}`,
+      bulkOrder
+    );
+    let data = parseList(response);
+    return data;
+  } catch (error) {
+    console.log(error);
+    return [];
+  }
+};
+
+const parseList = (response) => {
   if (response.status !== 200) throw Error(response.data);
   if (!response) return [];
   let list = response.data;
@@ -263,29 +303,32 @@ export const parseItem = (response, code) => {
   let item = response;
   if (typeof item !== "object") {
     item = undefined;
-  }  
+  }
   return item.data;
 };
 
 export const dataService = {
   signIn,
   register,
-  getStores,
-  addStore,
-  updateStore,
-  deleteStore,
-  getCategories,
-  addCategory,
-  updateCategory,
-  deleteCategory,
+  getUserData,
+  getAllUsers,
+  getOrderStatus,
+  getOrders,
+  addOrder,
+  updateOrder,
+  deleteOrder,
   getItems,
   addItem,
   updateItem,
   deleteItem,
-  getCategoryStores,
-  addCategoryStore,
-  deleteCategoryStore,
-  getCatStoreItems,
-  addStoreItem,
-  deleteCatStoreItem,
+  getPurchaseOrder,
+  getPurchaseOrderByOrderId,
+  addPurchaseOrder,
+  updatePurchaseOrder,
+  deletePurchaseOrder,
+  getBulkOrder,
+  getBulkOrderByOrderId,
+  addBulkOrder,
+  updateBulkOrder,
+  deleteBulkOrder,
 };

@@ -26,7 +26,7 @@
     </v-card-text>
     <v-divider></v-divider>
     <v-card-actions>
-      <v-btn color="success" v-on:click="register">Register</v-btn>
+      <v-btn color="success" to="/register">Register</v-btn>
       <v-spacer></v-spacer>
       <v-btn color="info" v-on:click="signInUser">Login</v-btn>
     </v-card-actions>
@@ -72,16 +72,29 @@ export default {
         };
         await this.signInAction(userInfo);
         if (this.currentUser !== null)
-          this.$router.push({ path: "/home" });
+          this.$router.push({ path: "/" });
         else {
           this.msg = "Invalid Credentials";
           this.isMsg = !(this.msg === "");
           }
       }
     },
-    register() {
-      this.$router.push({ path: "register" });
+    async register() {
+      console.log('test');
+      await this.$router.push({ path: "/" }).catch((err) => {
+        console.log(err);
+        throw new Error(`Problem handling something: ${err}.`);
+    });
     }
+  },
+  created(){
+    console.log("created");
+  },
+  mounted(){
+    console.log("mounted");
+  },
+  destroyed(){
+    console.log("destroyed");
   },
   computed: {
     ...mapState({ currentUser: "user" })

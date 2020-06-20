@@ -1,4 +1,4 @@
-# shoplist
+# vbc
 
 ## Project setup
 ```

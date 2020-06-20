@@ -7,7 +7,7 @@
             <tr>
               <th class="text-left">
                 Name
-                <v-dialog v-model="dialog" width="500" :key="item.id" :id="item.id">
+                <v-dialog v-model="dialog" width="500" :key="localItem.id" :id="localItem.id">
                   <template v-slot:activator="{ on }">
                     <v-icon color="primary" dark v-on="on" @click="initializeItem()">mdi-plus</v-icon>(Add New Item)
                   </template>
@@ -15,27 +15,30 @@
                     <v-card-title class="headline grey lighten-2" primary-title>Item Details</v-card-title>
                     <v-card-text>
                       <v-text-field
-                        v-model="updateItem.name"
+                        v-model="updatedItem.name"
                         :counter="100"
                         :rules="nameRules"
                         label="Item Name"
                         required
                       ></v-text-field>
 
-                      <v-text-field v-model="updateItem.description" label="Description"></v-text-field>
+                      <v-text-field v-model="updatedItem.description" label="Description"></v-text-field>
+                      <v-text-field v-model="updatedItem.minQty" label="Minimum Quantity"></v-text-field>
+                      <v-text-field v-model="updatedItem.defaultUnits" label="Units"></v-text-field>
+                      <v-text-field v-model="updatedItem.price" label="Price"></v-text-field>
 
                       <v-btn
                         :disabled="!valid"
                         color="success"
                         class="mr-4"
-                        @click="saveItem()"
+                        @click="addNewItem()"
                         @click.stop="dialog = false"
                       >Save</v-btn>
 
                       <v-btn
                         color="error"
                         class="mr-4"
-                        @click="addNewItem"
+                        @click="initializeItem()"
                         @click.stop="dialog = false"
                       >Cancel</v-btn>
                     </v-card-text>
@@ -48,8 +51,8 @@
                   </v-card>
                 </v-dialog>
               </th>
-              <th class="text-left">Edit</th>
-              <th class="text-left">Delete</th>
+              <th class="text-left">Item Details</th>
+              <th class="text-left">Active</th>
             </tr>
           </thead>
           <tbody>
@@ -79,19 +82,22 @@
                       ></v-text-field>
 
                       <v-text-field v-model="tempItem.description" label="Description"></v-text-field>
+                      <v-text-field v-model="tempItem.minQty" label="Minimum Quantity"></v-text-field>
+                      <v-text-field v-model="tempItem.defaultUnits" label="Units"></v-text-field>
+                      <v-text-field v-model="tempItem.price" label="Price"></v-text-field>
 
                       <v-btn
                         :disabled="!valid"
                         color="success"
                         class="mr-4"
-                        @click="saveItem()"
+                        @click="updateItem(item)"
                         @click.stop="$set(dialogEdit, item.id,  false)"
                       >Save</v-btn>
 
                       <v-btn
                         color="error"
                         class="mr-4"
-                        @click="addNewItem"
+                        @click="initializeItem()"
                         @click.stop="$set(dialogEdit, item.id,  false)"
                       >Cancel</v-btn>
                     </v-card-text>
@@ -105,12 +111,30 @@
                 </v-dialog>
               </td>
               <td>
-                <v-tooltip bottom>
-                  <template v-slot:activator="{ on }">
-                    <v-icon color="red" dark v-on="on" @click="deleteItem(item)">mdi-delete</v-icon>
-                  </template>
+                <!-- <v-tooltip bottom> -->
+                <!-- <template v-slot:activator="{ on }"> -->
+                <!-- <v-checkbox
+                  v-model="item.isActive"
+                      :value="item.isActive"
+                  class="ma-0 pa-0"
+                  @click="updateItem(item)"
+                  dense
+                ></v-checkbox>-->
+                <!-- <v-icon color="red" dark v-on="on" @click="deleteItem(item)">mdi-delete</v-icon> -->
+                <!-- </template>
                   <span>Delete Item</span>
-                </v-tooltip>
+                </v-tooltip>-->
+
+                <v-icon
+                  @click="toggleItem(item)"
+                  v-if="parseInt(item.isActive) === 1"
+                  color="green"
+                >mdi-check</v-icon>
+                <v-icon
+                  @click="toggleItem(item)"
+                  v-if="parseInt(item.isActive) === 0"
+                  color="red"
+                >mdi-close</v-icon>
               </td>
             </tr>
           </tbody>
@@ -133,20 +157,32 @@ export default {
 
   data() {
     return {
-      item: {
+      localItem: {
         id: 0,
         name: null,
-        description: null
+        description: null,
+        minQty: null,
+        defaultunits: "",
+        price: null,
+        isActive: true
       },
-      updateItem: {
+      updatedItem: {
         id: 0,
         name: null,
-        description: null
+        description: null,
+        minQty: null,
+        defaultUnits: "",
+        price: null,
+        isActive: true
       },
       tempItem: {
         id: 0,
         name: null,
-        description: null
+        description: null,
+        minQty: null,
+        defaultUnits: "",
+        price: null,
+        isActive: true
       },
       valid: true,
       name: "",
@@ -155,7 +191,8 @@ export default {
       dialogEdit: [],
       message: null,
       multiLine: true,
-      snackbar: false
+      snackbar: false,
+      selected: []
     };
   },
 
@@ -184,33 +221,68 @@ export default {
       this.tempItem = {
         id: item.id,
         name: item.name,
-        description: item.description
+        description: item.description,
+        minQty: item.minQty,
+        price: item.price,
+        defaultUnits: item.defaultUnits
       };
     },
     initializeItem: function() {
       this.$refs.form.validate();
-      this.updateItem = {
+      this.updatedItem = {
         id: 0,
         name: "",
-        description: ""
+        description: "",
+        minQty: "",
+        price: "",
+        defaultUnits: null
       };
     },
     addNewItem: function() {
-      //this.updateItem = this.item;
-    },
-    saveItem: function() {
       if (this.$refs.form.validate()) {
-        if (this.tempItem.id > 0) {
-          this.updateItemAction(this.tempItem);
-          this.snackMessage(
-            `Item "${this.tempItem.name}" updated successfully!`
-          );
-        } else {
-          this.addItemAction(this.updateItem);
-          this.snackMessage(
-            `Item "${this.updateItem.name}" added successfully!`
-          );
-        }
+        this.addItemAction(this.updatedItem);
+        this.snackMessage(
+          `Item "${this.updatedItem.name}" added successfully!`
+        );
+      }
+    },
+    toggleItem(item) {
+      let msg = "";
+      if (parseInt(item.isActive)) {
+        item.isActive === 0;
+        msg = "is Not Active";
+      } else {
+        item.isActive === 1;
+        msg = "is Active";
+      }
+      item.isActive = parseInt(item.isActive) === 1 ? 0 : 1;
+      if (this.$refs.form.validate()) {
+        this.updateItemAction({
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          minQty: item.minQty,
+          price: item.price,
+          defaultUnits: item.defaultUnits,
+          isActive: item.isActive
+        });
+
+        this.snackMessage(`Item "${item.name}" ${msg}!`);
+      }
+    },
+    updateItem: function(item) {
+      console.log(item);
+      if (this.$refs.form.validate()) {
+        this.updateItemAction({
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          minQty: item.minQty,
+          price: item.price,
+          defaultUnits: item.defaultUnits,
+          isActive: item.isActive
+        });
+        this.snackMessage(`Item "${item.name}" updated successfully!`);
       }
     },
     validate() {
@@ -221,7 +293,7 @@ export default {
   },
   computed: {
     ...mapState(["items"]),
-    sortedItems: function(){
+    sortedItems: function() {
       return 0;
     }
   }

@@ -1,54 +1,46 @@
 import Vue from "vue";
 import Vuex from "vuex";
 import { dataService } from "../shared";
-import createPersistedState from 'vuex-persistedstate';
+import createPersistedState from "vuex-persistedstate";
 
 Vue.use(Vuex);
 
 const state = {
-  user: { id: "", email: "", firstname: "", lastname: "", phone: "" },
-  stores: [],  
+  user: { id: 0, email: "", firstname: "", lastname: "", phone: "" },
+  orders: [],
+  orderstatus: [],
   items: [],
-  categories: [],
-  categoryStores: [],
-  catStoreItems: [],
+  purchaseOrders: [],
+  bulkOrders: [],
 };
 
 const mutations = {
-  clearUser(state, user){
+  clearUser(state, user) {
     state.user = user;
   },
-  signIn(state, signInUser) {    
+  signIn(state, signInUser) {
     state.user = signInUser;
   },
-  getStores(state, stores) {
-    state.stores = stores;
+  // Order Status
+  getOrderStatus(state, orderstatus) {
+    state.orderstatus = orderstatus;
   },
-  addStore(state, store) {
-    state.stores.unshift(...store);
+  // Orders
+  getOrders(state, orders) {
+    state.orders = orders;
   },
-  updateStore(state, store) {
-    const index = state.stores.findIndex((h) => h.id === store.id);
-    state.stores.splice(index, 1, store);
-    state.stores = [...state.stores];
+  addOrder(state, order) {
+    state.orders.unshift(...order);
   },
-  deleteStore(state, store) {
-    state.stores = [...state.stores.filter((p) => p.id !== store.id)];
+  updateOrder(state, order) {
+    const index = state.orders.findIndex((h) => h.id === order.id);
+    state.orders.splice(index, 1, order);
+    state.orders = [...state.orders];
   },
-  getCategories(state, categories) {
-    state.categories = categories;
+  deleteOrder(state, order) {
+    state.orders = [...state.orders.filter((p) => p.id !== order.id)];
   },
-  addCategory(state, category) {
-    state.categories.unshift(...category); // mutable addition
-  },
-  updateCategory(state, category) {
-    const index = state.categories.findIndex((c) => c.id === category.id);
-    state.categories.splice(index, 1, category);
-    state.categories = [...state.categories];
-  },
-  deleteCategory(state, categoryId) {
-    state.categories = [...state.categories.filter((p) => p.id !== categoryId)];
-  },
+  //Items
   getItems(state, items) {
     state.items = items;
   },
@@ -64,73 +56,75 @@ const mutations = {
   deleteItem(state, item) {
     state.items = [...state.items.filter((p) => p.id !== item.id)];
   },
-  getCategoryStores(state, categoryStores) {
-    state.categoryStores = categoryStores;
+  //Purchase Order
+  getPurchaseOrder(state, purchaseOrders) {
+    state.purchaseOrders = purchaseOrders;
   },
-  getCatStoreItems(state, catStoreItems) {
-    state.catStoreItems = catStoreItems;
+  addPurchaseOrder(state, purchaseOrder) {
+    state.purchaseOrders.unshift(...purchaseOrder); // mutable addition
   },
-  addCategoryStore(state, categoryStore) {
-    //console.log(`categoryStore: ${categoryStore}`);
-    state.categoryStores.unshift(...categoryStore); // mutable addition
+  updatePurchaseOrder(state, purchaseOrder) {
+    const index = state.purchaseOrders.findIndex(
+      (c) => c.id === purchaseOrder.id
+    );
+    //console.log(`purchaseOrder index of ${purchaseOrder.name} ; ${purchaseOrder.id} --> ${index}`);
+    state.purchaseOrders.splice(index, 1, purchaseOrder);
+    state.purchaseOrders = [...state.purchaseOrders];
   },
-  deleteCategoryStore(state, categoryStoreId) {
-    state.categoryStores = [
-      ...state.categoryStores.filter((p) => p.id !== categoryStoreId),
+  deletePurchaseOrder(state, purchaseOrder) {
+    state.purchaseOrders = [
+      ...state.purchaseOrders.filter((p) => p.id !== purchaseOrder.id),
     ];
   },
-  addStoreItem(state, catStoreItem) {
-    //console.log(`catStoreItem: ${catStoreItem}`);
-    if (catStoreItem) state.catStoreItems.unshift(...catStoreItem); // mutable addition
+  //Bulk Order
+  getBulkOrder(state, bulkOrders) {
+    state.bulkOrders = bulkOrders;
   },
-  deleteCatStoreItem(state, catStoreId) {
-    state.catStoreItems = [
-      ...state.catStoreItems.filter((p) => p.id !== catStoreId),
+  addBulkOrder(state, bulkOrder) {
+    state.bulkOrders.unshift(...bulkOrder); // mutable addition
+  },
+  updateBulkOrder(state, bulkOrder) {
+    const index = state.bulkOrders.findIndex((c) => c.id === bulkOrder.id);
+    //console.log(`bulkOrder index of ${bulkOrder.name} ; ${bulkOrder.id} --> ${index}`);
+    state.bulkOrders.splice(index, 1, bulkOrder);
+    state.bulkOrders = [...state.bulkOrders];
+  },
+  deleteBulkOrder(state, purchaseOrder) {
+    state.purchaseOrders = [
+      ...state.purchaseOrders.filter((p) => p.id !== purchaseOrder.id),
     ];
   },
 };
 
 const actions = {
-  async clearUserAction({commit}, user){    
+  async clearUserAction({ commit }, user) {
     commit("clearUser", user);
   },
   async signInAction({ commit }, user) {
-    const signInUser = await dataService.signIn(user);    
+    const signInUser = await dataService.signIn(user);
     commit("signIn", signInUser);
   },
-  //Stores
-  async getStoresAction({ commit }) {
-    const stores = await dataService.getStores();
-    commit("getStores", stores);
+  //OrderStatus
+  async getOrderStatusAction({ commit }) {
+    const orderstatus = await dataService.getOrderStatus();
+    commit("getOrderStatus", orderstatus);
   },
-  async addStoreAction({ commit }, store) {
-    const addedStore = await dataService.addStore(store);
-    commit("addStore", addedStore);
+  //Orders
+  async getOrdersAction({ commit }) {
+    const orders = await dataService.getOrders();
+    commit("getOrders", orders);
   },
-  async updateStoreAction({ commit }, store) {
-    const updatedStore = await dataService.updateStore(store);
-    commit("updateStore", updatedStore);
+  async addOrderAction({ commit }, order) {
+    const addedOrder = await dataService.addOrder(order);
+    commit("addOrder", addedOrder);
   },
-  async deleteStoreAction({ commit }, store) {
-    await dataService.deleteStore(store);
-    commit("deleteStore", store);
+  async updateOrderAction({ commit }, order) {
+    const updatedOrder = await dataService.updateOrder(order);
+    commit("updateOrder", updatedOrder);
   },
-  // categories
-  async getCategoriesAction({ commit }) {
-    const categories = await dataService.getCategories();
-    commit("getCategories", categories);
-  },
-  async addCategoryAction({ commit }, category) {
-    const addedCategory = await dataService.addCategory(category);
-    commit("addCategory", addedCategory);
-  },
-  async updateCategoryAction({ commit }, category) {
-    const updatedCategory = await dataService.updateCategory(category);
-    commit("updateCategory", updatedCategory);
-  },
-  async deleteCategoryAction({ commit }, category) {
-    await dataService.deleteCategory(category);
-    commit("deleteCategory", category.id);
+  async deleteOrderAction({ commit }, order) {
+    await dataService.deleteOrder(order);
+    commit("deleteOrder", order);
   },
   // Items
   async getItemsAction({ commit }) {
@@ -149,123 +143,89 @@ const actions = {
     const status = await dataService.deleteItem(item);
     if (status) commit("deleteItem", item);
   },
-  //CategoryStores
-  async getCategoryStoresAction({ commit }) {
-    const categoryStores = await dataService.getCategoryStores();
-    commit("getCategoryStores", categoryStores);
+  //PurchaseOrder
+  async getPurchaseOrderAction({ commit }) {
+    const purchaseOrder = await dataService.getPurchaseOrder();
+    commit("getPurchaseOrder", purchaseOrder);
   },
-  async addCategoryStoreAction({ commit }, categoryStore) {
-    const addedCategoryStore = await dataService.addCategoryStore(
-      categoryStore
+  async getPurchaseOrderByOrderIdAction({ commit }, orderId) {
+    const purchaseOrder = await dataService.getPurchaseOrderByOrderId(orderId);
+    commit("getPurchaseOrder", purchaseOrder);
+  },
+  async addPurchaseOrderAction({ commit }, purchaseOrder) {
+    const addedPurchaseOrder = await dataService.addPurchaseOrder(
+      purchaseOrder
     );
-    commit("addCategoryStore", addedCategoryStore);
+    commit("addPurchaseOrder", addedPurchaseOrder);
   },
-  async deleteCategoryStoreAction({ commit }, categoryStore) {
-    await dataService.deleteCategoryStore(categoryStore);
-    commit("deleteCategoryStore", categoryStore.id);
+  async updatePurchaseOrderAction({ commit }, purchaseOrder) {
+    const updatedPurchaseOrder = await dataService.updatePurchaseOrder(
+      purchaseOrder
+    );
+    commit("updatePurchaseOrder", updatedPurchaseOrder);
   },
-  //item Items
-  async getStoreItemsAction({ commit }) {
-    const catStoreItems = await dataService.getCatStoreItems();
-    commit("getCatStoreItems", catStoreItems);
+  async deletePurchaseOrderAction({ commit }, purchaseOrder) {
+    const status = await dataService.deletePurchaseOrder(purchaseOrder);
+    if (status) commit("deletePurchaseOrder", purchaseOrder);
   },
-  async addStoreItemsAction({ commit }, storeItem) {
-    const addedStoreItem = await dataService.addStoreItem(storeItem);
-    commit("addStoreItem", addedStoreItem);
+
+  //BulkOrder
+  async getBulkOrderAction({ commit }) {
+    const bulkOrder = await dataService.getBulkOrder();
+    commit("getBulkOrder", bulkOrder);
   },
-  async deleteCatStoreItemAction({ commit }, catStoreItem) {
-    await dataService.deleteCatStoreItem(catStoreItem);
-    commit("deleteCatStoreItem", catStoreItem.id);
+  async getBulkOrderByOrderIdAction({ commit }, orderId) {
+    const bulkOrder = await dataService.getBulkOrderByOrderId(orderId);
+    commit("getBulkOrder", bulkOrder);
+  },
+  async addBulkOrderAction({ commit }, bulkOrder) {
+    const addedBulkOrder = await dataService.addBulkOrder(bulkOrder);
+    commit("addBulkOrder", addedBulkOrder);
+  },
+  async updateBulkOrderAction({ commit }, bulkOrder) {
+    const updatedBulkOrder = await dataService.updateBulkOrder(bulkOrder);
+    commit("updateBulkOrder", updatedBulkOrder);
+  },
+  async deleteBulkOrderAction({ commit }, bulkOrder) {
+    const status = await dataService.deleteBulkOrder(bulkOrder);
+    if (status) commit("deleteBulkOrder", bulkOrder);
   },
 };
 
 const getters = {
-  getUserName: (state) =>
-    state.user.firstname === undefined || state.user.firstname === ""
-      ? "Guest"
-      : state.user.firstname + " " + state.user.lastname,
-  getStoreById: (state) => (id) =>
-    state.stores.find((v) => parseInt(v.id) === parseInt(id)),
-  getItemById: (state) => (id) =>
-    state.items.find((v) => parseInt(v.id) === parseInt(id)),
-  getCategoryById: (state) => (id) =>
-    state.categories.find((v) => parseInt(v.id) === parseInt(id)),
-  getStoresByCategory: (state) => (catId) =>
-    state.categoryStores.filter(
-      (v) => parseInt(v.categoryId) === parseInt(catId)
-    ),
-  getItemsByCatStoresId: (state) => (catStoreId) =>
-    state.catStoreItems.filter(
-      (v) => parseInt(v.catstoreId) === parseInt(catStoreId)
-    ),
-  getCatStore: (state) => (catId, storeId) =>
-    state.categoryStores.find(
-      (v) => v.categoryId === catId && v.storeId === storeId
-    ),
-  selectedCategoryStoreItems(state, getters) {
-    let items = [];
-    let children = [];
-    let subChildren = [];
-    try {
-      items = [];
-      state.categories
-        .sort((a, b) => {
-          const bandA = a.name.toUpperCase();
-          const bandB = b.name.toUpperCase();
-          let comparison = 0;
-          if (bandA > bandB) {
-            comparison = 1;
-          } else if (bandA < bandB) {
-            comparison = -1;
-          }
-          return comparison;
-        })
-        .forEach((category) => {
-          let catStores = [];
-          catStores = getters.getStoresByCategory(category.id);
-          if (catStores.length > 0) {
-            children = [];
-            catStores
-              .sort((a, b) => a.categoryId - b.categoryId)
-              .filter((c) => c.storeId > 0)
-              .forEach((catStore) => {
-                if (catStore.id) {
-                  let catStoreItems = getters.getItemsByCatStoresId(
-                    catStore.id
-                  );
-                  //console.log(catStore.id);
-                  subChildren = [];
-                  if (catStoreItems.length > 0) {
-                    catStoreItems.forEach((storeItem) => {
-                      let item = getters.getItemById(storeItem.itemId);
-                      subChildren.push({
-                        id: storeItem.itemId,
-                        name: item ? item.name : "",
-                        children: [],
-                      });
-                    });
-                  }
-                }
-                let store = getters.getStoreById(catStore.storeId);
-                children.push({
-                  id: catStore.storeId,
-                  name: store ? store.name : "",
-                  children: subChildren,
-                });
-              });
-
-            items.push({
-              id: category.id,
-              name: category.name,
-              children: children,
-            });
-          }
-        });
-    } catch (error) {
-      console.log(error);
+  getUserName: (state) => {
+    if (state.user) {
+      return state.user.firstname === undefined || state.user.firstname === ""
+        ? "Guest"
+        : state.user.firstname + " " + state.user.lastname;
     }
-    return items;
+    return "Guest";
+  },  
+  getItemById: (state) => (id) =>
+    state.items.find((v) => parseInt(v.id) === parseInt(id)),    
+  getActiveOrderStatus: function(state) {
+    if (state.orderstatus) {
+      return state.orderstatus.find((os) => os.status === "Active");
+    }
+    return 0;
   },
+  getCurrentOrder: function(state, getters) {
+    var actStatus = getters.getActiveOrderStatus;
+    var curOrder = state.orders.find((ord) => ord.orderStatus === actStatus.id);
+    return curOrder;
+  },
+  getActiveItems: function(state){
+    let activeItems = state.items.filter(i => parseInt(i.isActive) === 1)
+    return activeItems;
+  },
+  getActiveBulkOrders: function(state, getters){
+    let activeBulkOrders = [];
+    getters.getActiveItems.forEach(item => {      
+      let bo = state.bulkOrders.find(bu => parseInt(bu.itemId) === parseInt(item.id) && parseInt(bu.orderId) === parseInt(getters.getCurrentOrder.id));
+      activeBulkOrders.push(bo);
+    });    
+    return activeBulkOrders;
+  }
 };
 
 export default new Vuex.Store({

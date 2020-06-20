@@ -22,8 +22,11 @@
           </v-list-tile>
         </v-list>-->
       </v-menu>
+      <v-divider class="mx-2" inset vertical></v-divider>
       <v-toolbar-title>
-        <v-btn to="/">Shopping List</v-btn>
+        <v-btn to="/">
+          <v-icon>mdi-home</v-icon>
+        </v-btn>
       </v-toolbar-title>
       <v-spacer></v-spacer>
       <v-tooltip bottom>
@@ -32,8 +35,8 @@
         </template>
         <span>{{getUserName}}</span>
       </v-tooltip>
-
-      <v-btn v-if="!this.isUserSignedIn()" v-on:click="signInUser" to="/">Login</v-btn>
+      <v-divider class="mx-2" inset vertical></v-divider>
+      <v-btn v-if="!this.isUserSignedIn()" v-on:click="signInUser" to="/login">Login</v-btn>
       <v-btn v-if="this.isUserSignedIn()" v-on:click="clearUser" to="/login">Logout</v-btn>
       <v-menu left bottom></v-menu>
     </v-app-bar>
@@ -44,8 +47,10 @@
 import { mapActions, mapState, mapGetters } from "vuex";
 export default {
   data: () => ({
-    items: [      
+    items: [
       { title: "Manage Items", path: "/ManageItems" },
+      { title: "Bulk Order", path: "/BulkOrder" },
+      { title: "All Orders", path: "/AllUserOrders" },
       { title: "About", path: "/About" }
     ]
   }),
@@ -62,6 +67,7 @@ export default {
       return false;
     },
     clearUser: function() {
+      console.log(this.isUserSignedIn());
       this.clearUserAction({
         firstname: "",
         lastname: "",
@@ -69,8 +75,7 @@ export default {
         email: ""
       });
     },
-    signInUser: function() {
-    }
+    signInUser: function() {}
   }
 };
 </script>
