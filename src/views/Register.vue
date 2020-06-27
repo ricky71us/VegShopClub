@@ -1,66 +1,58 @@
 <template>
-  <v-card width="400" class="mx-auto mt-5">
-    <v-card-title class="pb-0">
-      <h1>Register</h1>
-    </v-card-title>
-    <v-card-text>
-      <v-form ref="form" v-model="valid">
-        <v-text-field
-          label="FirstName"
-          prepend-icon="mdi-account-circle"
-          v-model="firstname"
-          required
-          :rules="reqRule"
-        />
-        <v-text-field
-          label="LastName"
-          prepend-icon="mdi-account-circle"
-          v-model="lastname"
-          required
-          :rules="reqRule"
-        />
-        <v-text-field
-          label="Email"
-          prepend-icon="mdi-email"
-          v-model="email"
-          required
-          :rules="reqRule"
-        />
-        <v-text-field
-          :type="showPassword ? 'text' : 'password'"
-          label="Password"
-          prepend-icon="mdi-lock"
-          :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-          @click:append="showPassword = !showPassword"
-          v-model="password"
-          required
-          :rules="reqRule"
-        />
-        <v-text-field label="Phone" prepend-icon="mdi-phone" v-model="phone" />
-      </v-form>
-    </v-card-text>
-    <v-divider></v-divider>
-    <v-card-actions>
-      <v-btn color="success" v-on:click="cancel">Cancel</v-btn>
-      <v-spacer></v-spacer>
-      <v-btn color="info" @click="validate" v-on:click="registerUser">Save</v-btn>
-    </v-card-actions>
-    <v-divider></v-divider>
-
-    <!-- <v-sheet
-      v-if="this.msg"
-      color="orange lighten-2"
-      height="80"
-      elevation="10"
-    >
-      {{ this.msg }}
-    </v-sheet>-->
-
-    <v-snackbar v-model="isMsg" :bottom="true" :right="true" :timeout="4000">
-      {{ this.msg }}
-      <!-- <v-btn color="pink" text @click="snackbar = false">Close</v-btn> -->
+  <div>
+    <v-card width="400" class="mx-auto mt-5">
+      <v-card-title class="pb-0">
+        <h1>Register</h1>
+      </v-card-title>
+      <v-card-text>
+        <v-form ref="form" v-model="valid">
+          <v-text-field
+            label="FirstName"
+            prepend-icon="mdi-account-circle"
+            v-model="firstname"
+            required
+            :rules="reqRule"
+          />
+          <v-text-field
+            label="LastName"
+            prepend-icon="mdi-account-circle"
+            v-model="lastname"
+            required
+            :rules="reqRule"
+          />
+          <v-text-field
+            label="Email"
+            prepend-icon="mdi-email"
+            v-model="email"
+            required
+            :rules="reqRule"
+          />
+          <v-text-field
+            :type="showPassword ? 'text' : 'password'"
+            label="Password"
+            prepend-icon="mdi-lock"
+            :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+            @click:append="showPassword = !showPassword"
+            v-model="password"
+            required
+            :rules="reqRule"
+          />
+          <v-text-field label="Phone" prepend-icon="mdi-phone" v-model="phone" />
+        </v-form>
+      </v-card-text>
+      <v-divider></v-divider>
+      <v-card-actions>
+        <v-btn color="success" v-on:click="cancel">Cancel</v-btn>
+        <v-spacer></v-spacer>
+        <v-btn color="info" @click="validate" v-on:click="registerUser">Save</v-btn>
+      </v-card-actions>
+      <v-divider></v-divider>     
+    </v-card>
+    <v-snackbar v-model="snackbar" :multi-line="multiLine">
+      {{ this.message }}
+      <v-btn color="red" text @click="snackbar = false">Close</v-btn>
     </v-snackbar>
-  </v-card>
+  </div>
 </template>
 <script>
 //import axios from "axios";
@@ -86,7 +78,10 @@ export default {
       },
       showPassword: false,
       reqRule: [v => !!v || "Required"],
-      valid: false
+      valid: false,        
+      snackbar: false,
+      message: null,
+      multiLine: true,
     };
   },
 
@@ -103,11 +98,9 @@ export default {
           email: this.email,
           password: this.password,
           phone: this.phone
-        };        
+        };
         await dataService.register(data).then(response => {          
-          this.msg = response.message;
-          this.isMsg = !(this.msg === "");
-          console.log(this.msg.length);
+          this.snackMessage(response.message);
         });
       }
     },
@@ -123,6 +116,10 @@ export default {
           this.submitStatus = "OK";
         }, 500);
       }
+    },
+    snackMessage: function(message) {
+      this.message = message;
+      this.snackbar = true;
     },
     checkForm: function(e) {
       if (this.firstname && this.email) {

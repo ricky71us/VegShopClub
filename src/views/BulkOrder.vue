@@ -2,7 +2,21 @@
   <div>
     <v-form v-model="valid">
       <v-divider></v-divider>
-      <v-card class="mx-auto mt-7" max-width="900" tile dense>
+      <v-card class="mx-auto mt-3" max-width="1100" tile dense color="orange">
+        <v-list-item dense>
+          <v-list-item-content dens class="ma-0 pa-0">
+            <v-container class="ma-0 pa-0">
+              <v-row>
+                <v-col cols="5"></v-col>                
+                <v-col cols="4">Bulk Order</v-col>
+                <v-col cols="2"></v-col>
+                <v-col cols="1"></v-col>
+              </v-row>
+            </v-container>
+          </v-list-item-content>
+        </v-list-item>
+      </v-card>
+      <v-card class="mx-auto mt-3" max-width="1100" tile dense shaped>
         <v-list-item dense>
           <v-list-item-content dens class="ma-0 pa-0">
             <v-container class="ma-0 pa-0">
@@ -11,13 +25,13 @@
                 <v-col cols="2">Orderd Qty</v-col>
                 <v-col cols="2">Act Qty</v-col>
                 <v-col cols="2">Total</v-col>
-                <v-col cols="2">Act Price</v-col>
+                <v-col cols="2">Unit Price</v-col>
               </v-row>
             </v-container>
           </v-list-item-content>
         </v-list-item>
       </v-card>
-      <v-card class="mx-auto mt-7" max-width="900" tile dense>
+      <v-card class="mx-auto mt-1" max-width="1100" tile dense shaped>
         <v-list-item v-for="item in localItems" :key="item.id" dense>
           <v-list-item-content dens class="ma-0 pa-0">
             <v-container class="ma-0 pa-0">
@@ -31,7 +45,7 @@
                       :value="item.name"
                       color="success"
                       dense
-                      rounded
+                      disabled                      
                     ></v-text-field>
                   </v-flex>
                 </v-col>
@@ -45,8 +59,7 @@
                       :value="parseInt(item.qty).toFixed(2)"
                       color="success"
                       disabled
-                      dense
-                      rounded
+                      dense                      
                     ></v-text-field>
                   </v-flex>
                 </v-col>
@@ -61,7 +74,7 @@
                       @change="calcItemPrice(item)"
                       color="success"
                       dense
-                      rounded
+                      outlined
                     ></v-text-field>
                   </v-flex>
                 </v-col>
@@ -70,12 +83,13 @@
                     v-model="item.totalPrice"
                     hide-details="auto"
                     class="ma-0 pa-0 centered-input"
-                    :value="item.totalPrice"
+                    :value="parseInt(item.totalPrice).toFixed(2)"
                     label
                     @change="calcItemPrice(item)"
                     height="26"
                     prepend-inner-icon="mdi-currency-usd"
                     dense
+                    outlined
                   ></v-text-field>
                 </v-col>
                 <v-col cols="2" class="mb-0 pb-0">
@@ -102,17 +116,18 @@
               <v-row>
                 <v-col cols="4" class="mb-0 pb-0"></v-col>
                 <v-col cols="2" class="mb-0 pb-0"></v-col>
-                <v-col cols="2" class="mb-0 pb-0"></v-col>
-                <v-col cols="2" class="mb-0 pb-0 float-right">Total</v-col>
+                <v-col cols="2" class="mb-0 pb-0 float-right"></v-col>
                 <v-col cols="2" class="mb-0 pb-3">
                   <v-text-field
                     hide-details="auto"
                     class="ma-0 pa-0 float-right"
                     disabled
                     label
-                    prepend-icon="mdi-currency-usd"
+                    :value="grandTotal"
+                    prepend-inner-icon="mdi-currency-usd"
                   ></v-text-field>
                 </v-col>
+                <v-col cols="2" class="mb-0 pb-0"></v-col>
               </v-row>
             </v-container>
             <v-divider></v-divider>
@@ -123,7 +138,17 @@
             <v-container class="ma-0 pa-0">
               <v-row>
                 <v-col cols="4" class="mb-0 pb-0">
-                  <!-- <v-btn color="error">Cancel</v-btn> -->
+                  <!-- <v-tooltip bottom>
+                    <template v-slot:activator="{ on }">
+                      <v-btn
+                        v-on="on"
+                        color="success"
+                        @click="updateQty()"
+                        class="float-left"
+                      >Update Qty</v-btn>
+                    </template>
+                    <span>Update item quantity for each user proportionate to items ordered</span>
+                  </v-tooltip> -->
                 </v-col>
                 <v-col cols="2" class="mb-0 pb-0"></v-col>
                 <v-col cols="2" class="mb-0 pb-0"></v-col>
@@ -134,7 +159,7 @@
                     @click="saveBo()"
                     :disabled="!valid"
                     class="float-right"
-                  >Submit</v-btn>
+                  >Save</v-btn>
                 </v-col>
               </v-row>
             </v-container>
@@ -152,6 +177,7 @@
 
 <script>
 import { mapState, mapActions, mapGetters } from "vuex";
+import { dataService } from "../shared";
 export default {
   name: "BulkOrder",
   data() {
@@ -174,24 +200,25 @@ export default {
   },
   mounted() {
     this.getItemsAction();
-    this.getBulkOrderAction();
-    this.getPurchaseOrderAction();    
+    this.getItems();
   },
   created() {
     //console.log("created");
-    this.getItems;
   },
   methods: {
     ...mapActions([
       "getItemsAction",
-      "getBulkOrderAction",
-      "getPurchaseOrderAction",
+      "getOrdersAction",
+      "getOrderStatusAction",
+      "getPurchaseOrderByOrderIdAction",
+      "getBulkOrderByOrderIdAction",
       "updateBulkOrderAction"
     ]),
     calcItemPrice: function(item) {
-      item.totalPrice = (
-        parseFloat(item.totalPrice) / parseFloat(item.actQty)
-      ).toFixed(2);
+      if (parseInt(item.actQty) > 0)
+        item.actPrice = (
+          parseFloat(item.totalPrice) / parseFloat(item.actQty)
+        ).toFixed(4);
     },
     getItemById: function(id) {
       return this.items.find(i => i.id === id);
@@ -212,8 +239,11 @@ export default {
         }
       });
     },
-    saveBo() {
-      this.localItems.forEach(lp => {
+    updateQty() {
+      dataService.updateActQty(this.getCurrentOrder.id);
+    },
+    async saveBo() {
+      await this.localItems.forEach(lp => {
         this.tempBO = {
           id: lp.id,
           orderId: lp.orderId,
@@ -224,20 +254,20 @@ export default {
           isCancelled: lp.isCancelled
         };
         this.updateBulkOrderAction(this.tempBO);
-        console.log(this.tempBO);
       });
+
+      await this.updateQty();
       this.snackMessage(`Updated Data!`);
     },
     snackMessage: function(message) {
       this.message = message;
       this.snackbar = true;
-    }
-  },
-  computed: {
-    ...mapState(["bulkOrders", "items", "purchaseOrders"]),
-    ...mapGetters(["getCurrentOrder", "getActiveItems", "getActiveBulkOrders"]),
-
-    getItems: function() {
+    },
+    async getItems() {
+      await this.getOrderStatusAction();
+      await this.getOrdersAction();
+      await this.getPurchaseOrderByOrderIdAction(this.getCurrentOrder.id);
+      await this.getBulkOrderByOrderIdAction(this.getCurrentOrder.id);
       if (this.getUserName !== "Guest") {
         this.getActiveBulkOrders.forEach(item => {
           if (
@@ -251,12 +281,16 @@ export default {
               defaultUnits: this.getItemById(item.itemId).defaultUnits,
               orderId: item.orderId,
               qty: 0,
-              actQty: parseFloat(item.actQty),
-              actPrice: parseFloat(item.actPrice),
+              actQty: item.actQty > 0 ? parseFloat(item.actQty) : null,
+              totalPrice:
+                item.totalPrice > 0 ? parseFloat(item.totalPrice) : null,
               isCancelled: item.isCancelled,
-              totalPrice: (
-                parseFloat(item.actPrice) * parseFloat(item.actQty)
-              ).toFixed(2)
+              actPrice:
+                item.actQty > 0
+                  ? (
+                      parseFloat(item.totalPrice) / parseFloat(item.actQty)
+                    ).toFixed(4)
+                  : 0
             });
         });
         this.purchaseOrders.forEach(i => {
@@ -277,9 +311,22 @@ export default {
       }
       return this.localItems;
     }
+  },
+  computed: {
+    ...mapState(["bulkOrders", "items", "purchaseOrders"]),
+    ...mapGetters(["getCurrentOrder", "getActiveItems", "getActiveBulkOrders"]),
+    grandTotal: function() {
+      var total = 0;
+      this.localItems.forEach(item => {
+        if (item) total += parseFloat(item.totalPrice);
+      });
+
+      return total.toFixed(2);
+    }
   }
 };
 </script>
 
 <style lang="scss" scoped>
+
 </style>

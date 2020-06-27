@@ -1,146 +1,161 @@
 <template>
   <div id="app">
-    <v-form ref="form" v-model="valid">
-      <v-simple-table>
-        <template v-slot:default>
-          <thead>
-            <tr>
-              <th class="text-left">
-                Name
-                <v-dialog v-model="dialog" width="500" :key="localItem.id" :id="localItem.id">
-                  <template v-slot:activator="{ on }">
-                    <v-icon color="primary" dark v-on="on" @click="initializeItem()">mdi-plus</v-icon>(Add New Item)
-                  </template>
-                  <v-card>
-                    <v-card-title class="headline grey lighten-2" primary-title>Item Details</v-card-title>
-                    <v-card-text>
-                      <v-text-field
-                        v-model="updatedItem.name"
-                        :counter="100"
-                        :rules="nameRules"
-                        label="Item Name"
-                        required
-                      ></v-text-field>
+    <v-card class="mx-auto ma-3" max-width="1100" color="orange" rounded>
+      <v-list-item dense>
+        <v-list-item-content dens class="ma-0 pa-0">
+          <v-container class="ma-0 pa-0">
+            <v-row no-gutters>
+              <v-col cols="5"></v-col>
+              <v-col cols="6">Manage Items</v-col>
+              <v-col cols="1"></v-col>
+            </v-row>
+          </v-container>
+        </v-list-item-content>
+      </v-list-item>
+    </v-card>
+    <v-card class="mx-auto ma-3" max-width="1100" tile dense shaped>
+      <v-form ref="form" v-model="valid">
+        <v-simple-table>
+          <template v-slot:default>
+            <thead>
+              <tr>
+                <th class="text-left">
+                  Name
+                  <v-dialog v-model="dialog" width="500" :key="localItem.id" :id="localItem.id">
+                    <template v-slot:activator="{ on }">
+                      <v-icon color="primary" dark v-on="on" @click="initializeItem()">mdi-plus</v-icon>(Add New Item)
+                    </template>
+                    <v-card>
+                      <v-card-title class="headline grey lighten-2" primary-title>Item Details</v-card-title>
+                      <v-card-text>
+                        <v-text-field
+                          v-model="updatedItem.name"
+                          :counter="100"
+                          :rules="nameRules"
+                          label="Item Name"
+                          required
+                        ></v-text-field>
 
-                      <v-text-field v-model="updatedItem.description" label="Description"></v-text-field>
-                      <v-text-field v-model="updatedItem.minQty" label="Minimum Quantity"></v-text-field>
-                      <v-text-field v-model="updatedItem.defaultUnits" label="Units"></v-text-field>
-                      <v-text-field v-model="updatedItem.price" label="Price"></v-text-field>
+                        <v-text-field v-model="updatedItem.description" label="Description"></v-text-field>
+                        <v-text-field v-model="updatedItem.minQty" label="Minimum Quantity"></v-text-field>
+                        <v-text-field v-model="updatedItem.defaultUnits" label="Units"></v-text-field>
+                        <v-text-field v-model="updatedItem.price" label="Price"></v-text-field>
 
-                      <v-btn
-                        :disabled="!valid"
-                        color="success"
-                        class="mr-4"
-                        @click="addNewItem()"
-                        @click.stop="dialog = false"
-                      >Save</v-btn>
+                        <v-btn
+                          :disabled="!valid"
+                          color="success"
+                          class="mr-4"
+                          @click="addNewItem()"
+                          @click.stop="dialog = false"
+                        >Save</v-btn>
 
-                      <v-btn
-                        color="error"
-                        class="mr-4"
-                        @click="initializeItem()"
-                        @click.stop="dialog = false"
-                      >Cancel</v-btn>
-                    </v-card-text>
+                        <v-btn
+                          color="error"
+                          class="mr-4"
+                          @click="initializeItem()"
+                          @click.stop="dialog = false"
+                        >Cancel</v-btn>
+                      </v-card-text>
 
-                    <v-divider></v-divider>
+                      <v-divider></v-divider>
 
-                    <v-card-actions>
-                      <v-spacer></v-spacer>
-                    </v-card-actions>
-                  </v-card>
-                </v-dialog>
-              </th>
-              <th class="text-left">Item Details</th>
-              <th class="text-left">Active</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="item in items" :key="item.id">
-              <td>{{ item.name }}</td>
-              <td>
-                <v-dialog v-model="dialogEdit[item.id]" width="500" :key="item.id" :id="item.id">
-                  <template v-slot:activator="{ on }">
-                    <v-icon
-                      color="primary"
-                      :id="item.id"
-                      dark
-                      v-on="on"
-                      @click="editItem(item)"
-                    >mdi-pencil</v-icon>
-                  </template>
-                  <v-card>
-                    <v-card-title class="headline grey lighten-2" primary-title>Item Details</v-card-title>
+                      <v-card-actions>
+                        <v-spacer></v-spacer>
+                      </v-card-actions>
+                    </v-card>
+                  </v-dialog>
+                </th>
+                <th class="text-left">Item Details</th>
+                <th class="text-left">Active</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in items" :key="item.id">
+                <td>{{ item.name }}</td>
+                <td>
+                  <v-dialog v-model="dialogEdit[item.id]" width="500" :key="item.id" :id="item.id">
+                    <template v-slot:activator="{ on }">
+                      <v-icon
+                        color="primary"
+                        :id="item.id"
+                        dark
+                        v-on="on"
+                        @click="editItem(item)"
+                      >mdi-pencil</v-icon>
+                    </template>
+                    <v-card>
+                      <v-card-title class="headline grey lighten-2" primary-title>Item Details</v-card-title>
 
-                    <v-card-text>
-                      <v-text-field
-                        v-model="tempItem.name"
-                        :counter="100"
-                        :rules="nameRules"
-                        label="Item Name"
-                        required
-                      ></v-text-field>
+                      <v-card-text>
+                        <v-text-field
+                          v-model="tempItem.name"
+                          :counter="100"
+                          :rules="nameRules"
+                          label="Item Name"
+                          required
+                        ></v-text-field>
 
-                      <v-text-field v-model="tempItem.description" label="Description"></v-text-field>
-                      <v-text-field v-model="tempItem.minQty" label="Minimum Quantity"></v-text-field>
-                      <v-text-field v-model="tempItem.defaultUnits" label="Units"></v-text-field>
-                      <v-text-field v-model="tempItem.price" label="Price"></v-text-field>
+                        <v-text-field v-model="tempItem.description" label="Description"></v-text-field>
+                        <v-text-field v-model="tempItem.minQty" label="Minimum Quantity"></v-text-field>
+                        <v-text-field v-model="tempItem.defaultUnits" label="Units"></v-text-field>
+                        <v-text-field v-model="tempItem.price" label="Price"></v-text-field>
 
-                      <v-btn
-                        :disabled="!valid"
-                        color="success"
-                        class="mr-4"
-                        @click="updateItem(item)"
-                        @click.stop="$set(dialogEdit, item.id,  false)"
-                      >Save</v-btn>
+                        <v-btn
+                          :disabled="!valid"
+                          color="success"
+                          class="mr-4"
+                          @click="updateItem(item)"
+                          @click.stop="$set(dialogEdit, item.id,  false)"
+                        >Save</v-btn>
 
-                      <v-btn
-                        color="error"
-                        class="mr-4"
-                        @click="initializeItem()"
-                        @click.stop="$set(dialogEdit, item.id,  false)"
-                      >Cancel</v-btn>
-                    </v-card-text>
+                        <v-btn
+                          color="error"
+                          class="mr-4"
+                          @click="initializeItem()"
+                          @click.stop="$set(dialogEdit, item.id,  false)"
+                        >Cancel</v-btn>
+                      </v-card-text>
 
-                    <v-divider></v-divider>
+                      <v-divider></v-divider>
 
-                    <v-card-actions>
-                      <v-spacer></v-spacer>
-                    </v-card-actions>
-                  </v-card>
-                </v-dialog>
-              </td>
-              <td>
-                <!-- <v-tooltip bottom> -->
-                <!-- <template v-slot:activator="{ on }"> -->
-                <!-- <v-checkbox
+                      <v-card-actions>
+                        <v-spacer></v-spacer>
+                      </v-card-actions>
+                    </v-card>
+                  </v-dialog>
+                </td>
+                <td>
+                  <!-- <v-tooltip bottom> -->
+                  <!-- <template v-slot:activator="{ on }"> -->
+                  <!-- <v-checkbox
                   v-model="item.isActive"
                       :value="item.isActive"
                   class="ma-0 pa-0"
                   @click="updateItem(item)"
                   dense
-                ></v-checkbox>-->
-                <!-- <v-icon color="red" dark v-on="on" @click="deleteItem(item)">mdi-delete</v-icon> -->
-                <!-- </template>
+                  ></v-checkbox>-->
+                  <!-- <v-icon color="red" dark v-on="on" @click="deleteItem(item)">mdi-delete</v-icon> -->
+                  <!-- </template>
                   <span>Delete Item</span>
-                </v-tooltip>-->
+                  </v-tooltip>-->
 
-                <v-icon
-                  @click="toggleItem(item)"
-                  v-if="parseInt(item.isActive) === 1"
-                  color="green"
-                >mdi-check</v-icon>
-                <v-icon
-                  @click="toggleItem(item)"
-                  v-if="parseInt(item.isActive) === 0"
-                  color="red"
-                >mdi-close</v-icon>
-              </td>
-            </tr>
-          </tbody>
-        </template>
-      </v-simple-table>
-    </v-form>
+                  <v-icon
+                    @click="toggleItem(item)"
+                    v-if="parseInt(item.isActive) === 1"
+                    color="green"
+                  >mdi-check</v-icon>
+                  <v-icon
+                    @click="toggleItem(item)"
+                    v-if="parseInt(item.isActive) === 0"
+                    color="red"
+                  >mdi-close</v-icon>
+                </td>
+              </tr>
+            </tbody>
+          </template>
+        </v-simple-table>
+      </v-form>
+    </v-card>
     <v-divider></v-divider>
     <v-snackbar v-model="snackbar" :multi-line="multiLine">
       {{ this.message }}
@@ -271,7 +286,6 @@ export default {
       }
     },
     updateItem: function(item) {
-      console.log(item);
       if (this.$refs.form.validate()) {
         this.updateItemAction({
           id: item.id,

@@ -10,6 +10,9 @@ import OrderEntry from "../views/OrderEntry.vue";
 import BulkOrder from "../views/BulkOrder.vue";
 import Orders from "../views/Orders.vue";
 import AllUserOrders from "../views/AllUserOrders.vue";
+import OrderRecon from "../views/OrderRecon.vue";
+import PackagingByItem from "../views/PackagingByItem.vue";
+import Profile from "../views/Profile.vue";
 
 import VueAnalytics from "vue-analytics";
 import store from "../store";
@@ -29,9 +32,27 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: "/profile",
+    name: "profile",
+    component: Profile,
+    meta: { requiresAuth: true },
+  },
+  {
     path: "/orderEntry",
     name: "orderEntry",
     component: OrderEntry,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/orderRecon",
+    name: "orderRecon",
+    component: OrderRecon,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/packagingByItem",
+    name: "packagingByItem",
+    component: PackagingByItem,
     meta: { requiresAuth: true },
   },
   {

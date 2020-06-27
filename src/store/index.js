@@ -12,9 +12,20 @@ const state = {
   items: [],
   purchaseOrders: [],
   bulkOrders: [],
+  isPounds: "true",
+  isOrderLocked: "false",
 };
 
 const mutations = {
+  togglePounds(state, flag){
+    state.isPounds = flag;
+  },
+  toggleOrderLocked(state, flag){
+    state.isOrderLocked = flag;
+  },
+  updateUser(state, user){
+    state.user = user;
+  },
   clearUser(state, user) {
     state.user = user;
   },
@@ -104,6 +115,10 @@ const actions = {
     const signInUser = await dataService.signIn(user);
     commit("signIn", signInUser);
   },
+  async updateUserAction({ commit }, user) {
+    const updatedUser = await dataService.updateUser(user);
+    commit("updateUser", updatedUser);
+  },
   //OrderStatus
   async getOrderStatusAction({ commit }) {
     const orderstatus = await dataService.getOrderStatus();
@@ -161,7 +176,7 @@ const actions = {
   async updatePurchaseOrderAction({ commit }, purchaseOrder) {
     const updatedPurchaseOrder = await dataService.updatePurchaseOrder(
       purchaseOrder
-    );
+    );    
     commit("updatePurchaseOrder", updatedPurchaseOrder);
   },
   async deletePurchaseOrderAction({ commit }, purchaseOrder) {
@@ -201,6 +216,12 @@ const getters = {
     }
     return "Guest";
   },  
+  isUserSignedIn: (state) =>{
+    if (state.user){
+      return state.user.id > 0 ? true : false;
+    }
+    return false;
+  },
   getItemById: (state) => (id) =>
     state.items.find((v) => parseInt(v.id) === parseInt(id)),    
   getActiveOrderStatus: function(state) {
@@ -225,6 +246,15 @@ const getters = {
       activeBulkOrders.push(bo);
     });    
     return activeBulkOrders;
+  },
+  getActualPrice: function(state){
+    let actualPricePerItem = [];    
+    state.bulkOrders.forEach(bo => {
+      if (parseFloat(bo.actPrice) > 0){        
+        actualPricePerItem.push({itemId: bo.itemId, price: bo.actPrice});
+      }
+    })
+    return actualPricePerItem;
   }
 };
 

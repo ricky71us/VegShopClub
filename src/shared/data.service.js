@@ -30,6 +30,22 @@ const register = async function(user) {
   }
 };
 
+const updateUser = async function(user){
+  try {    
+    const response = await axios.put(
+      `${API}/authentication/user?id=${user.id}`,
+      user
+    );
+
+    const userInfo = parseItem(response, 200);
+
+    return userInfo;
+  } catch (error) {
+    console.error(error);
+    console.error(error.message);
+  }
+}
+
 const getUserData = async function(id) {
   try {    
     const response = await axios.get(
@@ -95,7 +111,7 @@ const addOrder = async function(order) {
 
 const updateOrder = async function(order) {
   try {
-    //console.log(order);
+    console.log(order);
     const response = await axios.put(`${API}/orders?id=${order.id}`, order);
     parseItem(response, 200);
     return order;
@@ -196,14 +212,26 @@ const addPurchaseOrder = async function(purchaseOrder) {
 };
 
 const updatePurchaseOrder = async function(purchaseOrder) {
-  try {
-    //console.log(purchaseOrder);
+  try {    
     const response = await axios.put(
       `${API}/purchaseorder?id=${purchaseOrder.id}`,
       purchaseOrder
     );
     parseItem(response, 200);
     return purchaseOrder;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+
+const updateActQty = async function(orderId) {
+  try {    
+    const response = await axios.post(
+      `${API}/purchaseorder/calcQty?orderId=${orderId}`      
+    );
+    parseItem(response, 200);
+    return true;
   } catch (error) {
     console.error(error);
     return null;
@@ -218,6 +246,20 @@ const deletePurchaseOrder = async function(purchaseOrder) {
     );
     let data = parseList(response);
     return data;
+  } catch (error) {
+    console.log(error);
+    return [];
+  }
+};
+
+const sendEmailPurchaseOrder = async function(purchaseOrder, fromUserId) {
+  try {    
+    const response = await axios.post(
+      `${API}/purchaseorder/sendemail?toUserId=${purchaseOrder.userId}&orderId=${purchaseOrder.orderId}&fromUserId=${fromUserId}`,
+      purchaseOrder
+    );    
+    let data = parseList(response);    
+    return data;    
   } catch (error) {
     console.log(error);
     return [];
@@ -310,6 +352,7 @@ export const parseItem = (response, code) => {
 export const dataService = {
   signIn,
   register,
+  updateUser,
   getUserData,
   getAllUsers,
   getOrderStatus,
@@ -325,7 +368,9 @@ export const dataService = {
   getPurchaseOrderByOrderId,
   addPurchaseOrder,
   updatePurchaseOrder,
+  updateActQty,
   deletePurchaseOrder,
+  sendEmailPurchaseOrder,
   getBulkOrder,
   getBulkOrderByOrderId,
   addBulkOrder,

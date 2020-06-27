@@ -71,30 +71,29 @@ export default {
           password: this.password
         };
         await this.signInAction(userInfo);
-        if (this.currentUser !== null)
-          this.$router.push({ path: "/" });
+        if (this.currentUser !== null) this.$router.push({ path: "/" });
         else {
           this.msg = "Invalid Credentials";
           this.isMsg = !(this.msg === "");
-          }
+        }
       }
     },
     async register() {
-      console.log('test');
-      await this.$router.push({ path: "/" }).catch((err) => {
+      console.log("test");
+      await this.$router.push({ path: "/" }).catch(err => {
         console.log(err);
         throw new Error(`Problem handling something: ${err}.`);
-    });
+      });
     }
   },
-  created(){
-    console.log("created");
+  created() {
+    
   },
-  mounted(){
-    console.log("mounted");
+  mounted() {
+    
   },
-  destroyed(){
-    console.log("destroyed");
+  destroyed() {
+    
   },
   computed: {
     ...mapState({ currentUser: "user" })
