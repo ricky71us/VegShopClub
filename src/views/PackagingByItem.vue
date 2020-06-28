@@ -7,7 +7,19 @@
             <v-row no-gutters>
               <v-col cols="5"></v-col>
               <v-col cols="6">Package Order By Items</v-col>
-              <v-col cols="1"></v-col>
+              <v-col cols="1">
+                <v-toolbar-title class="ma-0 pa-0">
+                  <v-tooltip bottom>
+                    <template v-slot:activator="{ on }">
+                      <v-btn v-on="on" dense small text>
+                        <v-icon large v-if="!isPounds" @click="toggleGmsLbs">mdi-weight-kilogram</v-icon>
+                        <v-icon large v-if="isPounds" @click="toggleGmsLbs">mdi-weight-pound</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>lbs - kgs</span>
+                  </v-tooltip>
+                </v-toolbar-title>
+              </v-col>
             </v-row>
           </v-container>
         </v-list-item-content>
@@ -25,12 +37,10 @@
                     <v-container class="ma-0 pa-0">
                       <v-row>
                         <v-col cols="3"></v-col>
-
                         <v-col cols="2"></v-col>
                         <v-col cols="2"></v-col>
-                        <v-col cols="1"></v-col>
-                        <v-col cols="2">Total Qty</v-col>
-                        <v-col cols="2">{{item.actQty}}</v-col>
+                        <v-col cols="2"></v-col>
+                        <v-col cols="3">Total Qty Ordered - {{convertGmsToLbs(item.actQty, item.defaultUnits)}} {{getDefaultUnits(item.defaultUnits)}}</v-col>
                       </v-row>
                     </v-container>
                   </v-list-item-content>
@@ -70,15 +80,14 @@
                             dense
                           ></v-text-field>
                         </v-col>
-
                         <v-col cols="2" class="mt-4 pb-0">
                           <v-flex shrink class="text-xl-left">
                             <v-text-field
-                              v-model="itempo.qty"
-                              :label="itempo.defaultUnits"
+                              v-model="itempo.qtyConv"
+                              :label="getDefaultUnits(itempo.defaultUnitsConv)"
                               hide-details="auto"
                               class="ma-0 pa-0 text-xl-left"
-                              :value="parseInt(itempo.qty).toFixed(2)"
+                              :value="parseInt(itempo.qtyConv).toFixed(2)"
                               disabled
                               color="success"
                               dense
@@ -88,11 +97,11 @@
                         <v-col cols="2" class="mt-4 pb-0">
                           <v-flex shrink class="text-xl-left">
                             <v-text-field
-                              v-model="itempo.suggestedQty"
-                              :label="itempo.defaultUnits"
+                              v-model="itempo.suggestedQtyConv"
+                              :label="getDefaultUnits(itempo.defaultUnitsConv)"
                               hide-details="auto"
                               class="ma-0 pa-0 text-xl-left"
-                              :value="parseFloat(itempo.actQty).toFixed(2)"
+                              :value="parseFloat(itempo.suggestedQtyConv).toFixed(2)"
                               color="success"
                               dense
                               disabled
@@ -102,11 +111,11 @@
                         <v-col cols="2" class="mb-2 pb-0">
                           <v-flex shrink class="text-xl-left">
                             <v-text-field
-                              v-model="itempo.actQty"
-                              :label="itempo.defaultUnits"
+                              v-model="itempo.actQtyConv"
+                              :label="getDefaultUnits(itempo.defaultUnitsConv)"
                               hide-details="auto"
                               class="ma-0 pa-0 text-xl-left"
-                              :value="parseFloat(itempo.actQty).toFixed(2)"
+                              :value="parseFloat(itempo.actQtyConv).toFixed(2)"
                               @change="calcItemPrice(itempo)"
                               color="success"
                               dense
@@ -201,9 +210,17 @@
                           <v-icon dark>mdi-email</v-icon>
                           </v-btn>-->
                         </v-col>
-                        <v-col cols="3" class="mb-0 pb-0"></v-col>
-                        <v-col cols="4" class="mb-0 pb-0"></v-col>
-                        <v-col cols="4" class="mb-0 pb-3">
+                        <v-col cols="8" class="mb-0 pb-0"></v-col>
+                        <v-col cols="2" class="mb-0 pb-0">
+                           <v-text-field
+                          hide-details="auto"
+                          class="ma-0 pa-0 float-right"
+                          :value="grandTotal"
+                          disabled
+                          label
+                        ></v-text-field>
+                        </v-col>
+                        <v-col cols="1" class="mb-0 pb-3">
                           <v-btn
                             color="success"
                             @click="savePo()"
@@ -242,7 +259,8 @@ export default {
       valid: false,
       snackbar: false,
       message: null,
-      multiLine: true
+      multiLine: true,
+      hiddenTextFlag: false
     };
   },
   mounted() {
@@ -259,21 +277,70 @@ export default {
       "getPurchaseOrderByOrderIdAction",
       "updatePurchaseOrderAction"
     ]),
+    toggleGmsLbs() {
+      this.isPounds = this.isPounds ? false : true;
+      this.localItemPo.forEach(po => {
+        po.qtyConv = this.convertGmsToLbs(po.qtyConv, po.defaultUnitsConv);
+        po.suggestedQtyConv = this.convertGmsToLbs(
+          po.suggestedQtyConv,
+          po.defaultUnitsConv
+        );
+        po.actQtyConv = this.convertGmsToLbs(
+          po.actQtyConv,
+          po.defaultUnitsConv
+        );
+        po.defaultUnitsConv = this.getDefaultUnits(po.defaultUnitsConv);
+      });
+    },
+    convertGmsToLbs(qty, defaultUnits) {
+      if (defaultUnits !== "kgs" && defaultUnits !== "lbs") return qty;
+      if (this.isPounds && defaultUnits === "lbs") {
+        return qty ? qty : null;
+      } else if (this.isPounds && defaultUnits === "kgs") {
+        return qty ? (qty * 2.20462).toFixed(2) : null;
+      }
+
+      if (!this.isPounds && defaultUnits === "kgs") {
+        return qty ? qty : null;
+      } else if (!this.isPounds && defaultUnits === "lbs") {
+        return qty ? (parseFloat(qty) * 0.453592).toFixed(2) : null;
+      }
+    },
+    calcItemPrice: function(item) {
+      if (item.defaultUnits === "lbs" && item.defaultUnitsConv === "kgs")
+        item.actQty = item.actQtyConv * 2.20462;
+      else if (item.defaultUnits === "kgs" && item.defaultUnitsConv === "lbs")
+        item.actQty = item.actQtyConv * 0.453592;
+      else
+        item.actQty = item.actQtyConv;
+    },
+    getDefaultUnits(defaultUnits) {
+      //console.log(this.isPounds);
+      if (defaultUnits !== "kgs" && defaultUnits !== "lbs") return defaultUnits;
+      if (this.isPounds) return "lbs";
+      else return "kgs";
+    },
     async getItems() {
       await this.bulkOrders.forEach(bo => {
         bo.orderId === this.getCurrentOrder.id;
         var item = this.items.find(
           it => parseInt(it.id) === parseInt(bo.itemId)
         );
+
         if (item) {
-          this.ordItems.push({
-            itemId: item.id,
-            itemName: item.name,
-            actQty: bo.actQty,
-            actPrice: bo.actPrice,
-            totalPrice: bo.totalPrice,
-            defaultUnits: item.defaultUnits
-          });
+          let bulkItem = this.bulkOrders.find(
+            bo => bo.itemId === item.id && parseInt(bo.actQty) > 0
+          );
+          if (bulkItem) {
+            this.ordItems.push({
+              itemId: item.id,
+              itemName: item.name,
+              actQty: bo.actQty,
+              actPrice: bo.actPrice,
+              totalPrice: bo.totalPrice,
+              defaultUnits: item.defaultUnits
+            });
+          }
         }
       });
     },
@@ -296,13 +363,20 @@ export default {
             userId: lp.userId,
             buyer: this.getUserName(lp.userId).firstname,
             qty: lp.qty,
-            actQty: lp.actQty > 0 ? lp.actQty : null,
+            qtyConv: this.convertGmsToLbs(lp.qty, item.defaultUnits),
+            actQty: lp.actQty,
+            actQtyConv: this.convertGmsToLbs(lp.actQty, item.defaultUnits),
             suggestedQty: lp.suggestedQty,
+            suggestedQtyConv: this.convertGmsToLbs(
+              lp.suggestedQty,
+              item.defaultUnits
+            ),
             actPrice: item.actPrice,
             isCancelled: lp.isCancelled,
             isPacked: lp.isPacked,
             itemName: item.name,
             defaultUnits: item.defaultUnits,
+            defaultUnitsConv: this.getDefaultUnits(item.defaultUnits),
             totalPrice: (
               (item.actPrice ? parseFloat(item.actPrice) : 0) *
               (lp.actQty ? parseFloat(lp.actQty) : 0)
@@ -321,6 +395,7 @@ export default {
           qty: lp.qty,
           actQty: parseFloat(lp.actQty),
           actPrice: parseFloat(lp.actPrice),
+          suggestedQty: lp.suggestedQty,
           isCancelled: lp.isCancelled,
           isPacked: lp.isPacked
         };
@@ -336,11 +411,7 @@ export default {
         lo["allPacked"] = false;
       });
     },
-    calcItemPrice: function(item) {
-      item.totalPrice = (
-        parseFloat(item.actPrice) * parseFloat(item.actQty)
-      ).toFixed(2);
-    },
+
     snackMessage: function(message) {
       this.message = message;
       this.snackbar = true;
@@ -351,24 +422,25 @@ export default {
     async itemPacked(itempo, item) {
       if (itempo.actQty) {
         let flag = parseInt(itempo.isPacked) === 1 ? 0 : 1;
-        await this.updatePurchaseOrderAction({
-          id: itempo.id,
-          orderId: itempo.orderId,
-          itemId: itempo.itemId,
-          userId: itempo.userId,
-          qty: itempo.qty,
-          actQty: itempo.actQty,
-          suggestedQty: itempo.suggestedQty,
-          actPrice: itempo.actPrice,
-          isCancelled: itempo.isCancelled,
-          isPacked: flag
-        });
-        this.getItemPo(itempo);
+        // await this.updatePurchaseOrderAction({
+        //   id: itempo.id,
+        //   orderId: itempo.orderId,
+        //   itemId: itempo.itemId,
+        //   userId: itempo.userId,
+        //   qty: itempo.qty,
+        //   actQty: itempo.actQty,
+        //   suggestedQty: itempo.suggestedQty,
+        //   actPrice: itempo.actPrice,
+        //   isCancelled: itempo.isCancelled,
+        //   isPacked: flag
+        // });
+        itempo.isPacked = flag;
+        //this.getItemPo(itempo);
         if (flag)
           this.snackMessage(`${item.itemName} packed for ${itempo.buyer}!`);
         else
           this.snackMessage(`${item.itemName} not packed for ${itempo.buyer}!`);
-      } else
+      } else if (itempo.actQty > 0)
         this.snackMessage(
           `Please enter a value in Actual Quantity before setting this flag`
         );
@@ -378,14 +450,21 @@ export default {
     ...mapState(["bulkOrders", "items", "purchaseOrders"]),
     ...mapGetters(["getCurrentOrder"]),
     grandTotal: function() {
-      var total = 0;
+      var totalQty = 0;
       this.localItemPo.forEach(item => {
         if (item) {
-          if (parseInt(item.isPacked)) total += parseFloat(item.totalPrice);
+          if (parseInt(item.isPacked) === 1 ) totalQty += parseFloat(item.actQtyConv);
         }
       });
-
-      return total.toFixed(2);
+      return totalQty.toFixed(2);
+    },
+    isPounds: {
+      get() {
+        return this.$store.state.isPounds;
+      },
+      set(value) {
+        this.$store.commit("togglePounds", value);
+      }
     }
   }
 };

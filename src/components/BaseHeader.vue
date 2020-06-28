@@ -9,7 +9,7 @@
             </v-btn>
           </template>
           <v-list>
-            <v-list-item v-for="(item, index) in items" :key="index" click>
+            <v-list-item v-for="(item, index) in getMenuItems()" :key="index" click>
               <v-list-item-title>
                 <v-btn :to="item.path">{{ item.title }}</v-btn>
               </v-list-item-title>
@@ -23,7 +23,7 @@
           </v-list-tile>
           </v-list>-->
         </v-menu>
-        <v-divider class="mx-2" inset vertical></v-divider>
+        <!-- <v-divider class="mx-2" inset vertical></v-divider>
         <v-toolbar-title>
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
@@ -34,9 +34,10 @@
             </template>
             <span>lbs - gms</span>
           </v-tooltip>
-        </v-toolbar-title>
-        <v-divider class="mx-2" inset vertical></v-divider>
-        <v-toolbar-title>
+        </v-toolbar-title> -->
+
+        <v-divider v-if="isAdminUser" class="mx-2" inset vertical></v-divider>
+        <v-toolbar-title v-if="isAdminUser">
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-btn v-on="on" dense small text to="/manageitems">
@@ -46,6 +47,7 @@
             <span>Manage Items</span>
           </v-tooltip>
         </v-toolbar-title>
+
         <v-divider class="mx-2" inset vertical></v-divider>
         <v-toolbar-title>
           <v-tooltip bottom>
@@ -57,8 +59,9 @@
             <span>My Order</span>
           </v-tooltip>
         </v-toolbar-title>
-        <v-divider class="mx-2" inset vertical></v-divider>
-        <v-toolbar-title>
+
+        <v-divider v-if="isAdminUser" class="mx-2" inset vertical></v-divider>
+        <v-toolbar-title v-if="isAdminUser">
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-btn v-on="on" dense small text to="/bulkOrder">
@@ -68,6 +71,7 @@
             <span>Bulk Order</span>
           </v-tooltip>
         </v-toolbar-title>
+
         <v-divider class="mx-2" inset vertical></v-divider>
         <v-toolbar-title>
           <v-tooltip bottom>
@@ -79,6 +83,7 @@
             <span>Package Order By Item</span>
           </v-tooltip>
         </v-toolbar-title>
+
         <v-divider class="mx-2" inset vertical></v-divider>
         <v-toolbar-title>
           <v-tooltip bottom>
@@ -90,9 +95,9 @@
             <span>Package Order By User</span>
           </v-tooltip>
         </v-toolbar-title>
-        <v-divider class="mx-2" inset vertical></v-divider>
+        <v-divider v-if="isAdminUser" class="mx-2" inset vertical></v-divider>
 
-        <v-toolbar-title>
+        <v-toolbar-title v-if="isAdminUser">
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-btn v-on="on" dense small text to="/orderRecon">
@@ -102,8 +107,9 @@
             <span>Order Reconciliation</span>
           </v-tooltip>
         </v-toolbar-title>
-        <v-divider class="mx-2" inset vertical></v-divider>
-        <v-toolbar-title>
+
+        <v-divider v-if="isAdminUser" class="mx-2" inset vertical></v-divider>
+        <v-toolbar-title v-if="isAdminUser">
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-btn v-on="on" dense small text>
@@ -115,15 +121,18 @@
             <span>Lock/Unlock Order</span>
           </v-tooltip>
         </v-toolbar-title>
+
         <v-spacer></v-spacer>
-        <v-tooltip bottom>
-          <template v-slot:activator="{ on }">
-            <v-btn v-on="on" to="/profile" dense small text>
-              <v-icon dark>mdi-account-circle</v-icon>
-            </v-btn>
-          </template>
-          <span>{{getUserName}}</span>
-        </v-tooltip>
+        <v-toolbar-title>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-btn v-on="on" to="/profile" dense small text>
+                <v-icon dark>mdi-account-circle</v-icon>
+              </v-btn>
+            </template>
+            <span>{{getUserName}}</span>
+          </v-tooltip>
+        </v-toolbar-title>
         <v-divider class="mx-2" inset vertical></v-divider>
         <!-- <v-tooltip bottom>
           <template v-slot:activator="{ on }">
@@ -141,12 +150,14 @@
           </template>
           <span>Logout</span>
         </v-tooltip>-->
-        <v-btn v-if="!isUserSignedIn" to="/login" dense small text>
-          <v-icon v-on:click="signInUser">mdi-login</v-icon>
-        </v-btn>
-        <v-btn v-if="isUserSignedIn" to="/login" dense small text>
-          <v-icon v-on:click="clearUser">mdi-logout</v-icon>
-        </v-btn>
+        <v-toolbar-title>
+          <v-btn v-if="!isUserSignedIn" to="/login" dense small text>
+            <v-icon v-on:click="signInUser">mdi-login</v-icon>
+          </v-btn>
+          <v-btn v-if="isUserSignedIn" to="/login" dense small text>
+            <v-icon v-on:click="clearUser">mdi-logout</v-icon>
+          </v-btn>
+        </v-toolbar-title>
         <v-menu left bottom></v-menu>
       </v-app-bar>
     </v-card>
@@ -161,14 +172,14 @@
 import { mapActions, mapState, mapGetters } from "vuex";
 export default {
   data: () => ({
-    items: [
-      { title: "My Order", path: "/" },
-      { title: "Bulk Order", path: "/BulkOrder" },
-      { title: "Packaging By User", path: "/AllUserOrders" },
-      { title: "Packaging By Item", path: "/PackagingByItem" },
-      { title: "Manage Items", path: "/ManageItems" },
-      { title: "Reconcile Orders", path: "/OrderRecon" },
-      { title: "FAQ", path: "/About" }
+    menuItems: [
+      { title: "My Order", path: "/", admin: false },
+      { title: "Packaging By User", path: "/AllUserOrders", admin: false },
+      { title: "Packaging By Item", path: "/PackagingByItem", admin: false },
+      { title: "FAQ", path: "/About", admin: false },
+      { title: "Bulk Order", path: "/BulkOrder", admin: true },
+      { title: "Manage Items", path: "/ManageItems", admin: true },
+      { title: "Reconcile Orders", path: "/OrderRecon", admin: true }
     ],
     valid: false,
     snackbar: false,
@@ -176,18 +187,24 @@ export default {
     multiLine: true,
     isValidUser: false
   }),
-
+  created() {
+    this.items = [];
+  },
   mounted() {
-    console.log(this.isUserSignedIn);
+    this.getOrderStatusAction()
+    this.getOrdersAction();
   },
   updated() {
-    console.log(this.isUserSignedIn);
     this.isValidUser = this.isUserSignedIn;
-    console.log(this.isValidUser);
   },
   computed: {
     ...mapState({ currentUser: "user" }),
-    ...mapGetters(["getUserName", "getCurrentOrder", "isUserSignedIn"]),
+    ...mapGetters([
+      "getUserName",
+      "getCurrentOrder",
+      "isUserSignedIn",
+      "isAdminUser"
+    ]),
     isPounds: {
       get() {
         return this.$store.state.isPounds;
@@ -206,7 +223,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(["clearUserAction", "updateOrderAction"]),
+    ...mapActions(["clearUserAction", "updateOrderAction","getOrderStatusAction", "getOrdersAction"]),
     snackMessage: function(message) {
       this.message = message;
       this.snackbar = true;
@@ -215,9 +232,15 @@ export default {
       this.isPounds = this.isPounds ? false : true;
       console.log(this.isPounds);
     },
+    getMenuItems() {
+      if (this.isAdminUser) {
+        return this.menuItems;
+      } else {
+        return this.menuItems.filter(i => i.admin === false);
+      }
+    },
     async toggleOrderLock() {
       this.isOrderLocked = this.isOrderLocked ? 0 : 1;
-      console.log(this.getCurrentOrder);
       await this.updateOrderAction({
         id: this.getCurrentOrder.id,
         orderDt: this.getCurrentOrder.orderDt,

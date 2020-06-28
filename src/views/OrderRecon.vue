@@ -14,12 +14,12 @@
       </v-list-item>
     </v-card>
     <v-card class="mx-auto ma-3" max-width="1100" tile dense shaped>
-      <v-form ref="form" v-model="valid">        
+      <v-form ref="form" v-model="valid">
         <v-card class="mx-auto mt-1" max-width="1100" tile dense shaped>
           <v-list-item dense>
             <v-list-item-content dens class="ma-0 pa-0">
               <v-container class="ma-0 pa-0">
-                <v-row>
+                <v-row >
                   <v-col cols="2"></v-col>
                   <v-col cols="4">Bulk Order</v-col>
                   <v-col cols="4">Packed Order</v-col>
@@ -43,16 +43,16 @@
           <v-list-item v-for="item in reportData" :key="item.itemId" dense>
             <v-list-item-content dens class="ma-0 pa-0">
               <v-container class="ma-0 pa-0">
-                <v-row class="ma-0 pa-0 red--text text--lighten-1">
+                <v-row class="ma-0 pa-0 red--text text--lighten-1" >
                   <v-col cols="2">
-                    <v-icon class="ma-0 pa-0" :color="item.starColor">mdi-star</v-icon>
+                    <v-icon small class="ma-0 pa-0" :color="item.starColor">mdi-star</v-icon>
                     <v-flex shrink class="text-xl-left">
                       <v-text-field
                         v-model="item.itemName"
                         hide-details="auto"
-                        class="ma-0 pa-0 text-xl-left"
+                        class="mb-0 pb-0 text-xl-left"
                         :value="item.itemName"
-                        color="success"
+                        color="success"                        
                         dense
                         label
                         disabled
@@ -232,35 +232,40 @@ export default {
       await this.getBulkOrderByOrderIdAction(this.getCurrentOrder.id);
 
       this.bulkOrders.forEach(bo => {
-        let po = this.purchaseOrders.filter(po => po.itemId === bo.itemId);
-        let pTotal = 0;
-        let pQty = 0;
+        if (bo.actQty > 0) {
+          let po = this.purchaseOrders.filter(
+            po => po.itemId === bo.itemId && parseInt(po.isCancelled) === 0
+          );
+          let pTotal = 0;
+          let pQty = 0;
 
-        po.forEach(p => {
-          pTotal += p.actPrice * p.actQty;
-          pQty += p.actQty ? parseFloat(p.actQty) : 0;
-        });
+          po.forEach(p => {
+            pTotal += p.actPrice * p.actQty;
+            pQty += p.actQty ? parseFloat(p.actQty) : 0;
+          });
 
-        this.pGrTotal += pTotal;
-        this.boGrTotal += bo.totalPrice ? parseFloat(bo.totalPrice) : 0;
+          this.pGrTotal += pTotal;
+          this.boGrTotal += bo.totalPrice ? parseFloat(bo.totalPrice) : 0;
 
-        let item = this.items.find(i => i.id === bo.itemId);
+          let item = this.items.find(i => i.id === bo.itemId);
 
-        this.reportData.push({
-          itemName: item.name,
-          itemId: bo.itemId,
-          boQty: bo.actQty,
-          boTotal: bo.totalPrice,
-          pQty: pQty,
-          pTotal: pTotal.toFixed(2),
-          unitPrice: bo.actPrice,
-          starColor:
-            bo.totalPrice === pTotal
-              ? "white"
-              : bo.totalPrice > pTotal
-              ? "green"
-              : "red"
-        });
+          this.reportData.push({
+            itemName: item.name,
+            itemId: bo.itemId,
+            defaultUnits: item.defaultUnits,
+            boQty: bo.actQty,
+            boTotal: bo.totalPrice,
+            pQty: pQty,
+            pTotal: pTotal.toFixed(2),
+            unitPrice: bo.actPrice,
+            starColor:
+              bo.totalPrice === pTotal
+                ? "white"
+                : pTotal - bo.totalPrice > 0
+                ? "green"
+                : "red"
+          });
+        }
       });
       return this.reportData;
     }

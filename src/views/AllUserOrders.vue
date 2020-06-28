@@ -5,9 +5,21 @@
         <v-list-item-content dens class="ma-0 pa-0">
           <v-container class="ma-0 pa-0">
             <v-row no-gutters>
-              <v-col cols="5"></v-col>
-              <v-col cols="6">Package Order By User</v-col>
-              <v-col cols="1"></v-col>
+              <v-col cols="5" class="ma-0 pa-0"></v-col>
+              <v-col cols="6" class="ma-0 pa-0">Package Order By User</v-col>
+              <v-col cols="1" class="ma-0 pa-0">
+                <v-toolbar-title class="ma-0 pa-0">
+                  <v-tooltip bottom>
+                    <template v-slot:activator="{ on }">
+                      <v-btn v-on="on" dense small text>
+                        <v-icon large v-if="!isPounds" @click="toggleGmsLbs">mdi-weight-kilogram</v-icon>
+                        <v-icon large v-if="isPounds" @click="toggleGmsLbs">mdi-weight-pound</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>lbs - kgs</span>
+                  </v-tooltip>
+                </v-toolbar-title>
+              </v-col>
             </v-row>
           </v-container>
         </v-list-item-content>
@@ -57,11 +69,11 @@
                         <v-col cols="2" class="mt-4 pb-0">
                           <v-flex shrink class="text-xl-left">
                             <v-text-field
-                              v-model="item.qty"
-                              :label="item.defaultUnits"
+                              v-model="item.qtyConv"
+                              :label="getDefaultUnits(item.defaultUnitsConv)"
                               hide-details="auto"
                               class="ma-0 pa-0 text-xl-left"
-                              :value="parseInt(item.qty).toFixed(2)"
+                              :value="parseInt(item.qtyConv).toFixed(2)"
                               disabled
                               color="success"
                               dense
@@ -70,26 +82,28 @@
                         </v-col>
                         <v-col cols="2" class="mt-4 pb-0">
                           <v-flex shrink class="text-xl-left">
-                            <v-text-field
-                              v-model="item.suggestedQty"
-                              :label="item.defaultUnits"
-                              hide-details="auto"
-                              class="ma-0 pa-0 text-xl-left"
-                              :value="parseFloat(item.suggestedQty).toFixed(2)"
-                              color="success"
-                              dense
-                              disabled
-                            ></v-text-field>
+                            <v-flex shrink class="text-xl-left">
+                              <v-text-field
+                                v-model="item.suggestedQtyConv"
+                                :label="getDefaultUnits(item.defaultUnitsConv)"
+                                hide-details="auto"
+                                class="ma-0 pa-0 text-xl-left"
+                                :value="parseFloat(item.suggestedQtyConv).toFixed(2)"
+                                color="success"
+                                dense
+                                disabled
+                              ></v-text-field>
+                            </v-flex>
                           </v-flex>
                         </v-col>
                         <v-col cols="2" class="mb-2 pb-0">
                           <v-flex shrink class="text-xl-left">
                             <v-text-field
-                              v-model="item.actQty"
-                              :label="item.defaultUnits"
+                              v-model="item.actQtyConv"
+                              :label="getDefaultUnits(item.defaultUnitsConv)"
                               hide-details="auto"
                               class="ma-0 pa-0 text-xl-left"
-                              :value="parseFloat(item.actQty).toFixed(2)"
+                              :value="parseFloat(item.actQtyConv).toFixed(2)"
                               @change="calcItemPrice(item)"
                               color="success"
                               dense
@@ -174,7 +188,28 @@
                     <v-container class="ma-0 pa-0">
                       <v-row>
                         <v-col cols="1" class="ml-0 pb-0">
-                          <v-row justify="end">
+                          <!-- <v-btn
+                          class="mx-2"
+                          fab
+                          dark
+                          small
+                          color="primary"
+                          @click="sendEmail(user.id)"
+                        >
+                          <v-icon dark>mdi-email</v-icon>
+                          </v-btn>-->
+                        </v-col>
+                        <v-col cols="3" class="mb-0 pb-0"></v-col>
+                        <v-col cols="4" class="mb-0 pb-0">
+                          <v-btn
+                            color="success"
+                            @click="savePo()"
+                            :disabled="!valid"
+                            class="float-right"
+                          >Save</v-btn>
+                        </v-col>
+                        <v-col cols="4" class="mb-0 pb-3">
+                          <v-row justify="center">
                             <v-btn
                               color="primary"
                               dark
@@ -183,7 +218,7 @@
                               <v-icon dark>mdi-email</v-icon>
                             </v-btn>
                             <v-dialog v-model="dialog" max-width="290">
-                              <v-card >
+                              <v-card>
                                 <v-card-title class="headline" color="red">
                                   Order Email
                                   <v-spacer></v-spacer>
@@ -207,26 +242,6 @@
                               </v-card>
                             </v-dialog>
                           </v-row>
-                          <!-- <v-btn
-                          class="mx-2"
-                          fab
-                          dark
-                          small
-                          color="primary"
-                          @click="sendEmail(user.id)"
-                        >
-                          <v-icon dark>mdi-email</v-icon>
-                          </v-btn>-->
-                        </v-col>
-                        <v-col cols="3" class="mb-0 pb-0"></v-col>
-                        <v-col cols="4" class="mb-0 pb-0"></v-col>
-                        <v-col cols="4" class="mb-0 pb-3">
-                          <v-btn
-                            color="success"
-                            @click="savePo()"
-                            :disabled="!valid"
-                            class="float-right"
-                          >Save</v-btn>
                         </v-col>
                       </v-row>
                     </v-container>
@@ -291,6 +306,49 @@ export default {
       this.message = message;
       this.snackbar = true;
     },
+    toggleGmsLbs() {
+      this.isPounds = this.isPounds ? false : true;
+      this.localUserPo.forEach(po => {
+        po.qtyConv = this.convertGmsToLbs(po.qtyConv, po.defaultUnitsConv);
+        po.suggestedQtyConv = this.convertGmsToLbs(
+          po.suggestedQtyConv,
+          po.defaultUnitsConv
+        );
+        po.actQtyConv = this.convertGmsToLbs(
+          po.actQtyConv,
+          po.defaultUnitsConv
+        );
+        po.defaultUnitsConv = this.getDefaultUnits(po.defaultUnitsConv);
+      });
+    },
+    convertGmsToLbs(qty, defaultUnits) {
+      if (defaultUnits !== "kgs" && defaultUnits !== "lbs") return qty;
+      if (this.isPounds && defaultUnits === "lbs") {
+        return qty ? qty : null;
+      } else if (this.isPounds && defaultUnits === "kgs") {
+        return qty ? (qty * 2.20462).toFixed(2) : null;
+      }
+
+      if (!this.isPounds && defaultUnits === "kgs") {
+        return qty ? qty : null;
+      } else if (!this.isPounds && defaultUnits === "lbs") {
+        return qty ? (parseFloat(qty) * 0.453592).toFixed(2) : null;
+      }
+    },
+    calcPrice: function(item) {
+      if (item.defaultUnits === "lbs" && item.defaultUnitsConv === "kgs")
+        item.actQty = item.actQtyConv * 2.20462;
+      else if (item.defaultUnits === "kgs" && item.defaultUnitsConv === "lbs")
+        item.actQty = item.actQtyConv * 0.453592;
+      else item.actQty = item.actQtyConv;
+    },
+    getDefaultUnits(defaultUnits) {
+      //console.log(this.isPounds);
+      if (defaultUnits !== "kgs" && defaultUnits !== "lbs") return defaultUnits;
+      if (this.isPounds) return "lbs";
+      else return "kgs";
+    },
+
     async getUsers() {
       await dataService.getAllUsers().then(response => {
         this.localUsers = response;
@@ -300,6 +358,7 @@ export default {
       });
     },
     calcItemPrice: function(item) {
+      this.calcPrice(item);
       item.totalPrice = (
         parseFloat(item.actPrice) * parseFloat(item.actQty)
       ).toFixed(2);
@@ -348,6 +407,7 @@ export default {
           userId: lp.userId,
           qty: lp.qty,
           actQty: parseFloat(lp.actQty),
+          suggestedQty: parseFloat(lp.suggestedQty),
           actPrice: parseFloat(lp.actPrice),
           isCancelled: lp.isCancelled,
           isPacked: lp.isPacked
@@ -384,43 +444,56 @@ export default {
         if (item) {
           let actItems = this.getActPrice(item);
           let actPrice = actItems.itemId > 0 ? actItems.price : lp.actPrice;
-          this.localUserPo.push({
-            id: lp.id,
-            orderId: lp.orderId,
-            itemId: lp.itemId,
-            userId: lp.userId,
-            qty: lp.qty,
-            actQty: lp.actQty > 0 ? lp.actQty : null,
-            suggestedQty: lp.suggestedQty,
-            actPrice: actPrice,
-            isCancelled: lp.isCancelled,
-            isPacked: lp.isPacked,
-            itemName: item.name,
-            defaultUnits: item.defaultUnits,
-            totalPrice: (
-              (actPrice ? parseFloat(actPrice) : 0) *
-              (lp.actQty ? parseFloat(lp.actQty) : 0)
-            ).toFixed(2)
-          });
+          let bulkItem = this.bulkOrders.find(
+            bo => bo.itemId === item.id && parseInt(bo.actQty) > 0
+          );
+          if (bulkItem) {
+            this.localUserPo.push({
+              id: lp.id,
+              orderId: lp.orderId,
+              itemId: lp.itemId,
+              userId: lp.userId,
+              qty: lp.qty,
+              qtyConv: this.convertGmsToLbs(lp.qty, item.defaultUnits),
+              actQty: lp.actQty > 0 ? lp.actQty : null,
+              actQtyConv: this.convertGmsToLbs(lp.actQty, item.defaultUnits),
+              suggestedQty: lp.suggestedQty,
+              suggestedQtyConv: this.convertGmsToLbs(
+                lp.suggestedQty,
+                item.defaultUnits
+              ),
+              actPrice: actPrice,
+              isCancelled: lp.isCancelled,
+              isPacked: lp.isPacked,
+              itemName: item.name,
+              defaultUnits: item.defaultUnits,
+              defaultUnitsConv: this.getDefaultUnits(item.defaultUnits),
+              totalPrice: (
+                (actPrice ? parseFloat(actPrice) : 0) *
+                (lp.actQty ? parseFloat(lp.actQty) : 0)
+              ).toFixed(2)
+            });
+          }
         }
       });
     },
-    async itemPacked(item, user) {      
+    async itemPacked(item, user) {
       if (item.actQty) {
         let flag = parseInt(item.isPacked) === 1 ? 0 : 1;
-        await this.updatePurchaseOrderAction({
-          id: item.id,
-          orderId: item.orderId,
-          itemId: item.itemId,
-          userId: item.userId,
-          qty: item.qty,
-          actQty: item.actQty,
-          actPrice: item.actPrice,
-          suggestedQty: item.suggestedQty,
-          isCancelled: item.isCancelled,
-          isPacked: flag
-        });
-        this.getUserPo(item.userId);
+        // await this.updatePurchaseOrderAction({
+        //   id: item.id,
+        //   orderId: item.orderId,
+        //   itemId: item.itemId,
+        //   userId: item.userId,
+        //   qty: item.qty,
+        //   actQty: item.actQty,
+        //   actPrice: item.actPrice,
+        //   suggestedQty: item.suggestedQty,
+        //   isCancelled: item.isCancelled,
+        //   isPacked: flag
+        // });
+        // this.getUserPo(item.userId);
+        item.isPacked = flag;
         if (flag)
           this.snackMessage(`${item.itemName} packed for ${user.firstname}!`);
         else
@@ -435,7 +508,7 @@ export default {
   },
 
   computed: {
-    ...mapState(["purchaseOrders", "items", "user"]),
+    ...mapState(["purchaseOrders", "items", "user", "bulkOrders"]),
     ...mapGetters(["getCurrentOrder", "getActiveItems", "getActualPrice"]),
 
     grandTotal: function() {
@@ -449,6 +522,14 @@ export default {
       });
 
       return total.toFixed(2);
+    },
+    isPounds: {
+      get() {
+        return this.$store.state.isPounds;
+      },
+      set(value) {
+        this.$store.commit("togglePounds", value);
+      }
     }
   }
 };

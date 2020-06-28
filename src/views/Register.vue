@@ -46,7 +46,7 @@
         <v-spacer></v-spacer>
         <v-btn color="info" @click="validate" v-on:click="registerUser">Save</v-btn>
       </v-card-actions>
-      <v-divider></v-divider>     
+      <v-divider></v-divider>
     </v-card>
     <v-snackbar v-model="snackbar" :multi-line="multiLine">
       {{ this.message }}
@@ -78,10 +78,10 @@ export default {
       },
       showPassword: false,
       reqRule: [v => !!v || "Required"],
-      valid: false,        
+      valid: false,
       snackbar: false,
       message: null,
-      multiLine: true,
+      multiLine: true
     };
   },
 
@@ -99,7 +99,7 @@ export default {
           password: this.password,
           phone: this.phone
         };
-        await dataService.register(data).then(response => {          
+        await dataService.register(data).then(response => {
           this.snackMessage(response.message);
         });
       }

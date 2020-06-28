@@ -1,13 +1,15 @@
 <template>
   <div>
     <v-form v-model="valid">
-      <div class="text-center" v-if="!isOrderLocked">
-    <v-sheet color="orange lighten-2">This order is <v-icon>mdi-lock</v-icon>. No more changes allowed to this order.</v-sheet>
-  </div>
+      <div class="text-center" v-if="isOrderLocked">
+        <v-sheet color="orange lighten-2">
+          This order is
+          <v-icon>mdi-lock</v-icon>. No more changes allowed to this order.
+        </v-sheet>
+      </div>
       <v-divider></v-divider>
 
       <v-card class="mx-auto mt-3" max-width="1100" color="orange" rounded elevation="20">
-        
         <v-list-item dense>
           <v-list-item-content dens class="ma-0 pa-0">
             <v-container class="ma-0 pa-0">
@@ -40,36 +42,20 @@
 
                 <v-col cols="4" class="mb-0 pb-0">
                   <v-flex shrink class="text-xl-left">
-                    <div v-if="isPounds">
-                      <v-text-field
-                        v-model="item.qty"
-                        :label="item.defaultUnits"
-                        hide-details="auto"
-                        class="ma-0 pa-0 text-xl-left"
-                        :value="parseFloat(item.qty).toFixed(2)"
-                        @change="calcItemPrice(item)"
-                        color="success"
-                        :rules="checkMinQty(item)"
-                        dense
-                        rounded
-                      ></v-text-field>
-                    </div>
-                    <div v-if="!isPounds">
-                      <v-text-field
-                        v-model="item.qty"
-                        :label="item.defaultUnits"
-                        hide-details="auto"
-                        class="ma-0 pa-0 text-xl-left"
-                        :value="parseFloat(item.qty).toFixed(2)"
-                        @change="calcItemPrice(item)"
-                        color="success"
-                        :rules="checkMinQty(item)"
-                        dense
-                        rounded
-                      ></v-text-field>
-                    </div>
+                    <v-text-field
+                      v-model="item.qty"
+                      :label="item.defaultUnits"
+                      hide-details="auto"
+                      class="ma-0 pa-0 text-xl-left"
+                      :value="parseFloat(item.qty).toFixed(2)"
+                      @change="calcItemPrice(item)"
+                      color="success"
+                      :rules="checkMinQty(item)"
+                      dense
+                      outlined
+                    ></v-text-field>
                   </v-flex>
-                </v-col>
+                </v-col>                
                 <v-col cols="4" class="mb-0 pb-0">
                   <v-text-field
                     v-model="item.totalPrice"
@@ -120,7 +106,7 @@
                 <v-col cols="4" class="mb-0 pb-0"></v-col>
                 <v-col cols="4" class="mb-0 pb-3">
                   <v-btn
-                    v-if="isOrderLocked"
+                    v-if="!isOrderLocked"
                     color="success"
                     @click="saveOrder()"
                     :disabled="!valid"
@@ -183,6 +169,8 @@ export default {
     };
   },
   mounted() {
+    this.getOrderStatusAction()
+    this.getOrdersAction();
     this.validateForm();
     if (this.localItems.length === 0) this.getItems();
   },
@@ -262,7 +250,9 @@ export default {
               name: item.name,
               minQty: parseFloat(item.minQty),
               qty: po.qty > 0 ? po.qty : parseFloat(item.minQty),
-              defaultUnits: this.toggleGmsLbs(item.defaultUnits),
+              defaultUnitslbs: this.toggleGmsLbs(item.defaultUnits),
+              defaultUnitsgms: this.toggleGmsLbs(item.defaultUnits),   
+              defaultUnits: item.defaultUnits,           
               price: parseFloat(item.price),
               totalPrice: (
                 parseFloat(item.price) * parseFloat(item.minQty)
@@ -315,8 +305,8 @@ export default {
                   itemId: item.id,
                   userId: this.user.id,
                   qty: item.qty,
-                  actQty: 0,
-                  suggestedQty: 0,
+                  actQty: pod.actQty,
+                  suggestedQty: pod.suggestedQty,
                   actPrice: 0,
                   isCancelled: 0
                 };
@@ -384,7 +374,7 @@ export default {
                 itemId: po.itemId,
                 userId: this.user.id,
                 qty: po.qty,
-                actQty: 0,
+                actQty: po.actQty,
                 actPrice: 0,
                 isCancelled: 1
               };
@@ -396,20 +386,18 @@ export default {
     }
   },
   computed: {
-    ...mapState([
-      "items",
-      "user",
-      "purchaseOrders",
-      "bulkOrders",
-      "isPounds",
-      "isOrderLocked"
-    ]),
+    ...mapState(["items", "user", "purchaseOrders", "bulkOrders", "isPounds"]),
     ...mapGetters(["getCurrentOrder", "getUserName", "getActiveItems"]),
     getPurchaseOrderByUser() {
       return this.purchaseOrders.filter(po => po.userId === this.user.id);
     },
     getHeaderText: function() {
-      return this.isOrderLocked ? "<p class='font-weight-black'>(This Order is Locked)</p>" : "";
+      return this.isOrderLocked
+        ? "<p class='font-weight-black'>(This Order is Locked)</p>"
+        : "";
+    },
+    isOrderLocked: function() {      
+      return parseInt(this.getCurrentOrder.isLocked) === 1 ? true : false;
     },
 
     grandTotal: function() {

@@ -222,6 +222,11 @@ const getters = {
     }
     return false;
   },
+  isAdminUser:(state) => {
+    if (state.user){
+      return parseInt(state.user.isAdmin) === 1 ? true : false;
+    }
+  },
   getItemById: (state) => (id) =>
     state.items.find((v) => parseInt(v.id) === parseInt(id)),    
   getActiveOrderStatus: function(state) {

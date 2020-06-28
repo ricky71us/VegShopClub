@@ -7,7 +7,7 @@
           <v-list-item-content dens class="ma-0 pa-0">
             <v-container class="ma-0 pa-0">
               <v-row>
-                <v-col cols="5"></v-col>                
+                <v-col cols="5"></v-col>
                 <v-col cols="4">Bulk Order</v-col>
                 <v-col cols="2"></v-col>
                 <v-col cols="1"></v-col>
@@ -22,7 +22,7 @@
             <v-container class="ma-0 pa-0">
               <v-row>
                 <v-col cols="4">Item</v-col>
-                <v-col cols="2">Orderd Qty</v-col>
+                <v-col cols="2">Ordered Qty</v-col>
                 <v-col cols="2">Act Qty</v-col>
                 <v-col cols="2">Total</v-col>
                 <v-col cols="2">Unit Price</v-col>
@@ -45,7 +45,7 @@
                       :value="item.name"
                       color="success"
                       dense
-                      disabled                      
+                      disabled
                     ></v-text-field>
                   </v-flex>
                 </v-col>
@@ -59,7 +59,7 @@
                       :value="parseInt(item.qty).toFixed(2)"
                       color="success"
                       disabled
-                      dense                      
+                      dense
                     ></v-text-field>
                   </v-flex>
                 </v-col>
@@ -148,7 +148,7 @@
                       >Update Qty</v-btn>
                     </template>
                     <span>Update item quantity for each user proportionate to items ordered</span>
-                  </v-tooltip> -->
+                  </v-tooltip>-->
                 </v-col>
                 <v-col cols="2" class="mb-0 pb-0"></v-col>
                 <v-col cols="2" class="mb-0 pb-0"></v-col>
@@ -199,6 +199,7 @@ export default {
     };
   },
   mounted() {
+    this.getQtyByItem();
     this.getItemsAction();
     this.getItems();
   },
@@ -224,6 +225,7 @@ export default {
       return this.items.find(i => i.id === id);
     },
     getQtyByItem() {
+      this.itemQty = [];      
       this.purchaseOrders.forEach(i => {
         if (
           this.itemQty.length === 0 ||
@@ -231,12 +233,12 @@ export default {
         ) {
           this.itemQty.push({
             itemId: i.itemId,
-            qty: i.qty
+            qty: parseFloat(i.qty)
           });
         } else {
           let item = this.itemQty.find(iq => iq.itemId === i.itemId);
-          item.qty += i.qty;
-        }
+          item.qty = parseFloat(item.qty) + parseFloat(i.qty);
+        }        
       });
     },
     updateQty() {
@@ -267,12 +269,14 @@ export default {
       await this.getOrderStatusAction();
       await this.getOrdersAction();
       await this.getPurchaseOrderByOrderIdAction(this.getCurrentOrder.id);
-      await this.getBulkOrderByOrderIdAction(this.getCurrentOrder.id);
-      if (this.getUserName !== "Guest") {
-        this.getActiveBulkOrders.forEach(item => {
+      await this.getBulkOrderByOrderIdAction(this.getCurrentOrder.id);      
+      this.getActiveBulkOrders.forEach(item => {
+        if (item) {
           if (
             this.localItems.length === 0 ||
-            !this.localItems.find(li => li.id === item.id)
+            !this.localItems.find(li => {
+              li.id === item.id;
+            })
           )
             this.localItems.push({
               id: item.id,
@@ -280,7 +284,7 @@ export default {
               name: this.getItemById(item.itemId).name,
               defaultUnits: this.getItemById(item.itemId).defaultUnits,
               orderId: item.orderId,
-              qty: 0,
+              qty: this.itemQty.find(iq => iq.itemId === item.itemId).qty,
               actQty: item.actQty > 0 ? parseFloat(item.actQty) : null,
               totalPrice:
                 item.totalPrice > 0 ? parseFloat(item.totalPrice) : null,
@@ -292,23 +296,8 @@ export default {
                     ).toFixed(4)
                   : 0
             });
-        });
-        this.purchaseOrders.forEach(i => {
-          if (
-            this.localItems.length === 0 ||
-            !this.localItems.find(iq => iq.itemId === i.itemId)
-          ) {
-            this.localItems.push({
-              itemId: i.itemId,
-              qty: i.qty
-            });
-          } else {
-            let item = this.localItems.find(iq => iq.itemId === i.itemId);
-
-            item.qty += parseFloat(i.qty);
-          }
-        });
-      }
+        }
+      });      
       return this.localItems;
     }
   },
@@ -318,7 +307,13 @@ export default {
     grandTotal: function() {
       var total = 0;
       this.localItems.forEach(item => {
-        if (item) total += parseFloat(item.totalPrice);
+        if (item) {
+          if (item.totalPrice) {
+            if (!isNaN(item.totalPrice)) {
+              total += parseFloat(item.totalPrice);
+            }
+          }
+        }
       });
 
       return total.toFixed(2);
@@ -328,5 +323,4 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
 </style>

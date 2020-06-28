@@ -38,7 +38,12 @@
 
                         <v-text-field v-model="updatedItem.description" label="Description"></v-text-field>
                         <v-text-field v-model="updatedItem.minQty" label="Minimum Quantity"></v-text-field>
-                        <v-text-field v-model="updatedItem.defaultUnits" label="Units"></v-text-field>
+                        <v-select
+                          v-model="tempItem.defaultUnits"
+                          :items="units"
+                          label="Default Unit"
+                          required
+                        ></v-select>
                         <v-text-field v-model="updatedItem.price" label="Price"></v-text-field>
 
                         <v-btn
@@ -97,11 +102,15 @@
 
                         <v-text-field v-model="tempItem.description" label="Description"></v-text-field>
                         <v-text-field v-model="tempItem.minQty" label="Minimum Quantity"></v-text-field>
-                        <v-text-field v-model="tempItem.defaultUnits" label="Units"></v-text-field>
+                        <v-select
+                          v-model="tempItem.defaultUnits"
+                          :items="units"
+                          label="Default Unit"
+                          required
+                        ></v-select>
                         <v-text-field v-model="tempItem.price" label="Price"></v-text-field>
 
-                        <v-btn
-                          :disabled="!valid"
+                        <v-btn                          
                           color="success"
                           class="mr-4"
                           @click="updateItem(item)"
@@ -172,6 +181,7 @@ export default {
 
   data() {
     return {
+      units: ["nos", "bunches", "kgs", "lbs"],
       localItem: {
         id: 0,
         name: null,
@@ -199,7 +209,7 @@ export default {
         price: null,
         isActive: true
       },
-      valid: true,
+      valid: false,
       name: "",
       nameRules: [v => !!v || "Name is required"],
       dialog: false,
@@ -233,6 +243,8 @@ export default {
       }
     },
     editItem: function(item) {
+       this.valid = true;
+       //console.log(this.$refs.form.validate())
       this.tempItem = {
         id: item.id,
         name: item.name,
@@ -271,7 +283,7 @@ export default {
         msg = "is Active";
       }
       item.isActive = parseInt(item.isActive) === 1 ? 0 : 1;
-      if (this.$refs.form.validate()) {
+      //if (this.$refs.form.validate()) {
         this.updateItemAction({
           id: item.id,
           name: item.name,
@@ -283,10 +295,11 @@ export default {
         });
 
         this.snackMessage(`Item "${item.name}" ${msg}!`);
-      }
+      //}
     },
     updateItem: function(item) {
-      if (this.$refs.form.validate()) {
+      console.log(item)
+      //if (this.$refs.form.validate()) {
         this.updateItemAction({
           id: item.id,
           name: item.name,
@@ -297,7 +310,7 @@ export default {
           isActive: item.isActive
         });
         this.snackMessage(`Item "${item.name}" updated successfully!`);
-      }
+      //}
     },
     validate() {
       if (this.$refs.form.validate()) {

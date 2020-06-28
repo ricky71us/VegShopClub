@@ -111,7 +111,7 @@ const addOrder = async function(order) {
 
 const updateOrder = async function(order) {
   try {
-    console.log(order);
+    //console.log(order);
     const response = await axios.put(`${API}/orders?id=${order.id}`, order);
     parseItem(response, 200);
     return order;
