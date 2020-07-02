@@ -7,10 +7,7 @@
           <v-list-item-content dens class="ma-0 pa-0">
             <v-container class="ma-0 pa-0">
               <v-row>
-                <v-col cols="5"></v-col>
-                <v-col cols="4">Bulk Order</v-col>
-                <v-col cols="2"></v-col>
-                <v-col cols="1"></v-col>
+                <v-col cols="12" class="text-md-center">Bulkorder Invoice</v-col>
               </v-row>
             </v-container>
           </v-list-item-content>
@@ -39,13 +36,15 @@
                 <v-col>
                   <v-flex shrink class="text-xl-left">
                     <v-text-field
+                    
                       v-model="item.name"
                       hide-details="auto"
-                      class="ma-0 pa-0 text-xl-left"
+                      class="ma-0 pa-0 text-xl-left custom"
                       :value="item.name"
                       color="success"
                       dense
                       disabled
+                      rounded
                     ></v-text-field>
                   </v-flex>
                 </v-col>
@@ -60,6 +59,7 @@
                       color="success"
                       disabled
                       dense
+                      rounded
                     ></v-text-field>
                   </v-flex>
                 </v-col>
@@ -102,6 +102,7 @@
                     disabled
                     prepend-inner-icon="mdi-currency-usd"
                     dense
+                    rounded
                   ></v-text-field>
                 </v-col>
               </v-row>

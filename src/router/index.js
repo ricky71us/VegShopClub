@@ -5,6 +5,7 @@ import Dashboard from "../views/Dashboard.vue";
 import Register from "../views/Register.vue";
 import About from "../views/About.vue";
 import ManageItems from "../views/ManageItems.vue";
+import ManageUsers from "../views/ManageUsers.vue";
 //import PurchaseOrder from "../views/PurchaseOrder.vue";
 import OrderEntry from "../views/OrderEntry.vue";
 import BulkOrder from "../views/BulkOrder.vue";
@@ -13,6 +14,8 @@ import AllUserOrders from "../views/AllUserOrders.vue";
 import OrderRecon from "../views/OrderRecon.vue";
 import PackagingByItem from "../views/PackagingByItem.vue";
 import Profile from "../views/Profile.vue";
+import AccessDenied from "../views/AccessDenied.vue";
+import OrderReport from "../views/OrderReport.vue";
 
 import VueAnalytics from "vue-analytics";
 import store from "../store";
@@ -26,10 +29,15 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: "/accessDenied",
+    name: "accessDenied",
+    component: AccessDenied,
+  },
+  {
     path: "/dashboard",
     name: "dashboard",
     component: Dashboard,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, adminOnly: false },
   },
   {
     path: "/profile",
@@ -44,34 +52,40 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: "/orderReport",
+    name: "orderReport",
+    component: OrderReport,
+    meta: { requiresAuth: true, adminOnly: true },
+  },
+  {
     path: "/orderRecon",
     name: "orderRecon",
     component: OrderRecon,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, adminOnly: true },
   },
   {
     path: "/packagingByItem",
     name: "packagingByItem",
     component: PackagingByItem,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, packerOnly: true },
   },
   {
     path: "/allUserOrders",
     name: "allUserOrders",
     component: AllUserOrders,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true , packerOnly: true},
   },
   {
     path: "/bulkOrder",
     name: "bulkOrder",
     component: BulkOrder,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, adminOnly: true },
   },
   {
     path: "/orders",
     name: "orders",
     component: Orders,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, adminOnly: true },
   },
   // {
   //   path: "/purchaseOrder",
@@ -81,12 +95,13 @@ const routes = [
   {
     path: "/login",
     name: "login",
-    component: Login,   
+    component: Login,
   },
   {
     path: "/register",
     name: "register",
     component: Register,
+    meta: { requiresAuth: true, adminOnly: true },
   },
   {
     path: "/about",
@@ -97,9 +112,19 @@ const routes = [
     path: "/manageitems",
     name: "ManageItems",
     component: ManageItems,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, adminOnly: true },
   },
+  {
+    path: "/manageUsers",
+    name: "ManageUsers",
+    component: ManageUsers,
+    meta: { requiresAuth: true, adminOnly: true },
+  },
+  
+  
+
 ];
+
 
 const router = new VueRouter({
   // mode: "history",
@@ -109,9 +134,39 @@ const router = new VueRouter({
 
 router.beforeEach((to, from, next) => {
   if (to.matched.some((record) => record.meta.requiresAuth)) {
-    if (to.name !== "login" && store.getters["getUserName"] === "Guest")
+    // console.log(to.name);
+    // console.log(store.state.isUserLoggedIn);
+    if (to.name !== "login" && !store.state.isUserLoggedIn) {
+      // console.log("test1111");
+      // console.log(from);
       next({ name: "login" });
-    else next();
+    } else if (
+      to.matched.some(
+        (record) =>
+          record.meta.adminOnly &&
+          parseInt(store.state.user.isAdmin) === parseInt(0)
+      )
+    ) {
+      next({ name: "accessDenied" });
+    } 
+    else if (
+      to.matched.some(
+        (record) =>
+          record.meta.packerOnly &&
+          (parseInt(store.state.user.isPacker) === parseInt(0) &&
+          parseInt(store.state.user.isAdmin) === parseInt(0))
+          
+      )
+    ) {    
+      next({ name: "accessDenied" });
+    } else {
+      // console.log("Inside Else")
+      next();
+    }
+  } else if (to.name === "login" && store.state.isUserLoggedIn) {
+    // console.log("test2222");
+    // console.log(from);
+    next({ name: "orderEntry" });
   } else {
     next(); // does not require auth, make sure to always call next()!
   }

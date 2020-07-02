@@ -5,16 +5,21 @@ import createPersistedState from "vuex-persistedstate";
 
 Vue.use(Vuex);
 
-const state = {
-  user: { id: 0, email: "", firstname: "", lastname: "", phone: "" },
-  orders: [],
-  orderstatus: [],
-  items: [],
-  purchaseOrders: [],
-  bulkOrders: [],
-  isPounds: "true",
-  isOrderLocked: "false",
-};
+const getDefaultState = () => {
+  return {
+    user: { id: 0, email: "", firstname: "", lastname: "", phone: "" },
+    orders: [],
+    orderstatus: [],
+    items: [],
+    purchaseOrders: [],
+    bulkOrders: [],
+    isPounds: false,
+    isOrderLocked: false,
+    isUserLoggedIn: false
+  }
+}
+
+const state = getDefaultState();
 
 const mutations = {
   togglePounds(state, flag){
@@ -26,11 +31,15 @@ const mutations = {
   updateUser(state, user){
     state.user = user;
   },
-  clearUser(state, user) {
-    state.user = user;
-  },
+  resetState(state ) {
+    //state.user = null;
+    localStorage.removeItem('userId')
+    Object.assign(state, getDefaultState());
+    state.isUserLoggedIn = false;
+  },  
   signIn(state, signInUser) {
     state.user = signInUser;
+    state.isUserLoggedIn = true;
   },
   // Order Status
   getOrderStatus(state, orderstatus) {
@@ -108,16 +117,18 @@ const mutations = {
 };
 
 const actions = {
-  async clearUserAction({ commit }, user) {
-    commit("clearUser", user);
+  async resetStateAction({ commit })  {
+    commit("resetState");
   },
   async signInAction({ commit }, user) {
-    const signInUser = await dataService.signIn(user);
+    const signInUser = await dataService.signIn(user).then(() =>{
+      localStorage.setItem('userId', signInUser.id);
+    });
     commit("signIn", signInUser);
   },
   async updateUserAction({ commit }, user) {
-    const updatedUser = await dataService.updateUser(user);
-    commit("updateUser", updatedUser);
+    await dataService.updateUser(user);
+    commit("updateUser", user);
   },
   //OrderStatus
   async getOrderStatusAction({ commit }) {
@@ -215,13 +226,12 @@ const getters = {
         : state.user.firstname + " " + state.user.lastname;
     }
     return "Guest";
-  },  
-  isUserSignedIn: (state) =>{
-    if (state.user){
-      return state.user.id > 0 ? true : false;
-    }
-    return false;
   },
+  isUserAuthenticated:() =>{
+    let userId = parseInt(localStorage.getItem('userId'));
+    if (userId > 0)
+    return 
+  },   
   isAdminUser:(state) => {
     if (state.user){
       return parseInt(state.user.isAdmin) === 1 ? true : false;

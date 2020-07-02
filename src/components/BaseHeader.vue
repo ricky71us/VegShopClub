@@ -2,7 +2,7 @@
   <div>
     <v-card class="overflow-hidden">
       <v-app-bar color="blue-grey accent-4" elevate-on-scroll dense dark>
-        <v-menu offset-y>
+        <!-- <v-menu offset-y>
           <template v-slot:activator="{ on }">
             <v-btn v-on="on" dense small text>
               <v-icon>mdi-hamburger</v-icon>
@@ -15,14 +15,15 @@
               </v-list-item-title>
             </v-list-item>
           </v-list>
-          <!-- <v-list>
+
+          <v-list>
           <v-list-tile v-for="(item, index) in items" :key="index" :to="item.path" router exact>
             <v-list-tile-content>
               <v-list-tile-title v-text="item.title" />
             </v-list-tile-content>
           </v-list-tile>
-          </v-list>-->
-        </v-menu>
+          </v-list>
+        </v-menu>-->
         <!-- <v-divider class="mx-2" inset vertical></v-divider>
         <v-toolbar-title>
           <v-tooltip bottom>
@@ -34,10 +35,31 @@
             </template>
             <span>lbs - gms</span>
           </v-tooltip>
-        </v-toolbar-title> -->
+        </v-toolbar-title>-->
 
-        <v-divider v-if="isAdminUser" class="mx-2" inset vertical></v-divider>
-        <v-toolbar-title v-if="isAdminUser">
+        <div class="text-center">
+          <v-menu offset-y transition="scale-transition">
+            <template v-slot:activator="{ on: menu }">
+              <!-- <v-btn color="primary" dark v-bind="attrs" v-on="on">Dropdown</v-btn> -->
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on:tooltip  }">
+                  <v-btn v-on="{...tooltip, ...menu}" dense small text>
+                    <v-icon dark>mdi-dots-vertical</v-icon>
+                  </v-btn>
+                </template>
+                <span>Menu</span>
+              </v-tooltip>
+            </template>
+            <v-list v-if="displayMenu">
+              <v-list-item v-for="(item, index) in getMenuItems()" :key="index" :to="item.path">
+                <v-list-item-title>{{ item.title }}</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+        </div>
+
+        <!-- <v-divider v-if="displayAdminMenu" class="mx-2" inset vertical></v-divider>
+        <v-toolbar-title v-if="displayAdminMenu">
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-btn v-on="on" dense small text to="/manageitems">
@@ -46,70 +68,84 @@
             </template>
             <span>Manage Items</span>
           </v-tooltip>
-        </v-toolbar-title>
+        </v-toolbar-title> -->
 
-        <v-divider class="mx-2" inset vertical></v-divider>
-        <v-toolbar-title>
+        
+
+        <v-divider v-if="displayMenu" class="mx-2" inset vertical></v-divider>
+        <v-toolbar-title v-if="displayMenu">
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-btn v-on="on" dense small text to="/orderEntry">
-                <v-icon>mdi-cart</v-icon>
+                <v-icon>mdi-cart-outline</v-icon>
               </v-btn>
             </template>
             <span>My Order</span>
           </v-tooltip>
         </v-toolbar-title>
 
-        <v-divider v-if="isAdminUser" class="mx-2" inset vertical></v-divider>
-        <v-toolbar-title v-if="isAdminUser">
+        <v-divider v-if="displayAdminMenu" class="mx-2" inset vertical></v-divider>
+        <v-toolbar-title v-if="displayAdminMenu">
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
-              <v-btn v-on="on" dense small text to="/bulkOrder">
-                <v-icon>mdi-view-agenda-outline</v-icon>
+              <v-btn v-on="on" dense small text to="/orderReport">
+                <v-icon>mdi-account-multiple</v-icon>
               </v-btn>
             </template>
-            <span>Bulk Order</span>
+            <span>Order Summary</span>
           </v-tooltip>
         </v-toolbar-title>
 
-        <v-divider class="mx-2" inset vertical></v-divider>
-        <v-toolbar-title>
+        <v-divider v-if="displayAdminMenu" class="mx-2" inset vertical></v-divider>
+        <v-toolbar-title v-if="displayAdminMenu">
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-btn v-on="on" dense small text to="/bulkOrder">
+                <v-icon>mdi-receipt</v-icon>
+              </v-btn>
+            </template>
+            <span>Invoice</span>
+          </v-tooltip>
+        </v-toolbar-title>
+
+        <v-divider v-if="displayMenu" class="mx-2" inset vertical></v-divider>
+        <v-toolbar-title v-if="displayMenu">
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-btn v-on="on" dense small text to="/packagingByItem">
                 <v-icon>mdi-scale-balance</v-icon>
               </v-btn>
             </template>
-            <span>Package Order By Item</span>
+            <span>Pack Items</span>
           </v-tooltip>
         </v-toolbar-title>
 
-        <v-divider class="mx-2" inset vertical></v-divider>
-        <v-toolbar-title>
+        <v-divider v-if="displayMenu" class="mx-2" inset vertical></v-divider>
+        <v-toolbar-title v-if="displayMenu">
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-btn v-on="on" dense small text to="/allUserOrders">
-                <v-icon>mdi-scale</v-icon>
+                <v-icon>mdi-email-outline</v-icon>
               </v-btn>
             </template>
-            <span>Package Order By User</span>
+            <span>Send Email</span>
           </v-tooltip>
         </v-toolbar-title>
-        <v-divider v-if="isAdminUser" class="mx-2" inset vertical></v-divider>
 
-        <v-toolbar-title v-if="isAdminUser">
+        <!-- <v-divider v-if="displayAdminMenu" class="mx-2" inset vertical></v-divider>
+        <v-toolbar-title v-if="displayAdminMenu">
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-btn v-on="on" dense small text to="/orderRecon">
                 <v-icon>mdi-ballot-recount</v-icon>
               </v-btn>
             </template>
-            <span>Order Reconciliation</span>
+            <span>Reconcile Order</span>
           </v-tooltip>
-        </v-toolbar-title>
+        </v-toolbar-title> -->
 
-        <v-divider v-if="isAdminUser" class="mx-2" inset vertical></v-divider>
-        <v-toolbar-title v-if="isAdminUser">
+        <!-- <v-divider v-if="displayAdminMenu" class="mx-2" inset vertical></v-divider>
+        <v-toolbar-title v-if="displayAdminMenu">
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-btn v-on="on" dense small text>
@@ -120,10 +156,10 @@
             </template>
             <span>Lock/Unlock Order</span>
           </v-tooltip>
-        </v-toolbar-title>
+        </v-toolbar-title> -->
 
         <v-spacer></v-spacer>
-        <v-toolbar-title>
+        <!-- <v-toolbar-title>
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-btn v-on="on" to="/profile" dense small text>
@@ -133,8 +169,34 @@
             <span>{{getUserName}}</span>
           </v-tooltip>
         </v-toolbar-title>
-        <v-divider class="mx-2" inset vertical></v-divider>
-        <!-- <v-tooltip bottom>
+        <v-divider class="mx-2" inset vertical></v-divider>-->
+        <div class="text-center" v-if="displayMenu">
+          <v-menu offset-y>
+            <template v-slot:activator="{ on: menu }">
+              <!-- <v-btn color="primary" dark v-bind="attrs" v-on="on">Dropdown</v-btn> -->
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on:tooltip  }">
+                  <v-btn v-on="{...tooltip, ...menu}" dense small text>
+                    <v-icon dark>mdi-account-circle</v-icon>
+                  </v-btn>
+                </template>
+                <span>{{getUserName}}</span>
+              </v-tooltip>
+            </template>
+            <v-list>
+              <!-- <template v-slot:activator="{ on: menuClick}"> -->
+                <v-list-item
+                  v-for="(item, index) in profileItems"
+                  :key="index"                                    
+                  :to="item.path"
+                >
+                  <v-list-item-title>{{ item.title }}</v-list-item-title>
+                </v-list-item>
+              <!-- </template> -->
+            </v-list>
+          </v-menu>
+        </div>
+        <v-tooltip bottom>
           <template v-slot:activator="{ on }">
             <v-btn v-on="on" v-if="!isUserSignedIn" to="/login" dense small text>
               <v-icon v-on:click="signInUser">mdi-login</v-icon>
@@ -145,23 +207,23 @@
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
             <v-btn v-on="on" v-if="isUserSignedIn" to="/login" dense small text>
-              <v-icon v-on:click="clearUser">mdi-logout</v-icon>
+              <v-icon v-on:click="resetState">mdi-logout</v-icon>
             </v-btn>
           </template>
           <span>Logout</span>
-        </v-tooltip>-->
-        <v-toolbar-title>
+        </v-tooltip>
+        <!-- <v-toolbar-title>
           <v-btn v-if="!isUserSignedIn" to="/login" dense small text>
             <v-icon v-on:click="signInUser">mdi-login</v-icon>
           </v-btn>
           <v-btn v-if="isUserSignedIn" to="/login" dense small text>
-            <v-icon v-on:click="clearUser">mdi-logout</v-icon>
+            <v-icon v-on:click="resetState">mdi-logout</v-icon>
           </v-btn>
-        </v-toolbar-title>
+        </v-toolbar-title>-->
         <v-menu left bottom></v-menu>
       </v-app-bar>
     </v-card>
-    <v-snackbar v-model="snackbar" :multi-line="multiLine">
+    <v-snackbar id="header-snackbar" v-model="snackbar" :multi-line="multiLine">
       {{ this.message }}
       <v-btn color="red" text @click="snackbar = false">Close</v-btn>
     </v-snackbar>
@@ -173,38 +235,45 @@ import { mapActions, mapState, mapGetters } from "vuex";
 export default {
   data: () => ({
     menuItems: [
+      
       { title: "My Order", path: "/", admin: false },
-      { title: "Packaging By User", path: "/AllUserOrders", admin: false },
-      { title: "Packaging By Item", path: "/PackagingByItem", admin: false },
-      { title: "FAQ", path: "/About", admin: false },
-      { title: "Bulk Order", path: "/BulkOrder", admin: true },
-      { title: "Manage Items", path: "/ManageItems", admin: true },
-      { title: "Reconcile Orders", path: "/OrderRecon", admin: true }
+      { title: "Order Summary", path: "/OrderReport", admin: true },
+      { title: "Bulkorder Invoice", path: "/BulkOrder", admin: true },
+      { title: "Pack Items", path: "/PackagingByItem", admin: false },
+      { title: "Send Email", path: "/AllUserOrders", admin: false },
+      { title: "Reconcile Order", path: "/OrderRecon", admin: true },
+      
+
+      { title: "Add User", path: "/Register", admin: true },
+      { title: "Add Item", path: "/ManageItems", admin: true },
+      { title: "Manage Users", path: "/ManageUsers", admin: true },
+      { title: "FAQ", path: "/About", admin: false }
+    ],
+    profileItems: [
+      { title: "Profile", path: "/profile", admin: false, onClick: "" },      
     ],
     valid: false,
     snackbar: false,
     message: null,
     multiLine: true,
-    isValidUser: false
+    isValidUser: false,
+    displayMenu: false,
+    displayAdminMenu: false
   }),
   created() {
     this.items = [];
+    this.setDisplayMenu();
   },
   mounted() {
-    this.getOrderStatusAction()
+    this.getOrderStatusAction();
     this.getOrdersAction();
   },
   updated() {
     this.isValidUser = this.isUserSignedIn;
   },
   computed: {
-    ...mapState({ currentUser: "user" }),
-    ...mapGetters([
-      "getUserName",
-      "getCurrentOrder",
-      "isUserSignedIn",
-      "isAdminUser"
-    ]),
+    ...mapState({ currentUser: "user", isUserSignedIn: "isUserLoggedIn" }),
+    ...mapGetters(["getUserName", "getCurrentOrder", "isAdminUser"]),
     isPounds: {
       get() {
         return this.$store.state.isPounds;
@@ -223,10 +292,23 @@ export default {
     }
   },
   methods: {
-    ...mapActions(["clearUserAction", "updateOrderAction","getOrderStatusAction", "getOrdersAction"]),
+    ...mapActions([
+      "resetStateAction",
+      "updateOrderAction",
+      "getOrderStatusAction",
+      "getOrdersAction"
+    ]),
     snackMessage: function(message) {
       this.message = message;
       this.snackbar = true;
+    },
+    setDisplayMenu() {
+      if (this.isUserSignedIn) {
+        this.displayMenu = true;
+        if (this.isAdminUser) this.displayAdminMenu = true;
+      } else {        
+        this.displayMenu = false;
+      }
     },
     toggleGmsLbs() {
       this.isPounds = this.isPounds ? false : true;
@@ -240,7 +322,7 @@ export default {
       }
     },
     async toggleOrderLock() {
-      this.isOrderLocked = this.isOrderLocked ? 0 : 1;
+      this.isOrderLocked = this.isOrderLocked ? false : true;
       await this.updateOrderAction({
         id: this.getCurrentOrder.id,
         orderDt: this.getCurrentOrder.orderDt,
@@ -251,15 +333,17 @@ export default {
       if (parseInt(this.isOrderLocked) === 1)
         this.snackMessage("Order is Locked!");
     },
-    clearUser: function() {
-      this.clearUserAction({
-        firstname: "",
-        lastname: "",
-        phone: "",
-        email: ""
-      });
+    resetState: function() {
+      this.resetStateAction();
+      this.setDisplayMenu();
     },
     signInUser: function() {}
   }
 };
 </script>
+<style lang="scss" scoped>
+body {
+  overflow: hidden;
+  height: 100vh;
+}
+</style>

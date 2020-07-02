@@ -6,7 +6,7 @@
           <v-container class="ma-0 pa-0">
             <v-row no-gutters>
               <v-col cols="5" class="ma-0 pa-0"></v-col>
-              <v-col cols="6" class="ma-0 pa-0">Package Order By User</v-col>
+              <v-col cols="6" class="ma-0 pt-2">Send Email</v-col>
               <v-col cols="1" class="ma-0 pa-0">
                 <v-toolbar-title class="ma-0 pa-0">
                   <v-tooltip bottom>
@@ -96,32 +96,31 @@
                             </v-flex>
                           </v-flex>
                         </v-col>
-                        <v-col cols="2" class="mb-2 pb-0">
+                        <v-col cols="2" class="mt-4 pb-0">
                           <v-flex shrink class="text-xl-left">
-                            <v-text-field
-                              v-model="item.actQtyConv"
-                              :label="getDefaultUnits(item.defaultUnitsConv)"
-                              hide-details="auto"
-                              class="ma-0 pa-0 text-xl-left"
-                              :value="parseFloat(item.actQtyConv).toFixed(2)"
-                              @change="calcItemPrice(item)"
-                              color="success"
-                              dense
-                              outlined
-                            ></v-text-field>
+                            <v-flex shrink class="text-xl-left">
+                              <v-text-field
+                                v-model="item.actQtyConv"
+                                :label="getDefaultUnits(item.defaultUnitsConv)"
+                                hide-details="auto"
+                                class="ma-0 pa-0 text-xl-left"
+                                :value="parseFloat(item.actQtyConv).toFixed(2)"
+                                color="success"
+                                dense
+                                disabled
+                              ></v-text-field>
+                            </v-flex>
                           </v-flex>
                         </v-col>
                         <v-col cols="1" class="mt-2 pl-5">
                           <v-icon
-                            @click="itemPacked(item, user)"
                             v-if="parseInt(item.isPacked) === 1"
                             color="green"
-                          >mdi-toggle-switch</v-icon>
+                          >mdi-check</v-icon>
                           <v-icon
-                            @click="itemPacked(item, user)"
                             v-if="parseInt(item.isPacked) === 0"
                             color="red"
-                          >mdi-toggle-switch-off</v-icon>
+                          >mdi-close</v-icon>
                         </v-col>
                         <v-col cols="2" class="mt-4 pb-0">
                           <v-flex shrink class="text-xl-left">
@@ -201,15 +200,15 @@
                         </v-col>
                         <v-col cols="3" class="mb-0 pb-0"></v-col>
                         <v-col cols="4" class="mb-0 pb-0">
-                          <v-btn
+                          <!-- <v-btn
                             color="success"
                             @click="savePo()"
                             :disabled="!valid"
                             class="float-right"
-                          >Save</v-btn>
+                          >Save</v-btn>-->
                         </v-col>
-                        <v-col cols="4" class="mb-0 pb-3">
-                          <v-row justify="center">
+                        <v-col cols="4">
+                          <v-row justify="end" class="mr-0 pb-0">
                             <v-btn
                               color="primary"
                               dark
@@ -217,23 +216,23 @@
                             >
                               <v-icon dark>mdi-email</v-icon>
                             </v-btn>
-                            <v-dialog v-model="dialog" max-width="290">
+                            <v-dialog v-model="dialog" max-width="290" modal>
                               <v-card>
                                 <v-card-title class="headline" color="red">
-                                  Order Email
+                                  Send Email
                                   <v-spacer></v-spacer>
-                                  <v-icon v-if="user.nonePacked " color="red" large>mdi-email-alert</v-icon>
-                                  <v-icon
-                                    v-if="!user.nonePacked && !user.allPacked"
-                                    color="orange"
-                                    large
-                                  >mdi-email-alert</v-icon>
+                                  <v-icon v-if="localAllPacked " color="green" large>mdi-email-alert</v-icon>
+                                  <v-icon v-if="!localAllPacked" color="red" large>mdi-email-alert</v-icon>
                                 </v-card-title>
                                 <v-card-text>{{emailDialogText}}</v-card-text>
-                                <v-card-actions>
+                                <v-card-actions  v-if="localAllPacked ">
                                   <v-spacer></v-spacer>
-                                  <v-btn color="green darken-1" text @click="dialog = false">No</v-btn>
-                                  <v-btn
+                                  <v-btn                                   
+                                    color="green darken-1"
+                                    text
+                                    @click="dialog = false"
+                                  >No</v-btn>
+                                  <v-btn                                  
                                     color="green darken-1"
                                     text
                                     @click="sendEmail(user.id); dialog = false"
@@ -286,7 +285,9 @@ export default {
       },
       dialog: false,
       emailDialogText: "",
-      emailDialogTextColor: ""
+      emailDialogTextColor: "",
+      localAllPacked: false,
+      localNonePacked: false
     };
   },
   created() {
@@ -364,20 +365,22 @@ export default {
       ).toFixed(2);
     },
     getEmailText(allPacked, nonePacked) {
-      if (nonePacked) {
-        this.emailDialogTextColor = "red";
-        this.emailDialogText =
-          "No items have been packed, do you still want to send the email?";
-      } else if (allPacked) {
+      this.localAllPacked = allPacked;
+      this.localNonePacked = nonePacked;      
+      if (allPacked) {
         this.emailDialogTextColor = "green";
-
         this.emailDialogText = "Are you ready to send the email?";
       } else {
-        this.emailDialogTextColor = "orange";
-
+        this.emailDialogTextColor = "red";
         this.emailDialogText =
-          "Order is only partially filled, do you want to send an email?";
+          "Looks like the order is not completely packed, please pack the items before you can send the email";
       }
+      // else {
+      //   this.emailDialogTextColor = "orange";
+
+      //   this.emailDialogText =
+      //     "Order is only partially filled, do you want to send an email?";
+      // }
     },
     sendEmail(id) {
       let pol = this.purchaseOrders.find(
@@ -424,19 +427,40 @@ export default {
       else return { itemId: 0, price: 0 };
     },
 
-    getUserPo(id) {
-      this.localUserPo = [];
-      let pos = this.purchaseOrders.filter(
-        po =>
-          parseInt(po.userId) === parseInt(id) && parseInt(po.isCancelled) === 0
-      );
+    setPackedFlags(pos, userId) {      
       let unPackedItems = pos.find(po => parseInt(po.isPacked) === 0);
       let packedItems = pos.find(po => parseInt(po.isPacked) === 1);
-      let user = this.localUsers.find(u => parseInt(u.id) === parseInt(id));
+      let user = this.localUsers.find(u => parseInt(u.id) === parseInt(userId));
       if (user) {
         user.allPacked = unPackedItems ? false : true;
         user.nonePacked = packedItems ? false : true;
       }
+    },
+
+    async itemPacked(itempo) {
+      if (itempo.actQty && itempo.actQty > 0) {
+        let flag = parseInt(itempo.isPacked) === 1 ? 0 : 1;
+        itempo.isPacked = flag;
+      } else
+        this.snackMessage(
+          `Please enter Actual Quantity before selecting 'packed'`
+        );
+
+      // let pos = this.localUsers.filter(
+      //   po =>
+      //     parseInt(po.userId) === parseInt(itempo.userId) &&
+      //     parseInt(po.isCancelled) === 0
+      // );
+
+      //this.setPackedFlags(pos, itempo.userId);
+    },
+
+    getUserPo(id) {
+      this.localUserPo = [];
+      let pos = this.purchaseOrders.filter(
+        po =>
+          parseInt(po.userId) === parseInt(id) && parseInt(po.isCancelled) === 0 
+      );    
 
       pos.forEach(lp => {
         let item = this.getActiveItems.find(i => i.id === lp.itemId);
@@ -445,7 +469,7 @@ export default {
           let actItems = this.getActPrice(item);
           let actPrice = actItems.itemId > 0 ? actItems.price : lp.actPrice;
           let bulkItem = this.bulkOrders.find(
-            bo => bo.itemId === item.id && parseInt(bo.actQty) > 0
+            bo => bo.itemId === item.id && parseInt(bo.actQty) > 0 && parseFloat(bo.actPrice) > 0
           );
           if (bulkItem) {
             this.localUserPo.push({
@@ -476,34 +500,8 @@ export default {
           }
         }
       });
-    },
-    async itemPacked(item, user) {
-      if (item.actQty) {
-        let flag = parseInt(item.isPacked) === 1 ? 0 : 1;
-        // await this.updatePurchaseOrderAction({
-        //   id: item.id,
-        //   orderId: item.orderId,
-        //   itemId: item.itemId,
-        //   userId: item.userId,
-        //   qty: item.qty,
-        //   actQty: item.actQty,
-        //   actPrice: item.actPrice,
-        //   suggestedQty: item.suggestedQty,
-        //   isCancelled: item.isCancelled,
-        //   isPacked: flag
-        // });
-        // this.getUserPo(item.userId);
-        item.isPacked = flag;
-        if (flag)
-          this.snackMessage(`${item.itemName} packed for ${user.firstname}!`);
-        else
-          this.snackMessage(
-            `${item.itemName} not packed for ${user.firstname}!`
-          );
-      } else
-        this.snackMessage(
-          `Please enter a value in Actual Quantity before setting this flag`
-        );
+
+       this.setPackedFlags(this.localUserPo, id);
     }
   },
 

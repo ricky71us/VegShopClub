@@ -6,7 +6,7 @@
           <v-container class="ma-0 pa-0">
             <v-row no-gutters>
               <v-col cols="5"></v-col>
-              <v-col cols="6">Package Order By Items</v-col>
+              <v-col cols="6" class="ma-0 pt-2">Pack Order</v-col>
               <v-col cols="1">
                 <v-toolbar-title class="ma-0 pa-0">
                   <v-tooltip bottom>
@@ -36,11 +36,10 @@
                   <v-list-item-content dens class="ma-0 pa-0">
                     <v-container class="ma-0 pa-0">
                       <v-row>
-                        <v-col cols="3"></v-col>
-                        <v-col cols="2"></v-col>
-                        <v-col cols="2"></v-col>
-                        <v-col cols="2"></v-col>
-                        <v-col cols="3">Total Qty Ordered - {{convertGmsToLbs(item.actQty, item.defaultUnits)}} {{getDefaultUnits(item.defaultUnits)}}</v-col>
+                        <v-col
+                          cols="12"
+                          class="text-md-center"
+                        >Total Quantity Ordered - {{convertGmsToLbs(item.actQty, item.defaultUnits)}} {{getDefaultUnits(item.defaultUnits)}}</v-col>
                       </v-row>
                     </v-container>
                   </v-list-item-content>
@@ -52,9 +51,9 @@
                     <v-container class="ma-0 pa-0">
                       <v-row>
                         <v-col cols="5" justify="centre">Buyer</v-col>
-                        <v-col cols="2">Orderd Qty</v-col>
+                        <v-col cols="2">Ordered Qty</v-col>
                         <v-col cols="2">Suggested Qty</v-col>
-                        <v-col cols="2">Act Qty</v-col>
+                        <v-col cols="2">Actual Qty</v-col>
                         <v-col cols="1">Packed</v-col>
                         <!-- <v-col cols="2">Unit Price</v-col>
                         <v-col cols="2">Total</v-col>-->
@@ -78,6 +77,7 @@
                             disabled
                             label
                             dense
+                            rounded
                           ></v-text-field>
                         </v-col>
                         <v-col cols="2" class="mt-4 pb-0">
@@ -91,6 +91,7 @@
                               disabled
                               color="success"
                               dense
+                              rounded
                             ></v-text-field>
                           </v-flex>
                         </v-col>
@@ -105,6 +106,7 @@
                               color="success"
                               dense
                               disabled
+                              rounded
                             ></v-text-field>
                           </v-flex>
                         </v-col>
@@ -125,12 +127,12 @@
                         </v-col>
                         <v-col cols="1" class="mb-2 pl-8">
                           <v-icon
-                            @click="itemPacked(itempo, item)"
+                            @click="itemPacked(itempo)"
                             v-if="parseInt(itempo.isPacked) === 1"
                             color="green"
                           >mdi-toggle-switch</v-icon>
                           <v-icon
-                            @click="itemPacked(itempo, item)"
+                            @click="itemPacked(itempo)"
                             v-if="parseInt(itempo.isPacked) === 0"
                             color="red"
                           >mdi-toggle-switch-off</v-icon>
@@ -210,15 +212,15 @@
                           <v-icon dark>mdi-email</v-icon>
                           </v-btn>-->
                         </v-col>
-                        <v-col cols="8" class="mb-0 pb-0"></v-col>
+                        <v-col cols="8" class="mb-0 pb-0" justify="end"></v-col>
                         <v-col cols="2" class="mb-0 pb-0">
-                           <v-text-field
-                          hide-details="auto"
-                          class="ma-0 pa-0 float-right"
-                          :value="grandTotal"
-                          disabled
-                          label
-                        ></v-text-field>
+                          <v-text-field
+                            hide-details="auto"
+                            class="ma-0 pa-0 float-right"
+                            :value="grandTotal"
+                            disabled
+                            label
+                          ></v-text-field>
                         </v-col>
                         <v-col cols="1" class="mb-0 pb-3">
                           <v-btn
@@ -307,12 +309,14 @@ export default {
       }
     },
     calcItemPrice: function(item) {
+      console.log(item);
+      if (parseInt(item.actQtyConv) === 0 || item.actQtyConv === "")
+        item.isPacked = 0;
       if (item.defaultUnits === "lbs" && item.defaultUnitsConv === "kgs")
         item.actQty = item.actQtyConv * 2.20462;
       else if (item.defaultUnits === "kgs" && item.defaultUnitsConv === "lbs")
         item.actQty = item.actQtyConv * 0.453592;
-      else
-        item.actQty = item.actQtyConv;
+      else item.actQty = item.actQtyConv;
     },
     getDefaultUnits(defaultUnits) {
       //console.log(this.isPounds);
@@ -324,13 +328,12 @@ export default {
       await this.bulkOrders.forEach(bo => {
         bo.orderId === this.getCurrentOrder.id;
         var item = this.items.find(
-          it => parseInt(it.id) === parseInt(bo.itemId)
+          it => parseInt(it.id) === parseInt(bo.itemId) && parseInt(it.isActive) === 1
         );
-
         if (item) {
           let bulkItem = this.bulkOrders.find(
-            bo => bo.itemId === item.id && parseInt(bo.actQty) > 0
-          );
+            bo => bo.itemId === item.id && parseInt(bo.actQty) > 0 && parseFloat(bo.actPrice) > 0
+          );          
           if (bulkItem) {
             this.ordItems.push({
               itemId: item.id,
@@ -351,6 +354,7 @@ export default {
           parseInt(po.itemId) === parseInt(item.itemId) &&
           parseInt(po.isCancelled) === 0
       );
+
       pos.forEach(lp => {
         var po = this.purchaseOrders.find(
           po => parseInt(po.itemId) === parseInt(lp.itemId)
@@ -419,30 +423,13 @@ export default {
     getUserName: function(userId) {
       return this.localUsers.find(u => parseInt(u.id) === parseInt(userId));
     },
-    async itemPacked(itempo, item) {
-      if (itempo.actQty) {
+    async itemPacked(itempo) {
+      if (itempo.actQty && itempo.actQty > 0) {
         let flag = parseInt(itempo.isPacked) === 1 ? 0 : 1;
-        // await this.updatePurchaseOrderAction({
-        //   id: itempo.id,
-        //   orderId: itempo.orderId,
-        //   itemId: itempo.itemId,
-        //   userId: itempo.userId,
-        //   qty: itempo.qty,
-        //   actQty: itempo.actQty,
-        //   suggestedQty: itempo.suggestedQty,
-        //   actPrice: itempo.actPrice,
-        //   isCancelled: itempo.isCancelled,
-        //   isPacked: flag
-        // });
         itempo.isPacked = flag;
-        //this.getItemPo(itempo);
-        if (flag)
-          this.snackMessage(`${item.itemName} packed for ${itempo.buyer}!`);
-        else
-          this.snackMessage(`${item.itemName} not packed for ${itempo.buyer}!`);
-      } else if (itempo.actQty > 0)
+      } else
         this.snackMessage(
-          `Please enter a value in Actual Quantity before setting this flag`
+          `Please enter 'Actual Quantity' before marking it packed.`
         );
     }
   },
@@ -453,7 +440,8 @@ export default {
       var totalQty = 0;
       this.localItemPo.forEach(item => {
         if (item) {
-          if (parseInt(item.isPacked) === 1 ) totalQty += parseFloat(item.actQtyConv);
+          //if (parseInt(item.isPacked) === 1)
+          totalQty += item.actQtyConv ? parseFloat(item.actQtyConv) : null;
         }
       });
       return totalQty.toFixed(2);

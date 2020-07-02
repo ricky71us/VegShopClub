@@ -5,9 +5,7 @@
         <v-list-item-content dens class="ma-0 pa-0">
           <v-container class="ma-0 pa-0">
             <v-row no-gutters>
-              <v-col cols="5"></v-col>
-              <v-col cols="6">Manage Items</v-col>
-              <v-col cols="1"></v-col>
+              <v-col cols="12" class="text-md-center">Manage Items</v-col>
             </v-row>
           </v-container>
         </v-list-item-content>
@@ -39,9 +37,9 @@
                         <v-text-field v-model="updatedItem.description" label="Description"></v-text-field>
                         <v-text-field v-model="updatedItem.minQty" label="Minimum Quantity"></v-text-field>
                         <v-select
-                          v-model="tempItem.defaultUnits"
+                          v-model="updatedItem.defaultUnits"
                           :items="units"
-                          label="Default Unit"
+                          label="Unit"
                           required
                         ></v-select>
                         <v-text-field v-model="updatedItem.price" label="Price"></v-text-field>
@@ -105,12 +103,12 @@
                         <v-select
                           v-model="tempItem.defaultUnits"
                           :items="units"
-                          label="Default Unit"
+                          label="Unit"
                           required
                         ></v-select>
                         <v-text-field v-model="tempItem.price" label="Price"></v-text-field>
 
-                        <v-btn                          
+                        <v-btn
                           color="success"
                           class="mr-4"
                           @click="updateItem(item)"
@@ -243,8 +241,8 @@ export default {
       }
     },
     editItem: function(item) {
-       this.valid = true;
-       //console.log(this.$refs.form.validate())
+      this.valid = true;
+      //console.log(this.$refs.form.validate())
       this.tempItem = {
         id: item.id,
         name: item.name,
@@ -284,32 +282,31 @@ export default {
       }
       item.isActive = parseInt(item.isActive) === 1 ? 0 : 1;
       //if (this.$refs.form.validate()) {
-        this.updateItemAction({
-          id: item.id,
-          name: item.name,
-          description: item.description,
-          minQty: item.minQty,
-          price: item.price,
-          defaultUnits: item.defaultUnits,
-          isActive: item.isActive
-        });
+      this.updateItemAction({
+        id: item.id,
+        name: item.name,
+        description: item.description,
+        minQty: item.minQty,
+        price: item.price,
+        defaultUnits: item.defaultUnits,
+        isActive: item.isActive
+      });
 
-        this.snackMessage(`Item "${item.name}" ${msg}!`);
+      this.snackMessage(`Item "${item.name}" ${msg}!`);
       //}
     },
     updateItem: function(item) {
-      console.log(item)
       //if (this.$refs.form.validate()) {
-        this.updateItemAction({
-          id: item.id,
-          name: item.name,
-          description: item.description,
-          minQty: item.minQty,
-          price: item.price,
-          defaultUnits: item.defaultUnits,
-          isActive: item.isActive
-        });
-        this.snackMessage(`Item "${item.name}" updated successfully!`);
+      this.updateItemAction({
+        id: this.tempItem.id,
+        name: this.tempItem.name,
+        description: this.tempItem.description,
+        minQty: this.tempItem.minQty,
+        price: this.tempItem.price,
+        defaultUnits: this.tempItem.defaultUnits,
+        isActive: item.isActive
+      });
+      this.snackMessage(`Item "${this.tempItem.name}" updated successfully!`);
       //}
     },
     validate() {

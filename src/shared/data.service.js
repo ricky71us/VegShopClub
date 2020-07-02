@@ -15,7 +15,7 @@ const signIn = async function(user) {
 };
 
 const register = async function(user) {
-  try {    
+  try {
     const response = await axios.post(
       `${API}/authentication/registration`,
       user
@@ -30,8 +30,8 @@ const register = async function(user) {
   }
 };
 
-const updateUser = async function(user){
-  try {    
+const updateUser = async function(user) {
+  try {
     const response = await axios.put(
       `${API}/authentication/user?id=${user.id}`,
       user
@@ -44,13 +44,12 @@ const updateUser = async function(user){
     console.error(error);
     console.error(error.message);
   }
-}
+};
 
 const getUserData = async function(id) {
-  try {    
-    const response = await axios.get(
-      `${API}/authentication/user/${id}`);
-
+  try {
+    const response = await axios.get(`${API}/authentication/user/${id}`);
+    console.log(response);
     const userInfo = parseItem(response, 200);
     return userInfo;
   } catch (error) {
@@ -60,9 +59,8 @@ const getUserData = async function(id) {
 };
 
 const getAllUsers = async function() {
-  try {    
-    const response = await axios.get(
-      `${API}/authentication/users`);
+  try {
+    const response = await axios.get(`${API}/authentication/users`);
 
     const userInfo = parseItem(response, 200);
     return userInfo;
@@ -212,7 +210,7 @@ const addPurchaseOrder = async function(purchaseOrder) {
 };
 
 const updatePurchaseOrder = async function(purchaseOrder) {
-  try {    
+  try {
     const response = await axios.put(
       `${API}/purchaseorder?id=${purchaseOrder.id}`,
       purchaseOrder
@@ -226,9 +224,9 @@ const updatePurchaseOrder = async function(purchaseOrder) {
 };
 
 const updateActQty = async function(orderId) {
-  try {    
+  try {
     const response = await axios.post(
-      `${API}/purchaseorder/calcQty?orderId=${orderId}`      
+      `${API}/purchaseorder/calcQty?orderId=${orderId}`
     );
     parseItem(response, 200);
     return true;
@@ -253,13 +251,13 @@ const deletePurchaseOrder = async function(purchaseOrder) {
 };
 
 const sendEmailPurchaseOrder = async function(purchaseOrder, fromUserId) {
-  try {    
+  try {
     const response = await axios.post(
       `${API}/purchaseorder/sendemail?toUserId=${purchaseOrder.userId}&orderId=${purchaseOrder.orderId}&fromUserId=${fromUserId}`,
       purchaseOrder
-    );    
-    let data = parseList(response);    
-    return data;    
+    );
+    let data = parseList(response);
+    return data;
   } catch (error) {
     console.log(error);
     return [];
@@ -341,6 +339,7 @@ const parseList = (response) => {
 };
 
 export const parseItem = (response, code) => {
+  //console.log(response);
   if (response.status !== code) throw Error(response);
   let item = response;
   if (typeof item !== "object") {

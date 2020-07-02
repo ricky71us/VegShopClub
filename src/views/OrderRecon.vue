@@ -6,7 +6,7 @@
           <v-container class="ma-0 pa-0">
             <v-row no-gutters>
               <v-col cols="5"></v-col>
-              <v-col cols="6">Order Reconciliation</v-col>
+              <v-col cols="6">Reconcile Order</v-col>
               <v-col cols="1"></v-col>
             </v-row>
           </v-container>
@@ -19,7 +19,7 @@
           <v-list-item dense>
             <v-list-item-content dens class="ma-0 pa-0">
               <v-container class="ma-0 pa-0">
-                <v-row >
+                <v-row>
                   <v-col cols="2"></v-col>
                   <v-col cols="4">Bulk Order</v-col>
                   <v-col cols="4">Packed Order</v-col>
@@ -43,9 +43,23 @@
           <v-list-item v-for="item in reportData" :key="item.itemId" dense>
             <v-list-item-content dens class="ma-0 pa-0">
               <v-container class="ma-0 pa-0">
-                <v-row class="ma-0 pa-0 red--text text--lighten-1" >
+                <v-row class="ma-0 pa-0">
                   <v-col cols="2">
-                    <v-icon small class="ma-0 pa-0" :color="item.starColor">mdi-star</v-icon>
+                    <v-badge :color="item.starColor" icon="mdi-star" overlap>
+                      <!-- <v-flex shrink class="text-xl-left"> -->
+                        <v-text-field
+                          v-model="item.itemName"
+                          hide-details="auto"
+                          class="mb-0 pb-0"
+                          :value="item.itemName"                          
+                          dense
+                          label
+                          disabled 
+                          outlined                          
+                        ></v-text-field>
+                      <!-- </v-flex> -->
+                    </v-badge>
+                    <!-- <v-icon small class="ma-0 pa-0" :color="item.starColor">mdi-star</v-icon>
                     <v-flex shrink class="text-xl-left">
                       <v-text-field
                         v-model="item.itemName"
@@ -58,7 +72,7 @@
                         disabled
                         rounded
                       ></v-text-field>
-                    </v-flex>
+                    </v-flex>-->
                   </v-col>
                   <v-col cols="2">
                     <v-flex shrink class="text-xl-left">

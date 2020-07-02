@@ -2,9 +2,9 @@
   <div>
     <v-card width="400" class="mx-auto mt-5">
       <v-card-title class="pb-0">
-        <h1>Register</h1>
+        <h2>New User</h2>
       </v-card-title>
-      <v-card-text>
+      <v-card-text class="pt-5">
         <v-form ref="form" v-model="valid">
           <v-text-field
             label="FirstName"
@@ -44,7 +44,7 @@
       <v-card-actions>
         <v-btn color="success" v-on:click="cancel">Cancel</v-btn>
         <v-spacer></v-spacer>
-        <v-btn color="info" @click="validate" v-on:click="registerUser">Save</v-btn>
+        <v-btn color="info" @click="validate" v-on:click="registerUser">Add User</v-btn>
       </v-card-actions>
       <v-divider></v-divider>
     </v-card>

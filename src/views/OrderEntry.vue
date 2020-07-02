@@ -9,16 +9,12 @@
       </div>
       <v-divider></v-divider>
 
-      <v-card class="mx-auto mt-3" max-width="1100" color="orange" rounded elevation="20">
+      <v-card class="mx-auto mt-3" max-width="1100" color="orange" rounded >
         <v-list-item dense>
           <v-list-item-content dens class="ma-0 pa-0">
             <v-container class="ma-0 pa-0">
               <v-row>
-                <v-col cols="3"></v-col>
-                <v-col cols="2"></v-col>
-                <v-col cols="2">My Order</v-col>
-                <v-col cols="2"></v-col>
-                <v-col cols="3"></v-col>
+                <v-col cols="12" class="text-md-center">My Order</v-col>
               </v-row>
             </v-container>
           </v-list-item-content>
@@ -40,13 +36,13 @@
                   ></v-checkbox>
                 </v-col>
 
-                <v-col cols="4" class="mb-0 pb-0">
+                <v-col cols="4" class="text-md-end mb-0 pb-0">
                   <v-flex shrink class="text-xl-left">
                     <v-text-field
                       v-model="item.qty"
                       :label="item.defaultUnits"
                       hide-details="auto"
-                      class="ma-0 pa-0 text-xl-left"
+                      class="ma-0 pa-0 text-md-end"
                       :value="parseFloat(item.qty).toFixed(2)"
                       @change="calcItemPrice(item)"
                       color="success"
@@ -55,12 +51,12 @@
                       outlined
                     ></v-text-field>
                   </v-flex>
-                </v-col>                
+                </v-col>
                 <v-col cols="4" class="mb-0 pb-0">
                   <v-text-field
                     v-model="item.totalPrice"
                     hide-details="auto"
-                    class="ma-0 pa-0 centered-input"
+                    class="ma-0 pa-0 text-md-end"
                     :value="item.totalPrice"
                     disabled
                     label
@@ -80,8 +76,8 @@
             <v-container class="ma-0 pa-0">
               <v-row>
                 <v-col cols="4" class="mb-0 pb-0"></v-col>
-                <v-col cols="4" class="ml-0 pt-6">(Approximate Total)</v-col>
-                <v-col cols="4" class="mb-0 pb-3">
+                <v-col cols="4" class="text-md-end ml-0 pt-6">(Approximate Total)</v-col>
+                <v-col cols="4" class="mr-0">
                   <v-text-field
                     hide-details="auto"
                     class="ma-0 pa-0"
@@ -100,18 +96,14 @@
           <v-list-item-content dens class="ma-0 pa-0">
             <v-container class="ma-0 pa-0">
               <v-row>
-                <v-col cols="4" class="mb-0 pb-0">
-                  <!-- <v-btn color="error">Cancel</v-btn> -->
-                </v-col>
-                <v-col cols="4" class="mb-0 pb-0"></v-col>
-                <v-col cols="4" class="mb-0 pb-3">
+                <v-col cols="12" class="mb-0 pb-3">
                   <v-btn
-                    v-if="!isOrderLocked"
+                    v-if="!isOrderLocked && !orderPlaced"
                     color="success"
                     @click="saveOrder()"
                     :disabled="!valid"
                     class="float-right"
-                  >Save</v-btn>
+                  >Place Order</v-btn>
                 </v-col>
               </v-row>
             </v-container>
@@ -120,7 +112,15 @@
         </v-list-item>
       </v-card>
     </v-form>
-    <v-snackbar v-model="snackbar" :multi-line="multiLine">
+    <v-snackbar
+      v-model="snackbar"
+      :multi-line="multiLine"
+      shaped
+      outlined
+      tile
+      top
+      transition="scale-transition"
+    >
       {{ this.message }}
       <v-btn color="red" text @click="snackbar = false">Close</v-btn>
     </v-snackbar>
@@ -165,17 +165,22 @@ export default {
       },
       snackbar: false,
       message: null,
-      multiLine: true
+      multiLine: true,
+      isOrderLocked: false,
+      orderPlaced: false
     };
   },
   mounted() {
-    this.getOrderStatusAction()
-    this.getOrdersAction();
+    // this.getOrderStatusAction();
+    // this.getOrdersAction();
     this.validateForm();
     if (this.localItems.length === 0) this.getItems();
   },
-  created() {
-    this.getItemsAction();
+  async created() {
+    await this.getOrderStatusAction();
+    await this.getOrdersAction();
+    await this.getItemsAction();
+    await this.setOrderLock();
   },
   methods: {
     ...mapActions([
@@ -188,7 +193,6 @@ export default {
       "addBulkOrderAction",
       "updatePurchaseOrderAction"
     ]),
-
     calcItemPrice: function(item) {
       item.totalPrice = (parseFloat(item.price) * parseFloat(item.qty)).toFixed(
         2
@@ -222,12 +226,9 @@ export default {
         });
       }
     },
-    toggleGmsLbs(units) {
-      if (units === "gms") {
-        return "lbs";
-      } else if (units === "lbs") {
-        return "gms";
-      } else return units;
+    setOrderLock: function() {
+      this.isOrderLocked =
+        parseInt(this.getCurrentOrder.isLocked) === 1 ? true : false;
     },
     async getItems() {
       await this.getOrderStatusAction();
@@ -250,9 +251,7 @@ export default {
               name: item.name,
               minQty: parseFloat(item.minQty),
               qty: po.qty > 0 ? po.qty : parseFloat(item.minQty),
-              defaultUnitslbs: this.toggleGmsLbs(item.defaultUnits),
-              defaultUnitsgms: this.toggleGmsLbs(item.defaultUnits),   
-              defaultUnits: item.defaultUnits,           
+              defaultUnits: item.defaultUnits,
               price: parseFloat(item.price),
               totalPrice: (
                 parseFloat(item.price) * parseFloat(item.minQty)
@@ -264,7 +263,7 @@ export default {
               name: item.name,
               minQty: parseFloat(item.minQty),
               qty: parseFloat(item.minQty),
-              defaultUnits: this.toggleGmsLbs(item.defaultUnits),
+              defaultUnits: item.defaultUnits,
               price: parseFloat(item.price),
               totalPrice: (
                 parseFloat(item.price) * parseFloat(item.minQty)
@@ -274,8 +273,9 @@ export default {
         }
       });
     },
-    saveOrder() {
-      this.validateForm();
+    async saveOrder() {
+      this.orderPlaced = true;
+      await this.validateForm();
       if (this.user) {
         var selList = [];
         if (this.selected.length > 0) {
@@ -322,7 +322,9 @@ export default {
               //   isCancelled: 0
               //});
               this.updatePurchaseOrderAction(this.tempPO);
-              this.snackMessage(`Updated Data successfully!`);
+              this.snackMessage(
+                `Thank you for your Order! We will let you know when your item is ready for pick up.`
+              );
             } else {
               // console.log({
               //   orderId: this.getCurrentOrder.id,
@@ -383,6 +385,7 @@ export default {
           }
         });
       }
+      this.orderPlaced = false;
     }
   },
   computed: {
@@ -396,10 +399,6 @@ export default {
         ? "<p class='font-weight-black'>(This Order is Locked)</p>"
         : "";
     },
-    isOrderLocked: function() {      
-      return parseInt(this.getCurrentOrder.isLocked) === 1 ? true : false;
-    },
-
     grandTotal: function() {
       var total = 0;
       var selList = [];

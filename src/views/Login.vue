@@ -1,9 +1,9 @@
 <template>
   <v-card width="400" class="mx-auto mt-5">
     <v-card-title class="pb-0">
-      <h1>Login</h1>
+      <h2>Login</h2>
     </v-card-title>
-    <v-card-text>
+    <v-card-text class="pt-5">
       <v-form ref="form" v-model="valid">
         <v-text-field
           label="E-mail"
@@ -26,7 +26,7 @@
     </v-card-text>
     <v-divider></v-divider>
     <v-card-actions>
-      <v-btn color="success" to="/register">Register</v-btn>
+      <!-- <v-btn color="success" to="/register">Register</v-btn> -->
       <v-spacer></v-spacer>
       <v-btn color="info" v-on:click="signInUser">Login</v-btn>
     </v-card-actions>

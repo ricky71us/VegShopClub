@@ -1,4 +1,4 @@
-# vbc
+# VBC
 
 ## Project setup
 ```

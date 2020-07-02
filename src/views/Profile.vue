@@ -9,7 +9,7 @@
                 <v-text-field v-model="localUser.firstname" label="FirstName"></v-text-field>
                 <v-text-field v-model="localUser.lastname" label="Last Name"></v-text-field>
                 <v-text-field v-model="localUser.email" label="Email Address" disabled></v-text-field>
-                <v-text-field v-model="localUser.phone" label="Phone" disabled></v-text-field>
+                <v-text-field v-model="localUser.phone" label="Phone" ></v-text-field>
                 <v-text-field v-model="localUser.password" label="Password" :rules="passwordRules"></v-text-field>
               </v-card-text>
               <v-card-actions>
@@ -48,7 +48,7 @@ export default {
       snackbar: false,
       message: null,
       multiLine: true,
-      passwordRules: [v => !!v || "Password is required"]
+      passwordRules: [],//[v => !!v || "Password is required"]
     };
   },
   mounted() {

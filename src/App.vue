@@ -1,9 +1,9 @@
 <template>
   <v-app>
-    <BaseHeader />
+    <BaseHeader v-if="isUserLoggedIn" />
     <v-content>
       <router-view />
-    </v-content>    
+    </v-content>
     <BaseFooter />
   </v-app>
 </template>
@@ -14,18 +14,19 @@ export default {
   name: "App",
 
   components: {},
-
+  mounted() {    
+  },
   methods: {
     ...mapActions(["signInAction"]),
-     track () {
-      this.$ga.page('/')
+    track() {
+      this.$ga.page("/");
     },
     async signInUser() {
       var userInfo = {
         email: "bhupathy4444@yahoo.com",
         password: "test"
       };
-      await this.signInAction(userInfo);      
+      await this.signInAction(userInfo);
       // if (this.currentUser !== null || this.currentUser === undefined)
       //   this.$router.push({ path: '/dashboard' });
       // else this.msg = 'Invalid Credentials';
@@ -35,7 +36,7 @@ export default {
     }
   },
   computed: {
-    ...mapState({ currentUser: "user" }),
+    ...mapState({ currentUser: "user", isUserLoggedIn: "isUserLoggedIn" }),
     ...mapGetters(["getUserName"])
   }
 };
