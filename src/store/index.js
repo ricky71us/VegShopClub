@@ -15,28 +15,28 @@ const getDefaultState = () => {
     bulkOrders: [],
     isPounds: false,
     isOrderLocked: false,
-    isUserLoggedIn: false
-  }
-}
+    isUserLoggedIn: false,
+  };
+};
 
 const state = getDefaultState();
 
 const mutations = {
-  togglePounds(state, flag){
+  togglePounds(state, flag) {
     state.isPounds = flag;
   },
-  toggleOrderLocked(state, flag){
+  toggleOrderLocked(state, flag) {
     state.isOrderLocked = flag;
   },
-  updateUser(state, user){
+  updateUser(state, user) {
     state.user = user;
   },
-  resetState(state ) {
+  resetState(state) {
     //state.user = null;
-    localStorage.removeItem('userId')
+    localStorage.removeItem("userId");
     Object.assign(state, getDefaultState());
     state.isUserLoggedIn = false;
-  },  
+  },
   signIn(state, signInUser) {
     state.user = signInUser;
     state.isUserLoggedIn = true;
@@ -117,13 +117,14 @@ const mutations = {
 };
 
 const actions = {
-  async resetStateAction({ commit })  {
+  async resetStateAction({ commit }) {
     commit("resetState");
   },
   async signInAction({ commit }, user) {
-    const signInUser = await dataService.signIn(user).then(() =>{
-      localStorage.setItem('userId', signInUser.id);
-    });
+    const signInUser = await dataService.signIn(user)
+    //.then(() => {
+      //localStorage.setItem("userId", signInUser.id);
+    //});
     commit("signIn", signInUser);
   },
   async updateUserAction({ commit }, user) {
@@ -187,7 +188,7 @@ const actions = {
   async updatePurchaseOrderAction({ commit }, purchaseOrder) {
     const updatedPurchaseOrder = await dataService.updatePurchaseOrder(
       purchaseOrder
-    );    
+    );
     commit("updatePurchaseOrder", updatedPurchaseOrder);
   },
   async deletePurchaseOrderAction({ commit }, purchaseOrder) {
@@ -227,18 +228,17 @@ const getters = {
     }
     return "Guest";
   },
-  isUserAuthenticated:() =>{
-    let userId = parseInt(localStorage.getItem('userId'));
-    if (userId > 0)
-    return 
-  },   
-  isAdminUser:(state) => {
-    if (state.user){
+  isUserAuthenticated: () => {
+    let userId = parseInt(localStorage.getItem("userId"));
+    if (userId > 0) return true;
+  },
+  isAdminUser: (state) => {
+    if (state.user) {
       return parseInt(state.user.isAdmin) === 1 ? true : false;
     }
   },
   getItemById: (state) => (id) =>
-    state.items.find((v) => parseInt(v.id) === parseInt(id)),    
+    state.items.find((v) => parseInt(v.id) === parseInt(id)),
   getActiveOrderStatus: function(state) {
     if (state.orderstatus) {
       return state.orderstatus.find((os) => os.status === "Active");
@@ -250,27 +250,31 @@ const getters = {
     var curOrder = state.orders.find((ord) => ord.orderStatus === actStatus.id);
     return curOrder;
   },
-  getActiveItems: function(state){
-    let activeItems = state.items.filter(i => parseInt(i.isActive) === 1)
+  getActiveItems: function(state) {
+    let activeItems = state.items.filter((i) => parseInt(i.isActive) === 1);
     return activeItems;
   },
-  getActiveBulkOrders: function(state, getters){
+  getActiveBulkOrders: function(state, getters) {
     let activeBulkOrders = [];
-    getters.getActiveItems.forEach(item => {      
-      let bo = state.bulkOrders.find(bu => parseInt(bu.itemId) === parseInt(item.id) && parseInt(bu.orderId) === parseInt(getters.getCurrentOrder.id));
+    getters.getActiveItems.forEach((item) => {
+      let bo = state.bulkOrders.find(
+        (bu) =>
+          parseInt(bu.itemId) === parseInt(item.id) &&
+          parseInt(bu.orderId) === parseInt(getters.getCurrentOrder.id)
+      );
       activeBulkOrders.push(bo);
-    });    
+    });
     return activeBulkOrders;
   },
-  getActualPrice: function(state){
-    let actualPricePerItem = [];    
-    state.bulkOrders.forEach(bo => {
-      if (parseFloat(bo.actPrice) > 0){        
-        actualPricePerItem.push({itemId: bo.itemId, price: bo.actPrice});
+  getActualPrice: function(state) {
+    let actualPricePerItem = [];
+    state.bulkOrders.forEach((bo) => {
+      if (parseFloat(bo.actPriceFinal) > 0) {
+        actualPricePerItem.push({ itemId: bo.itemId, price: bo.actPriceFinal });
       }
-    })
+    });
     return actualPricePerItem;
-  }
+  },
 };
 
 export default new Vuex.Store({

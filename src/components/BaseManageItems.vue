@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <v-card class="mx-auto ma-3" max-width="1100" color="orange" rounded>
+    <v-card class="mx-auto mt-12" max-width="1100" color="orange" rounded>
       <v-list-item dense>
         <v-list-item-content dens class="ma-0 pa-0">
           <v-container class="ma-0 pa-0">
@@ -219,8 +219,17 @@ export default {
     };
   },
 
-  mounted() {
-    this.getItemsAction();
+  async mounted() {
+    await this.getItemsAction();
+    this.items.sort(function(a, b) {
+      if (a.name < b.name) {
+        return -1;
+      }
+      if (a.name > b.name) {
+        return 1;
+      }
+      return 0;
+    });
   },
 
   methods: {

@@ -1,64 +1,76 @@
 <template>
-  <div>
-    <v-card class="mx-auto ma-3" max-width="1100" color="orange" rounded>
+  <div v-if="pageLoaded">
+    <v-card class="mx-auto mt-12" max-width="1100" color="orange" rounded>
       <v-list-item dense>
         <v-list-item-content dens class="ma-0 pa-0">
           <v-container class="ma-0 pa-0">
             <v-row no-gutters>
-              <v-col cols="5"></v-col>
-              <v-col cols="6">Reconcile Order</v-col>
-              <v-col cols="1"></v-col>
+              <v-col cols="12" class="text-md-center">Reconcile Order</v-col>
             </v-row>
           </v-container>
         </v-list-item-content>
       </v-list-item>
     </v-card>
-    <v-card class="mx-auto ma-3" max-width="1100" tile dense shaped>
-      <v-form ref="form" v-model="valid">
-        <v-card class="mx-auto mt-1" max-width="1100" tile dense shaped>
-          <v-list-item dense>
+    <!-- <v-card class="mx-auto ma-3" max-width="1100" > -->
+      <!-- <v-form ref="form" v-model="valid"> -->
+        <v-card class="mx-auto mt-1" max-width="1100">
+          <v-list-item >
             <v-list-item-content dens class="ma-0 pa-0">
               <v-container class="ma-0 pa-0">
                 <v-row>
-                  <v-col cols="2"></v-col>
-                  <v-col cols="4">Bulk Order</v-col>
-                  <v-col cols="4">Packed Order</v-col>
-                  <v-col cols="2"></v-col>
+                  <v-col style="background:#78909C;color:white" cols="4"></v-col>
+                  <v-col
+                    style="background:#8D6E63;color:white"
+                    class="text-md-center"
+                    cols="4"
+                  >Bulkorder Invoice</v-col>
+                  <v-col
+                    style="background:#4DB6AC;color:white"
+                    class="text-md-center"
+                    cols="4"
+                  >Packed Order</v-col>
                 </v-row>
                 <v-divider></v-divider>
-                <v-row>
-                  <v-col cols="1"></v-col>
-                  <v-col cols="1">Item</v-col>
-                  <v-col cols="2">Qty</v-col>
-                  <v-col cols="2">Total</v-col>
-                  <v-col cols="2">Qty</v-col>
-                  <v-col cols="2">Total</v-col>
-                  <v-col cols="2">Unit Price</v-col>
+                <v-row>                  
+                  <v-col class="text-md-center" style="background:#B0BEC5;color:white" cols="4">items</v-col>
+                  <v-col class="text-md-center" style="background:#BCAAA4;color:white" cols="2">Qty</v-col>
+                  <v-col style="background:#BCAAA4;color:white" cols="1">Unit Price</v-col>
+                  <v-col style="background:#BCAAA4;color:white" cols="1">Total</v-col>
+                  <v-col class="text-md-center" style="background:#B2DFDB;color:white" cols="2">Qty</v-col>
+                  <v-col style="background:#B2DFDB;color:white" cols="1">Unit Price</v-col>
+                  <v-col style="background:#B2DFDB;color:white" cols="1">Total</v-col>
                 </v-row>
               </v-container>
             </v-list-item-content>
           </v-list-item>
         </v-card>
-        <v-card class="mx-auto mt-1" max-width="1100" tile dense shaped>
+        <v-card class="mx-auto mt-1" max-width="1100">
           <v-list-item v-for="item in reportData" :key="item.itemId" dense>
             <v-list-item-content dens class="ma-0 pa-0">
               <v-container class="ma-0 pa-0">
                 <v-row class="ma-0 pa-0">
-                  <v-col cols="2">
-                    <v-badge :color="item.starColor" icon="mdi-star" overlap>
-                      <!-- <v-flex shrink class="text-xl-left"> -->
+                  <v-col cols="4" class="mt-3">
+                    <div v-if="item.starColor === 'red'" style="color:red">{{item.itemName}}</div>
+                    <div v-if="item.starColor === 'green'" style="color:green" >{{item.itemName}}</div>
+                     <!-- <div v-if="item.starColor === 'white'" style="color:blue" >{{item.itemName}}</div><div >{{item.itemName}}</div> -->
+                    <!-- <v-badge :color="item.starColor" icon="mdi-star"  class="ma-0 pa-0" > 
+                    </v-badge>-->
+                    <!-- <v-flex shrink class="text-xl-left"> -->
+                    <!-- <strong>
                         <v-text-field
                           v-model="item.itemName"
                           hide-details="auto"
-                          class="mb-0 pb-0"
-                          :value="item.itemName"                          
+                          class="ma-0 pa-0"
+                          :value="item.itemName"
                           dense
+                          :color="item.starColor"
                           label
-                          disabled 
-                          outlined                          
+                          disabled                          
+                          full-width
                         ></v-text-field>
-                      <!-- </v-flex> -->
-                    </v-badge>
+                    </strong>-->
+                    <!-- </v-flex> -->
+
                     <!-- <v-icon small class="ma-0 pa-0" :color="item.starColor">mdi-star</v-icon>
                     <v-flex shrink class="text-xl-left">
                       <v-text-field
@@ -74,75 +86,102 @@
                       ></v-text-field>
                     </v-flex>-->
                   </v-col>
-                  <v-col cols="2">
-                    <v-flex shrink class="text-xl-left">
+                  <v-col cols="2" class="text-md-right">
+                    {{item.boQty}} {{item.defaultUnits}}
+                    <!-- <v-flex shrink class="text-xl-left">
+                      <strong>
+                        <v-text-field
+                          v-model="item.boQty"
+                          :label="item.defaultUnits"
+                          hide-details="auto"
+                          class="mt- pa-0 text-xl-left"
+                          :value="item.boQty"
+                          color="success"
+                          dense
+                          disabled
+                        ></v-text-field>
+                      </strong>
+                    </v-flex> -->
+                  </v-col>
+                  <v-col cols="1" class="mb-0 pb-0 text-md-right">
+                    $ {{parseFloat(item.unitPrice).toFixed(2)}}
+                    <!-- <v-flex shrink class="text-xl-left">
+                      <strong>
+                        <v-text-field
+                          v-model="item.unitPrice"
+                          hide-details="auto"
+                          class="ma-0 pa-0 text-xl-left"
+                          :value="parseFloat(item.unitPrice).toFixed(2)"
+                          color="success"
+                          disabled
+                          dense
+                          prefix="$"
+                        ></v-text-field>
+                      </strong>
+                    </v-flex> -->
+                  </v-col>
+                  <v-col cols="1" class="mb-0 pb-0 text-md-right">
+                    $ {{item.boTotal}}
+                    <!-- <v-flex shrink class="text-xl-left">
+                      <strong>
+                        <v-text-field
+                          v-model="item.boTotal"
+                          hide-details="auto"
+                          class="ma-0 pa-0 text-xl-left"
+                          :value="parseFloat(item.qty).toFixed(2)"
+                          color="success"
+                          disabled
+                          dense
+                          prefix="$"
+                        ></v-text-field>
+                      </strong>
+                    </v-flex> -->
+                  </v-col>
+                  <v-col cols="2" class="mb-0 pb-0 text-md-right">
+                    {{item.pQty}} {{item.defaultUnits}}
+                    <!-- <v-flex shrink class="text-xl-left">
+                      <strong>
+                        <v-text-field
+                          v-model="item.pQty"
+                          :label="item.defaultUnits"
+                          hide-details="auto"
+                          class="ma-0 pa-0 text-xl-left"
+                          :value="parseFloat(item.qty).toFixed(2)"
+                          color="success"
+                          dense
+                          disabled
+                        ></v-text-field>
+                      </strong>
+                    </v-flex> -->
+                  </v-col>
+                  <v-col cols="1" class="mb-0 pb-0 text-md-right">
+                    $ {{parseFloat(item.unitPriceFinal).toFixed(2)}} 
+                    <!-- <strong>
                       <v-text-field
-                        v-model="item.boQty"
-                        :label="item.defaultUnits"
+                        v-model="item.unitPriceFinal"
                         hide-details="auto"
-                        class="ma-0 pa-0 text-xl-left"
-                        :value="item.boQty"
-                        color="success"
-                        dense
+                        class="mr-0 pr-0 centered-input"
+                        :value="parseFloat(item.actPriceFinal).toFixed(2)"
                         disabled
-                        rounded
+                        prefix="$"
+                        dense
                       ></v-text-field>
-                    </v-flex>
+                    </strong> -->
                   </v-col>
-                  <v-col cols="2" class="mb-0 pb-0">
-                    <v-flex shrink class="text-xl-left">
-                      <v-text-field
-                        v-model="item.boTotal"
+                  <v-col cols="1"  class="mb-0 pb-0 text-md-right">
+                    $ {{item.pTotal}}
+                    <!-- <strong>
+                      <v-text-field                      
+                        v-model="item.pTotal"
                         hide-details="auto"
-                        class="ma-0 pa-0 text-xl-left"
-                        :value="parseFloat(item.qty).toFixed(2)"
+                        class="ma-0 pa-0 centered-input"
+                        :value="item.totalPrice"
                         color="success"
                         disabled
                         dense
-                        prepend-inner-icon="mdi-currency-usd"
-                        rounded
+                        prefix="$"
                       ></v-text-field>
-                    </v-flex>
-                  </v-col>
-                  <v-col cols="2" class="mb-0 pb-0">
-                    <v-flex shrink class="text-xl-left">
-                      <v-text-field
-                        v-model="item.pQty"
-                        :label="item.defaultUnits"
-                        hide-details="auto"
-                        class="ma-0 pa-0 text-xl-left"
-                        :value="parseFloat(item.qty).toFixed(2)"
-                        color="success"
-                        dense
-                        disabled
-                        rounded
-                      ></v-text-field>
-                    </v-flex>
-                  </v-col>
-                  <v-col cols="2" class="mb-0 pb-0">
-                    <v-text-field
-                      v-model="item.pTotal"
-                      hide-details="auto"
-                      class="ma-0 pa-0 centered-input"
-                      :value="item.totalPrice"
-                      color="success"
-                      disabled
-                      dense
-                      prepend-inner-icon="mdi-currency-usd"
-                      rounded
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="2" class="mb-0 pb-0">
-                    <v-text-field
-                      v-model="item.unitPrice"
-                      hide-details="auto"
-                      class="mr-0 pr-0 centered-input"
-                      :value="parseFloat(item.actPrice).toFixed(2)"
-                      disabled
-                      prepend-inner-icon="mdi-currency-usd"
-                      dense
-                      rounded
-                    ></v-text-field>
+                    </strong> -->
                   </v-col>
                 </v-row>
               </v-container>
@@ -154,30 +193,33 @@
             <v-list-item-content dens class="ma-0 pa-0">
               <v-container class="ma-0 pa-0">
                 <v-row>
-                  <v-col cols="2" class="mb-0 pb-0"></v-col>
-                  <v-col cols="2" class="mb-0 pb-0"></v-col>
-                  <v-col cols="2" class="mb-0 pb-0">
-                    <v-text-field
-                      hide-details="auto"
-                      class="ma-0 pa-0 float-right"
-                      disabled
-                      label
-                      :value="parseFloat(pGrTotal).toFixed(2)"
-                      prepend-inner-icon="mdi-currency-usd"
-                      rounded
-                    ></v-text-field>
+                  <v-col cols="7" class="mb-0 pb-0"></v-col>
+                  <v-col cols="2" class="mb-0 pb-0 float-right" style="font-weight:bold">
+                    ${{parseFloat(pGrTotal).toFixed(2)}}
+                    <!-- <strong>
+                      <v-text-field
+                        hide-details="auto"
+                        class="ma-0 pa-0 float-right"
+                        disabled
+                        label
+                        :value="parseFloat(pGrTotal).toFixed(2)"
+                        prefix="$"
+                      ></v-text-field>
+                    </strong> -->
                   </v-col>
                   <v-col cols="2" class="mb-0 pb-0 float-right"></v-col>
-                  <v-col cols="2" class="mb-0 pb-3">
-                    <v-text-field
-                      hide-details="auto"
-                      class="ma-0 pa-0 float-right"
-                      disabled
-                      label
-                      :value="parseFloat(boGrTotal).toFixed(2)"
-                      prepend-inner-icon="mdi-currency-usd"
-                      rounded
-                    ></v-text-field>
+                  <v-col cols="1" class="mb-0 pb-3" style="font-weight:bold" >
+                    $ {{parseFloat(boGrTotal).toFixed(2)}}
+                    <!-- <strong>
+                      <v-text-field
+                        hide-details="auto"
+                        class="ma-0 pa-0 float-right"
+                        disabled
+                        label
+                        :value="parseFloat(boGrTotal).toFixed(2)"
+                        prefix="$"
+                      ></v-text-field>
+                    </strong> -->
                   </v-col>
                   <v-col cols="2" class="mb-0 pb-0"></v-col>
                 </v-row>
@@ -186,8 +228,8 @@
             </v-list-item-content>
           </v-list-item>
         </v-card>
-      </v-form>
-    </v-card>
+      <!-- </v-form> -->
+    <!-- </v-card> -->
     <v-snackbar v-model="snackbar" :multi-line="multiLine">
       {{ this.message }}
       <v-btn color="red" text @click="snackbar = false">Close</v-btn>
@@ -225,7 +267,8 @@ export default {
       },
       reportData: [],
       pGrTotal: 0,
-      boGrTotal: 0
+      boGrTotal: 0,
+      pageLoaded: false
     };
   },
   mounted() {
@@ -269,9 +312,10 @@ export default {
             defaultUnits: item.defaultUnits,
             boQty: bo.actQty,
             boTotal: bo.totalPrice,
-            pQty: pQty,
+            pQty: pQty.toFixed(2),
             pTotal: pTotal.toFixed(2),
-            unitPrice: bo.actPrice,
+            unitPrice: bo.actPrice.toString(),
+            unitPriceFinal: bo.actPriceFinal.toString(),
             starColor:
               bo.totalPrice === pTotal
                 ? "white"
@@ -281,6 +325,16 @@ export default {
           });
         }
       });
+      this.reportData.sort(function(a, b) {
+        if (a.itemName < b.itemName) {
+          return -1;
+        }
+        if (a.itemName > b.itemName) {
+          return 1;
+        }
+        return 0;
+      });
+      this.pageLoaded = "true";
       return this.reportData;
     }
   },

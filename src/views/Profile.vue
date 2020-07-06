@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-form ref="form" v-model="valid">
-      <v-card class="mx-auto ma-3" max-width="1100" color="orange" rounded>
+      <v-card class="mx-auto ma-12" max-width="1100" color="orange" rounded>
         <v-container fluid>
           <v-layout column>
             <v-card>
@@ -9,7 +9,7 @@
                 <v-text-field v-model="localUser.firstname" label="FirstName"></v-text-field>
                 <v-text-field v-model="localUser.lastname" label="Last Name"></v-text-field>
                 <v-text-field v-model="localUser.email" label="Email Address" disabled></v-text-field>
-                <v-text-field v-model="localUser.phone" label="Phone" ></v-text-field>
+                <v-text-field v-model="localUser.phone" label="Phone"></v-text-field>
                 <v-text-field v-model="localUser.password" label="Password" :rules="passwordRules"></v-text-field>
               </v-card-text>
               <v-card-actions>
@@ -42,13 +42,16 @@ export default {
         lastname: "",
         phone: "",
         email: "",
-        password: ""
+        password: "",
+        isAdmin: 0,
+        isPacker: 0,
+        active: 0
       },
       valid: false,
       snackbar: false,
       message: null,
       multiLine: true,
-      passwordRules: [],//[v => !!v || "Password is required"]
+      passwordRules: [] //[v => !!v || "Password is required"]
     };
   },
   mounted() {
@@ -58,6 +61,9 @@ export default {
       lastname: this.user.lastname,
       phone: this.user.phone,
       email: this.user.email,
+      isAdmin : this.user.isAdmin,
+      isPacker: this.user.isPacker,
+      active: this.user.active,
       password: ""
     };
   },

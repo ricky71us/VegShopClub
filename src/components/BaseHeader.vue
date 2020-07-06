@@ -1,7 +1,7 @@
 <template>
   <div>
-    <v-card class="overflow-hidden">
-      <v-app-bar color="blue-grey accent-4" elevate-on-scroll dense dark>
+    <v-card class="overflow-hidden mb-2">
+      <v-app-bar color="blue-grey accent-4" elevate-on-scroll dense dark fixed>
         <!-- <v-menu offset-y>
           <template v-slot:activator="{ on }">
             <v-btn v-on="on" dense small text>
@@ -38,18 +38,18 @@
         </v-toolbar-title>-->
 
         <div class="text-center">
-          <v-menu offset-y transition="scale-transition">
+          <v-menu offset-y transition="expand-transition" open-on-hover>
             <template v-slot:activator="{ on: menu }">
               <!-- <v-btn color="primary" dark v-bind="attrs" v-on="on">Dropdown</v-btn> -->
-              <v-tooltip bottom>
-                <template v-slot:activator="{ on:tooltip  }">
-                  <v-btn v-on="{...tooltip, ...menu}" dense small text>
+              <!-- <v-tooltip bottom>
+                <template v-slot:activator="{ on:tooltip  }"> -->
+                  <v-btn v-on="{...menu}" dense small text>
                     <v-icon dark>mdi-dots-vertical</v-icon>
                   </v-btn>
                 </template>
-                <span>Menu</span>
-              </v-tooltip>
-            </template>
+              <!--  <span>Menu</span>
+               </v-tooltip>
+            </template> -->
             <v-list v-if="displayMenu">
               <v-list-item v-for="(item, index) in getMenuItems()" :key="index" :to="item.path">
                 <v-list-item-title>{{ item.title }}</v-list-item-title>
@@ -170,19 +170,19 @@
           </v-tooltip>
         </v-toolbar-title>
         <v-divider class="mx-2" inset vertical></v-divider>-->
-        <div class="text-center" v-if="displayMenu">
-          <v-menu offset-y>
+        <div class="text-center" v-if="displayMenu" >
+          <v-menu offset-y open-on-hover transition="expand-transition">
             <template v-slot:activator="{ on: menu }">
               <!-- <v-btn color="primary" dark v-bind="attrs" v-on="on">Dropdown</v-btn> -->
-              <v-tooltip bottom>
-                <template v-slot:activator="{ on:tooltip  }">
-                  <v-btn v-on="{...tooltip, ...menu}" dense small text>
+              <!-- <v-tooltip bottom>
+                <template v-slot:activator="{ on:tooltip  }"> -->
+                  <v-btn v-on="{...menu}" dense small text>
                     <v-icon dark>mdi-account-circle</v-icon>
                   </v-btn>
                 </template>
-                <span>{{getUserName}}</span>
+                <!-- <span>{{getUserName}}</span>
               </v-tooltip>
-            </template>
+            </template> -->
             <v-list>
               <!-- <template v-slot:activator="{ on: menuClick}"> -->
                 <v-list-item
@@ -244,10 +244,10 @@ export default {
       { title: "Reconcile Order", path: "/OrderRecon", admin: true },
       
 
-      { title: "Add User", path: "/Register", admin: true },
-      { title: "Add Item", path: "/ManageItems", admin: true },
+      // { title: "Add User", path: "/Register", admin: true },
+      { title: "Manage Items", path: "/ManageItems", admin: true },
       { title: "Manage Users", path: "/ManageUsers", admin: true },
-      { title: "FAQ", path: "/About", admin: false }
+      // { title: "FAQ", path: "/About", admin: false }
     ],
     profileItems: [
       { title: "Profile", path: "/profile", admin: false, onClick: "" },      
@@ -265,8 +265,8 @@ export default {
     this.setDisplayMenu();
   },
   mounted() {
-    this.getOrderStatusAction();
-    this.getOrdersAction();
+    //this.getOrderStatusAction();
+    //this.getOrdersAction();
   },
   updated() {
     this.isValidUser = this.isUserSignedIn;

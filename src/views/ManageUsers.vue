@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-card class="mx-auto ma-3" max-width="1100" color="orange" rounded>
+    <v-card class="mx-auto mt-12" max-width="1100" color="orange" rounded>
       <v-list-item dense>
         <v-list-item-content dens class="ma-0 pa-0">
           <v-container class="ma-0 pa-0">
@@ -18,11 +18,16 @@
                     <span>Order Locked</span>
                   </v-tooltip>
                 </v-toolbar-title>-->
-
-                <v-btn  text to="/register">
-                  <v-icon left>mdi-plus</v-icon>Add New User
-                </v-btn>
-                
+                <v-toolbar-title>
+                  <v-tooltip bottom>
+                    <template v-slot:activator="{ on }">
+                      <v-btn v-on="on" text to="/register">
+                        <v-icon left>mdi-plus</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Add New User</span>
+                  </v-tooltip>
+                </v-toolbar-title>
 
                 <!-- <v-col cols="1" class="mb-2 pl-8">
                   <v-icon >mdi-lock</v-icon>
@@ -48,7 +53,9 @@
     <v-card class="mx-auto ma-3" max-width="1100" tile dense shaped>
       <v-form ref="form" v-model="valid">
         <div v-if="isNewPwd" class="text-center">
-          <v-sheet color="orange lighten-2"> Password of {{userPwdReset}} has been reset to {{newPwd}}</v-sheet>
+          <v-sheet
+            color="orange lighten-2"
+          >Password of {{userPwdReset}} has been reset to {{newPwd}}</v-sheet>
         </div>
         <v-data-table
           :headers="header"
@@ -92,7 +99,7 @@ export default {
     return {
       localUsers: [],
       header: [
-        { text: "Name", value: "name", align: "start" },        
+        { text: "Name", value: "name", align: "start" },
         // { text: "Admin", value: "isAdmin" },
         { text: "Active", value: "active" },
         { text: "Packer", value: "isPacker" },
@@ -106,7 +113,7 @@ export default {
       isNewPwd: false,
       newPwd: "",
       dialog: false,
-      userPwdReset: "",
+      userPwdReset: ""
     };
   },
   created() {
@@ -127,19 +134,29 @@ export default {
           active: parseInt(lu.active) === 1,
           id: lu.id,
           firstname: lu.firstname,
-          lastname: lu.lastname,
+          lastname: lu.lastname
         });
+      });
+
+      this.users.sort(function(a, b) {
+        if (a.name < b.name) {
+          return -1;
+        }
+        if (a.name > b.name) {
+          return 1;
+        }
+        return 0;
       });
     },
     async getUsers() {
       await dataService.getAllUsers().then(response => {
         this.localUsers = response;
       });
-    },    
-    async updateUser(user) {      
-        await dataService.updateUser(user);
-        //this.updateUserAction(this.localUser);
-        this.snackMessage("User Data updated!");      
+    },
+    async updateUser(user) {
+      await dataService.updateUser(user);
+      //this.updateUserAction(this.localUser);
+      this.snackMessage("User Data updated!");
     },
     snackMessage: function(message) {
       this.message = message;
@@ -184,8 +201,9 @@ export default {
       //await this.getUsers();
     },
     async resetPwd(user) {
+      console.log(user);
       this.newPwd = this.generatePassword;
-      await this.updateUserAction({
+      await this.updateUser({
         id: user.id,
         isPacker: user.isPacker ? 1 : 0,
         isAdmin: user.isAdmin ? 1 : 0,

@@ -1,11 +1,11 @@
 <template>
   <div>
-    <v-card class="mx-auto mt-3" max-width="1100" color="orange" rounded>
+    <v-card class="mx-auto mt-12" max-width="1100" color="orange" rounded>
       <v-list-item dense>
         <v-list-item-content dens class="ma-0 pb-0">
           <v-container class="ma-0 pa-0">
             <v-row>
-              <v-col cols="10" class="text-md-center mt-0">Order Summary</v-col>
+              <v-col cols="10" class="text-md-center">Order Summary</v-col>
               <v-col cols="2" class="text-md-center ma-0 pa-0">
                 <!-- <v-toolbar-title>
                   <v-tooltip bottom>
@@ -19,7 +19,7 @@
                   </v-tooltip>
                 </v-toolbar-title>-->
 
-                <v-btn v-if="isOrderLocked" @click="toggleOrderLock" text >
+                <v-btn v-if="isOrderLocked" @click="toggleOrderLock" text>
                   <v-icon left>mdi-lock-open</v-icon>unlock
                 </v-btn>
                 <v-btn v-if="!isOrderLocked" @click="toggleOrderLock" text>
@@ -51,11 +51,15 @@
       :items="reportData"
       hide-default-footer
       :items-per-page="5"
-      class="elevation-1 mt-8"
+      class="elevation-1 mt-8; text-align:right; pa-3"
     >
       <template slot="body.append">
         <tr>
-          <th v-for="(item, index) in reportTotalRow" :key="index">{{item}}</th>
+          <th
+            style="background-color: grey;"
+            v-for="(item, index) in reportTotalRow"
+            :key="index"
+          >{{item}}</th>
         </tr>
       </template>
     </v-data-table>
@@ -149,40 +153,71 @@ export default {
     async getData() {
       await this.getUsers();
       this.bulkOrders.forEach(bo => {
-        if (bo.actQty > 0) {
-          let item = this.items.find(i => i.id === bo.itemId);
-          this.allItems.push({ id: bo.itemId, name: item.name });
+        //if (bo.qty > 0) {
+        let item = this.items.find(
+          i => i.id === bo.itemId && parseInt(i.isActive) === 1
+        );
+        if (item) this.allItems.push({ id: bo.itemId, name: item.name });
+        //}
+      });
+
+      this.allItems.sort(function(a, b) {
+        if (a.name < b.name) {
+          return -1;
         }
+        if (a.name > b.name) {
+          return 1;
+        }
+        return 0;
       });
 
       this.allItems.forEach(ai => {
-        let item = this.items.find(i => i.id === ai.id);
+        let item = this.items.find(
+          i => i.id === ai.id && parseInt(i.isActive) === 1
+        );
         if (item) {
-          this.reportHeader.push({ text: item.name, value: "i_" + item.id });
+          this.reportHeader.push({
+            text: `${item.name} (${item.defaultUnits})`,
+            value: "i_" + item.id,
+            class: "grey"
+          });
         }
       });
 
       this.reportHeader.unshift({
         text: "Buyer",
         value: "userName",
-        sortable: false,
-        align: "start"
+        sortable: true,
+        align: "start",
+        class: "grey"
       });
-
-      this.localUsers.forEach(u => {
-        // clear report Row
-        this.reportRow = [];
-        this.reportTotalRow = [];
-        this.reportRow = { userName: `${u.firstname} ${u.lastname} ` };
-
-        this.purchaseOrders.forEach(po => {
-          if (po.userId === u.id && parseInt(po.isCancelled) === 0) {
-            this.reportRow["i_" + po.itemId] = po.qty;
+      
+      this.localUsers
+        .sort(function(a, b) {
+          if (a.firstname < b.firstname) {
+            return -1;
           }
-        });
+          if (a.firstname > b.firstname) {
+            return 1;
+          }
+          return 0;
+        })
+        .forEach(u => {
+          // clear report Row
+          this.reportRow = [];
+          this.reportTotalRow = [];
+          this.reportRow = { userName: `${u.firstname} ${u.lastname} ` };
 
-        this.reportData.push(this.reportRow);
-      });
+          this.purchaseOrders.forEach(po => {
+            if (po.userId === u.id && parseInt(po.isCancelled) === 0) {
+              this.reportRow["i_" + po.itemId] = po.qty
+                .toString()
+                .replace(/\.00$/, "");
+            }
+          });
+
+          this.reportData.push(this.reportRow);
+        });
 
       this.allItems.forEach(i => {
         let tot = this.itemQty.find(iq => iq.itemId === i.id);

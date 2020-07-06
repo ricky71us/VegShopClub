@@ -1,12 +1,11 @@
 <template>
   <div>
-    <v-card class="mx-auto ma-3" max-width="1100" color="orange" rounded>
+    <v-card class="mx-auto mt-12" max-width="1100" color="orange" rounded>
       <v-list-item dense>
         <v-list-item-content dens class="ma-0 pa-0">
           <v-container class="ma-0 pa-0">
             <v-row no-gutters>
-              <v-col cols="5" class="ma-0 pa-0"></v-col>
-              <v-col cols="6" class="ma-0 pt-2">Send Email</v-col>
+              <v-col cols="11" class="ma-0 pt-2 text-md-center">Send Email</v-col>
               <v-col cols="1" class="ma-0 pa-0">
                 <v-toolbar-title class="ma-0 pa-0">
                   <v-tooltip bottom>
@@ -36,13 +35,13 @@
                   <v-list-item-content dens class="ma-0 pa-0">
                     <v-container class="ma-0 pa-0">
                       <v-row no-gutters>
-                        <v-col class="ma-0 pa-0 align-centre" cols="2">Item</v-col>
-                        <v-col cols="2">Orderd Qty</v-col>
-                        <v-col cols="2">Suggested Qty</v-col>
-                        <v-col cols="2">Act Qty</v-col>
-                        <v-col cols="1">Packed</v-col>
-                        <v-col cols="2">Unit Price</v-col>
-                        <v-col cols="1">Total</v-col>
+                        <v-col class="ma-0 pa-0 align-centre" cols="4">Item</v-col>
+                        <!-- <v-col cols="2">Orderd Qty</v-col>
+                        <v-col cols="2">Suggested Qty</v-col>-->
+                        <v-col class="pl-5 text-md-center" cols="2">Act Qty</v-col>
+                        <v-col cols="1" class="text-md-center">Packed</v-col>
+                        <v-col style="text-align:center" cols="2">Unit Price</v-col>
+                        <v-col style="text-align:center" class="pl-12" cols="3">Total</v-col>
                       </v-row>
                     </v-container>
                   </v-list-item-content>
@@ -53,20 +52,26 @@
                   <v-list-item-content dens class="ma-0 pa-0">
                     <v-container class="ma-0 pa-0">
                       <v-row class="ma-0 pa-0">
-                        <v-col cols="2" class="mt-4 pb-0">
-                          <v-text-field
-                            v-model="item.itemName"
-                            hide-details="auto"
-                            class="ma-0 pa-0 .flex-wrap"
-                            :value="item.itemName"
-                            color="success"
-                            disabled
-                            label
-                            dense
-                            wrap
-                          ></v-text-field>
+                        <v-col cols="4" class="mt-4 pb-0">
+                          {{item.itemName}}
+                          <!-- <tempalte v-slot:item="item"> -->
+                          <!-- <strong>
+                            <v-text-field
+                              v-model="item.itemName"
+                              hide-details="auto"
+                              class="ma-0 pa-0 .flex-wrap"
+                              :value="item.itemName"
+                              color="#000000"
+                              disabled
+                              label
+                              dense
+                              wrap
+                              rounded
+                            ></v-text-field>
+                          </strong> -->
+                          <!-- </tempalte> -->
                         </v-col>
-                        <v-col cols="2" class="mt-4 pb-0">
+                        <!-- <v-col cols="2" class="mt-4 pb-0">
                           <v-flex shrink class="text-xl-left">
                             <v-text-field
                               v-model="item.qtyConv"
@@ -95,60 +100,65 @@
                               ></v-text-field>
                             </v-flex>
                           </v-flex>
-                        </v-col>
-                        <v-col cols="2" class="mt-4 pb-0">
-                          <v-flex shrink class="text-xl-left">
+                        </v-col>-->
+                        <v-col cols="2" class="mt-4 pb-0 text-md-center">
+                          {{item.actQtyConv}} {{item.defaultUnitsConv}}
+                          <!-- <v-flex shrink class="text-xl-left">
                             <v-flex shrink class="text-xl-left">
+                              <strong>
+                                <v-text-field
+                                  v-model="item.actQtyConv"
+                                  :label="getDefaultUnits(item.defaultUnitsConv)"
+                                  hide-details="auto"
+                                  class="ma-0 pa-0 text-xl-left"
+                                  :value="parseFloat(item.actQtyConv).toFixed(2)"
+                                  color="success"
+                                  dense
+                                  disabled
+                                  rounded
+                                ></v-text-field>
+                              </strong>
+                            </v-flex>
+                          </v-flex> -->
+                        </v-col>
+                        <v-col cols="1" class="mt-2 pl-5 text-md-center">
+                          <v-icon v-if="parseInt(item.isPacked) === 1" color="green">mdi-check</v-icon>
+                          <v-icon v-if="parseInt(item.isPacked) === 0" color="red">mdi-close</v-icon>
+                        </v-col>
+                        <v-col cols="2" class="mt-4 pb-0 text-md-right">
+                          $ {{parseFloat(item.actPrice).toFixed(2)}}
+                          <!-- <v-flex shrink class="text-xl-left">
+                            <strong>
                               <v-text-field
-                                v-model="item.actQtyConv"
-                                :label="getDefaultUnits(item.defaultUnitsConv)"
-                                hide-details="auto"
-                                class="ma-0 pa-0 text-xl-left"
-                                :value="parseFloat(item.actQtyConv).toFixed(2)"
-                                color="success"
+                                v-model="item.actPrice"
+                                style="text-align:right"
+                                hide-details
+                                class="ma-0 pa-0 float-right"
+                                :value="parseFloat(item.actPrice).toFixed(2)"
+                                @change="calcItemPrice(item)"
+                                prefix="$"
                                 dense
                                 disabled
+                                rounded
                               ></v-text-field>
-                            </v-flex>
-                          </v-flex>
+                            </strong>
+                          </v-flex> -->
                         </v-col>
-                        <v-col cols="1" class="mt-2 pl-5">
-                          <v-icon
-                            v-if="parseInt(item.isPacked) === 1"
-                            color="green"
-                          >mdi-check</v-icon>
-                          <v-icon
-                            v-if="parseInt(item.isPacked) === 0"
-                            color="red"
-                          >mdi-close</v-icon>
-                        </v-col>
-                        <v-col cols="2" class="mt-4 pb-0">
-                          <v-flex shrink class="text-xl-left">
-                            <v-text-field
-                              v-model="item.actPrice"
-                              style="text-align:right"
-                              hide-details
-                              class="ma-0 pa-0 float-right"
-                              :value="parseFloat(item.actPrice).toFixed(2)"
-                              @change="calcItemPrice(item)"
-                              prepend-inner-icon="mdi-currency-usd"
-                              dense
-                              disabled
-                            ></v-text-field>
-                          </v-flex>
-                        </v-col>
-                        <v-col cols="1" class="mt-4 pb-0">
-                          <v-flex shrink class="text-xl-left">
-                            <v-text-field
-                              v-model="item.totalPrice"
-                              hide-details
-                              class="ma-0 pa-0 float-right"
-                              :value="item.totalPrice"
-                              disabled
-                              prepend-inner-icon="mdi-currency-usd"
-                              dense
-                            ></v-text-field>
-                          </v-flex>
+                        <v-col cols="3" class="mt-4 pb-0 text-md-right">
+                          $ {{item.totalPrice}}
+                          <!-- <v-flex shrink class="text-xl-left">
+                            <strong>
+                              <v-text-field
+                                v-model="item.totalPrice"
+                                hide-details
+                                class="ma-0 pa-0 float-right"
+                                :value="item.totalPrice"
+                                disabled
+                                prefix="$"
+                                dense
+                              ></v-text-field>
+                            </strong> 
+                          </v-flex>-->
                         </v-col>
                       </v-row>
                     </v-container>
@@ -157,29 +167,33 @@
                 </v-list-item>
                 <v-divider></v-divider>
                 <v-list-item dense>
-                  <v-list-item-content dens class="ma-0 pa-0">
+                  <v-list-item-content dens class="mb-2 pa-0">
                     <v-container class="ma-0 pa-0">
                       <v-row no-gutters>
-                        <v-col cols="3" class="mb-0 pb-0"></v-col>
+                        <v-col cols="4" class="mb-0 pb-0"></v-col>
+                        <!-- <v-col cols="2" class="mb-0 pb-0"></v-col>
+                        <v-col cols="2" class="mb-0 pb-0"></v-col>-->
                         <v-col cols="2" class="mb-0 pb-0"></v-col>
+                        <v-col cols="1"></v-col>
                         <v-col cols="2" class="mb-0 pb-0"></v-col>
-                        <v-col cols="2" class="mb-0 pb-0"></v-col>
-                        <v-col cols="2" class="mb-0 pb-0"></v-col>
-                        <v-col cols="1" class="mb-0 pb-3">
-                          <v-text-field
-                            hide-details
-                            class="ma-0 pa-0 float-right"
-                            :value="grandTotal"
-                            disabled
-                            label
-                            prepend-inner-icon="mdi-currency-usd"
-                            readonly
-                            full-width
-                          ></v-text-field>
+                        <v-col cols="3" style="font-weight:bold" class="mt-4 pr-3 text-md-right">
+                          $ {{grandTotal}}
+                          <!-- <v-flex shrink class="text-xl-left">
+                            
+                            <strong>
+                              <v-text-field
+                                hide-details
+                                class="ma-0 pa-0 float-right"
+                                :value="grandTotal"
+                                disabled
+                                prefix="$"
+                                dense
+                              ></v-text-field>
+                            </strong>
+                          </v-flex> -->
                         </v-col>
                       </v-row>
-                    </v-container>
-                    <v-divider></v-divider>
+                    </v-container>                    
                   </v-list-item-content>
                 </v-list-item>
                 <v-list-item dense>
@@ -225,14 +239,10 @@
                                   <v-icon v-if="!localAllPacked" color="red" large>mdi-email-alert</v-icon>
                                 </v-card-title>
                                 <v-card-text>{{emailDialogText}}</v-card-text>
-                                <v-card-actions  v-if="localAllPacked ">
+                                <v-card-actions v-if="localAllPacked ">
                                   <v-spacer></v-spacer>
-                                  <v-btn                                   
-                                    color="green darken-1"
-                                    text
-                                    @click="dialog = false"
-                                  >No</v-btn>
-                                  <v-btn                                  
+                                  <v-btn color="green darken-1" text @click="dialog = false">No</v-btn>
+                                  <v-btn
                                     color="green darken-1"
                                     text
                                     @click="sendEmail(user.id); dialog = false"
@@ -287,14 +297,16 @@ export default {
       emailDialogText: "",
       emailDialogTextColor: "",
       localAllPacked: false,
-      localNonePacked: false
+      localNonePacked: false,
+      actPriceList: [],
     };
   },
-  created() {
-    this.getUsers();
+  async created() {
+    await this.getUsers();
   },
-  mounted() {
-    this.getPurchaseOrderByOrderIdAction(this.getCurrentOrder.id);
+  async mounted() {
+    await this.getPurchaseOrderByOrderIdAction(this.getCurrentOrder.id);
+    this.actPriceList = this.getActualPrice;
   },
   methods: {
     ...mapActions([
@@ -357,6 +369,15 @@ export default {
       this.localUsers.forEach(lo => {
         lo["allPacked"] = false;
       });
+      this.localUsers.sort(function(a, b) {
+        if (a.firstname < b.firstname) {
+          return -1;
+        }
+        if (a.firstname > b.firstname) {
+          return 1;
+        }
+        return 0;
+      });
     },
     calcItemPrice: function(item) {
       this.calcPrice(item);
@@ -366,7 +387,7 @@ export default {
     },
     getEmailText(allPacked, nonePacked) {
       this.localAllPacked = allPacked;
-      this.localNonePacked = nonePacked;      
+      this.localNonePacked = nonePacked;
       if (allPacked) {
         this.emailDialogTextColor = "green";
         this.emailDialogText = "Are you ready to send the email?";
@@ -421,13 +442,13 @@ export default {
       this.snackMessage(`Updated Data!`);
     },
 
-    getActPrice(item) {
-      let actItem = this.getActualPrice.find(ap => ap.itemId === item.id);
+    getActPrice(item) {      
+      let actItem = this.actPriceList.find(ap => ap.itemId === item.id);
       if (actItem) return actItem;
       else return { itemId: 0, price: 0 };
     },
 
-    setPackedFlags(pos, userId) {      
+    setPackedFlags(pos, userId) {
       let unPackedItems = pos.find(po => parseInt(po.isPacked) === 0);
       let packedItems = pos.find(po => parseInt(po.isPacked) === 1);
       let user = this.localUsers.find(u => parseInt(u.id) === parseInt(userId));
@@ -459,19 +480,24 @@ export default {
       this.localUserPo = [];
       let pos = this.purchaseOrders.filter(
         po =>
-          parseInt(po.userId) === parseInt(id) && parseInt(po.isCancelled) === 0 
-      );    
+          parseInt(po.userId) === parseInt(id) && parseInt(po.isCancelled) === 0
+      );
 
       pos.forEach(lp => {
         let item = this.getActiveItems.find(i => i.id === lp.itemId);
 
         if (item) {
           let actItems = this.getActPrice(item);
-          let actPrice = actItems.itemId > 0 ? actItems.price : lp.actPrice;
+          
+          let actPrice = actItems.itemId > 0 ? actItems.price : 0.00;
           let bulkItem = this.bulkOrders.find(
-            bo => bo.itemId === item.id && parseInt(bo.actQty) > 0 && parseFloat(bo.actPrice) > 0
+            bo =>
+              bo.itemId === item.id &&
+              parseInt(bo.actQty) > 0 &&
+              parseFloat(bo.actPrice) > 0
           );
           if (bulkItem) {
+          
             this.localUserPo.push({
               id: lp.id,
               orderId: lp.orderId,
@@ -500,8 +526,17 @@ export default {
           }
         }
       });
+      this.localUserPo.sort(function(a, b) {
+        if (a.itemName < b.itemName) {
+          return -1;
+        }
+        if (a.itemName > b.itemName) {
+          return 1;
+        }
+        return 0;
+      });
 
-       this.setPackedFlags(this.localUserPo, id);
+      this.setPackedFlags(this.localUserPo, id);
     }
   },
 
