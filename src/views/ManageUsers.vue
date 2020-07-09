@@ -50,7 +50,7 @@
       </v-list-item>
     </v-card>
 
-    <v-card class="mx-auto ma-3" max-width="1100" tile dense shaped>
+    <v-card v-if="dataReady" class="mx-auto ma-3" max-width="1100" tile dense shaped>
       <v-form ref="form" v-model="valid">
         <div v-if="isNewPwd" class="text-center">
           <v-sheet
@@ -61,8 +61,9 @@
           :headers="header"
           :items="users"
           hide-default-footer
-          :items-per-page="5"
+          :items-per-page="100"
           class="elevation-1 mt-8"
+          
         >
           <template v-slot:item.isPacker="{ item }">
             <v-icon @click="toggleIsPacker(item)" v-if="item.isPacker" color="green">mdi-check</v-icon>
@@ -113,15 +114,14 @@ export default {
       isNewPwd: false,
       newPwd: "",
       dialog: false,
-      userPwdReset: ""
+      userPwdReset: "",
+      dataReady: false
     };
   },
-  created() {
-    //this.getUsers();
-  },
-  async mounted() {
+  async created() {
     await this.getData();
   },
+  async mounted() {},
   methods: {
     ...mapActions(["updateUserAction"]),
     async getData() {
@@ -145,11 +145,13 @@ export default {
         if (a.name > b.name) {
           return 1;
         }
-        return 0;
       });
+      this.dataReady = true;
+      console.log(this.users);
+      return this.users;
     },
     async getUsers() {
-      await dataService.getAllUsers().then(response => {
+      await dataService.getAllUsers().then(response => {        
         this.localUsers = response;
       });
     },
@@ -200,8 +202,7 @@ export default {
       this.snackMessage(`Update Successful!`);
       //await this.getUsers();
     },
-    async resetPwd(user) {
-      console.log(user);
+    async resetPwd(user) {      
       this.newPwd = this.generatePassword;
       await this.updateUser({
         id: user.id,

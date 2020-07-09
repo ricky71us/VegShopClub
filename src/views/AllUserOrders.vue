@@ -28,9 +28,9 @@
       <v-expansion-panels focusable>
         <v-expansion-panel v-for="user in localUsers" :key="user.id">
           <v-expansion-panel-header @click="getUserPo(user.id)">{{user.firstname}} {{user.lastname}}</v-expansion-panel-header>
-          <v-expansion-panel-content>
-            <v-form v-model="valid">
-              <v-card class="mx-auto mt-3" max-width="1100" tile dense>
+          <v-expansion-panel-content  >            
+            <v-form v-model="valid" v-if="displayItems">
+              <v-card class="mx-auto mt-3" max-width="1100" tile dense >
                 <v-list-item dense>
                   <v-list-item-content dens class="ma-0 pa-0">
                     <v-container class="ma-0 pa-0">
@@ -41,7 +41,7 @@
                         <v-col class="pl-5 text-md-center" cols="2">Act Qty</v-col>
                         <v-col cols="1" class="text-md-center">Packed</v-col>
                         <v-col style="text-align:center" cols="2">Unit Price</v-col>
-                        <v-col style="text-align:center" class="pl-12" cols="3">Total</v-col>
+                        <v-col style="text-align:right" class="pl-12" cols="3">Total</v-col>
                       </v-row>
                     </v-container>
                   </v-list-item-content>
@@ -68,7 +68,7 @@
                               wrap
                               rounded
                             ></v-text-field>
-                          </strong> -->
+                          </strong>-->
                           <!-- </tempalte> -->
                         </v-col>
                         <!-- <v-col cols="2" class="mt-4 pb-0">
@@ -119,7 +119,7 @@
                                 ></v-text-field>
                               </strong>
                             </v-flex>
-                          </v-flex> -->
+                          </v-flex>-->
                         </v-col>
                         <v-col cols="1" class="mt-2 pl-5 text-md-center">
                           <v-icon v-if="parseInt(item.isPacked) === 1" color="green">mdi-check</v-icon>
@@ -142,7 +142,7 @@
                                 rounded
                               ></v-text-field>
                             </strong>
-                          </v-flex> -->
+                          </v-flex>-->
                         </v-col>
                         <v-col cols="3" class="mt-4 pb-0 text-md-right">
                           $ {{item.totalPrice}}
@@ -190,10 +190,10 @@
                                 dense
                               ></v-text-field>
                             </strong>
-                          </v-flex> -->
+                          </v-flex>-->
                         </v-col>
                       </v-row>
-                    </v-container>                    
+                    </v-container>
                   </v-list-item-content>
                 </v-list-item>
                 <v-list-item dense>
@@ -299,6 +299,7 @@ export default {
       localAllPacked: false,
       localNonePacked: false,
       actPriceList: [],
+      displayItems: false,
     };
   },
   async created() {
@@ -363,8 +364,21 @@ export default {
     },
 
     async getUsers() {
+      //console.log(this.purchaseOrders);
       await dataService.getAllUsers().then(response => {
-        this.localUsers = response;
+        if (response && response.length > 0)
+          response.forEach(u => {
+            // let user = this.purchaseOrders.find(
+            //   po => po.userId === u.id && parseInt(po.isPacked) === 1
+            // );
+
+            let user = this.purchaseOrders.find(
+              po => po.userId === u.id && parseInt(po.isCancelled) === 0 && parseInt(po.suggestedQty) > 0
+            );
+
+            //console.log(user);
+            if (user) this.localUsers.push(u);
+          });
       });
       this.localUsers.forEach(lo => {
         lo["allPacked"] = false;
@@ -442,19 +456,32 @@ export default {
       this.snackMessage(`Updated Data!`);
     },
 
-    getActPrice(item) {      
+    getActPrice(item) {
       let actItem = this.actPriceList.find(ap => ap.itemId === item.id);
       if (actItem) return actItem;
       else return { itemId: 0, price: 0 };
     },
 
     setPackedFlags(pos, userId) {
+      //console.log(pos);
       let unPackedItems = pos.find(po => parseInt(po.isPacked) === 0);
       let packedItems = pos.find(po => parseInt(po.isPacked) === 1);
       let user = this.localUsers.find(u => parseInt(u.id) === parseInt(userId));
       if (user) {
         user.allPacked = unPackedItems ? false : true;
         user.nonePacked = packedItems ? false : true;
+       // console.log(packedItems);
+       // console.log(unPackedItems);
+        //   if (packedItems) {
+        //     user.nonePacked = false;
+        //     if (unPackedItems) {
+        //       user.allPacked = false;
+        //     } else {
+        //       user.allPacked = true;
+        //     }
+        //   } else {
+        //     user.nonePacked = true;
+        //   }
       }
     },
 
@@ -488,8 +515,8 @@ export default {
 
         if (item) {
           let actItems = this.getActPrice(item);
-          
-          let actPrice = actItems.itemId > 0 ? actItems.price : 0.00;
+
+          let actPrice = actItems.itemId > 0 ? actItems.price : 0.0;
           let bulkItem = this.bulkOrders.find(
             bo =>
               bo.itemId === item.id &&
@@ -497,7 +524,7 @@ export default {
               parseFloat(bo.actPrice) > 0
           );
           if (bulkItem) {
-          
+            this.displayItems = true;
             this.localUserPo.push({
               id: lp.id,
               orderId: lp.orderId,

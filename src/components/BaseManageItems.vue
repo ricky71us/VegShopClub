@@ -99,7 +99,7 @@
                         ></v-text-field>
 
                         <v-text-field v-model="tempItem.description" label="Description"></v-text-field>
-                        <v-text-field v-model="tempItem.minQty" label="Minimum Quantity"></v-text-field>
+                        <v-text-field v-model="tempItem.minQty" :value="parseFloat(tempItem.minQty).toFixed(2)" label="Minimum Quantity"></v-text-field>
                         <v-select
                           v-model="tempItem.defaultUnits"
                           :items="units"
@@ -256,8 +256,8 @@ export default {
         id: item.id,
         name: item.name,
         description: item.description,
-        minQty: item.minQty,
-        price: item.price,
+        minQty: parseFloat(item.minQty).toFixed(2),
+        price: parseFloat(item.price).toFixed(2),
         defaultUnits: item.defaultUnits
       };
     },

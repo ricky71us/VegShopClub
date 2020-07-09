@@ -48,7 +48,7 @@
                         flat
                         solo
                       ></v-text-field>
-                    </strong> -->
+                    </strong>-->
                   </v-flex>
                 </v-col>
                 <v-col cols="2" class="mt-2 pb-0 text-md-center">
@@ -68,7 +68,7 @@
                         flat
                       ></v-text-field>
                     </strong>
-                  </v-flex> -->
+                  </v-flex>-->
                 </v-col>
                 <v-col cols="2" class="mb-0 pb-2">
                   <v-flex shrink class="text-xl-left">
@@ -114,7 +114,7 @@
                       solo
                     ></v-text-field>
                   </strong>
-                </v-col> -->
+                </v-col>-->
               </v-row>
             </v-container>
             <v-divider></v-divider>
@@ -141,7 +141,7 @@
                       flat
                       solo
                     ></v-text-field>
-                  </strong> -->
+                  </strong>-->
                 </v-col>
                 <v-col cols="2" class="mb-0 pb-0"></v-col>
               </v-row>
@@ -244,17 +244,19 @@ export default {
     getQtyByItem() {
       this.itemQty = [];
       this.purchaseOrders.forEach(i => {
-        if (
-          this.itemQty.length === 0 ||
-          !this.itemQty.find(iq => iq.itemId === i.itemId)
-        ) {
-          this.itemQty.push({
-            itemId: i.itemId,
-            qty: parseFloat(i.qty)
-          });
-        } else {
-          let item = this.itemQty.find(iq => iq.itemId === i.itemId);
-          item.qty = parseFloat(item.qty) + parseFloat(i.qty);
+        if (parseFloat(i.isCancelled) === 0) {
+          if (
+            this.itemQty.length === 0 ||
+            !this.itemQty.find(iq => iq.itemId === i.itemId)
+          ) {
+            this.itemQty.push({
+              itemId: i.itemId,
+              qty: parseFloat(i.qty)
+            });
+          } else {
+            let item = this.itemQty.find(iq => iq.itemId === i.itemId);
+            item.qty = parseFloat(item.qty) + parseFloat(i.qty);
+          }
         }
       });
     },

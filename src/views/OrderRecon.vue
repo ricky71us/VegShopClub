@@ -13,7 +13,7 @@
     </v-card>
     <!-- <v-card class="mx-auto ma-3" max-width="1100" > -->
       <!-- <v-form ref="form" v-model="valid"> -->
-        <v-card class="mx-auto mt-1" max-width="1100">
+        <v-card class="mx-auto mt-3" max-width="1100" color="#B0BEC5">
           <v-list-item >
             <v-list-item-content dens class="ma-0 pa-0">
               <v-container class="ma-0 pa-0">
@@ -32,13 +32,17 @@
                 </v-row>
                 <v-divider></v-divider>
                 <v-row>                  
-                  <v-col class="text-md-center" style="background:#B0BEC5;color:white" cols="4">items</v-col>
+                  <v-col class="text-md-center" style="background:#B0BEC5;color:white" cols="4">Items</v-col>
                   <v-col class="text-md-center" style="background:#BCAAA4;color:white" cols="2">Qty</v-col>
-                  <v-col style="background:#BCAAA4;color:white" cols="1">Unit Price</v-col>
-                  <v-col style="background:#BCAAA4;color:white" cols="1">Total</v-col>
+                  <v-col style="background:#BCAAA4;color:white" cols="1" class="hidden-sm-and-down">Unit Price</v-col>
+                  <v-col style="background:#BCAAA4;color:white" cols="1" class="hidden-md-and-up">$</v-col>
+                  <v-col style="background:#BCAAA4;color:white" cols="1" class="hidden-sm-and-down">Total</v-col>
+                  <v-col style="background:#BCAAA4;color:white" cols="1" class="hidden-md-and-up">$ </v-col>
                   <v-col class="text-md-center" style="background:#B2DFDB;color:white" cols="2">Qty</v-col>
-                  <v-col style="background:#B2DFDB;color:white" cols="1">Unit Price</v-col>
-                  <v-col style="background:#B2DFDB;color:white" cols="1">Total</v-col>
+                  <v-col style="background:#B2DFDB;color:white" cols="1" class="hidden-sm-and-down">Unit Price</v-col>
+                  <v-col style="background:#B2DFDB;color:white" cols="1" class="hidden-md-and-up">$</v-col>                  
+                  <v-col style="background:#B2DFDB;color:white" cols="1" class="hidden-sm-and-down">Total</v-col>
+                  <v-col style="background:#B2DFDB;color:white" cols="1" class="hidden-md-and-up">$</v-col>
                 </v-row>
               </v-container>
             </v-list-item-content>
@@ -52,6 +56,7 @@
                   <v-col cols="4" class="mt-3">
                     <div v-if="item.starColor === 'red'" style="color:red">{{item.itemName}}</div>
                     <div v-if="item.starColor === 'green'" style="color:green" >{{item.itemName}}</div>
+                    <div v-if="item.starColor === 'white'" style="color:black" >{{item.itemName}}</div>
                      <!-- <div v-if="item.starColor === 'white'" style="color:blue" >{{item.itemName}}</div><div >{{item.itemName}}</div> -->
                     <!-- <v-badge :color="item.starColor" icon="mdi-star"  class="ma-0 pa-0" > 
                     </v-badge>-->
@@ -195,7 +200,7 @@
                 <v-row>
                   <v-col cols="7" class="mb-0 pb-0"></v-col>
                   <v-col cols="2" class="mb-0 pb-0 float-right" style="font-weight:bold">
-                    ${{parseFloat(pGrTotal).toFixed(2)}}
+                    $ {{parseFloat(boGrTotal).toFixed(2)}}
                     <!-- <strong>
                       <v-text-field
                         hide-details="auto"
@@ -209,7 +214,7 @@
                   </v-col>
                   <v-col cols="2" class="mb-0 pb-0 float-right"></v-col>
                   <v-col cols="1" class="mb-0 pb-3" style="font-weight:bold" >
-                    $ {{parseFloat(boGrTotal).toFixed(2)}}
+                    ${{parseFloat(pGrTotal).toFixed(2)}}                    
                     <!-- <strong>
                       <v-text-field
                         hide-details="auto"
@@ -297,7 +302,7 @@ export default {
           let pQty = 0;
 
           po.forEach(p => {
-            pTotal += p.actPrice * p.actQty;
+            pTotal += bo.actPriceFinal * p.actQty;
             pQty += p.actQty ? parseFloat(p.actQty) : 0;
           });
 
@@ -317,9 +322,9 @@ export default {
             unitPrice: bo.actPrice.toString(),
             unitPriceFinal: bo.actPriceFinal.toString(),
             starColor:
-              bo.totalPrice === pTotal
+              parseFloat(bo.totalPrice) === parseFloat(pTotal)
                 ? "white"
-                : pTotal - bo.totalPrice > 0
+                : parseFloat(pTotal) - parseFloat(bo.totalPrice) > 0
                 ? "green"
                 : "red"
           });

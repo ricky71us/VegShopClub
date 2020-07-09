@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-card width="400" class="mx-auto mt-5">
+    <v-card width="400" class="mx-auto mt-12">
       <v-card-title class="pb-0">
         <h2>New User</h2>
       </v-card-title>

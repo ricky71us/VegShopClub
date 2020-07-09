@@ -119,9 +119,7 @@ const routes = [
     name: "ManageUsers",
     component: ManageUsers,
     meta: { requiresAuth: true, adminOnly: true },
-  },
-  
-  
+  },  
 
 ];
 
@@ -173,7 +171,7 @@ router.beforeEach((to, from, next) => {
 });
 
 Vue.use(VueAnalytics, {
-  id: "UA-163162436-1",
+  id: "UA-163162436-2",
   router,
 });
 export default router;

@@ -27,7 +27,7 @@
               <v-row>
                 <v-col class="text-md-center" cols="4">Item</v-col>
                 <v-col class="text-md-center" cols="4">Quantity</v-col>
-                <v-col class="text-md-center" cols="4">Item Total</v-col>
+                <v-col class="text-md-right" cols="4">Item Total</v-col>
               </v-row>
             </v-container>
           </v-list-item-content>
@@ -78,7 +78,7 @@
                       prefix="$"
                       dense
                     ></v-text-field>
-                  </strong> -->
+                  </strong>-->
                 </v-col>
               </v-row>
             </v-container>
@@ -93,7 +93,7 @@
                 <v-col cols="4" class="mb-0 pb-0"></v-col>
                 <v-col cols="4" class="text-md-right ml-0 pt-4">(Approximate Total)</v-col>
                 <v-col cols="4" class="pr-6 text-md-right" style="font-weight:bold">
-                          ${{grandTotal}}
+                  ${{grandTotal}}
                   <!-- <strong>
                     <v-text-field
                       hide-details="auto"
@@ -103,7 +103,7 @@
                       label
                       prefix="$"
                     ></v-text-field>
-                  </strong> -->
+                  </strong>-->
                 </v-col>
               </v-row>
             </v-container>
@@ -131,15 +131,7 @@
       </v-card>
     </v-form>
 
-    <v-snackbar
-      v-model="snackbar"
-      :multi-line="multiLine"
-      top
-      app
-      max-width="5"
-      transition="fab-transition"
-      text
-    >
+    <v-snackbar v-model="snackbar" :multi-line="multiLine" top :timeout="9000">
       {{ this.message }}
       <v-btn color="red" text @click="snackbar = false">Close</v-btn>
     </v-snackbar>
@@ -230,7 +222,11 @@ export default {
       });
     },
     validateForm() {
-      if (this.selected.length === 0) {
+      let po = this.purchaseOrders.find(
+        po => parseInt(po.isCancelled) === 0 && po.userId === this.user.id
+      );
+      if (po) this.valid = true;
+      else if (this.selected.length === 0) {
         this.valid = false;
       } else {
         this.valid = true;
@@ -422,6 +418,7 @@ export default {
 
             this.updatePurchaseOrderAction(this.tempPO);
           }
+          if (this.selected.length === 0) this.snackMessage(`Data Updated.`);
         });
       }
       this.orderPlaced = false;

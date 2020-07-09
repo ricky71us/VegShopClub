@@ -67,8 +67,8 @@
                     <v-container class="ma-0 pa-0">
                       <v-row class="ma-0 pa-0">
                         <v-col cols="5" class="mt-4 pb-0">
-                           {{itempo.buyer}}
-                        <!--  <strong>
+                          {{itempo.buyer}}
+                          <!--  <strong>
                             <v-text-field
                               v-model="itempo.buyer"
                               hide-details="auto"
@@ -81,7 +81,7 @@
                               flat
                               solo
                             ></v-text-field>
-                          </strong> -->
+                          </strong>-->
                         </v-col>
                         <v-col cols="2" class="mt-4 pb-0 text-md-center">
                           {{itempo.qtyConv}} {{itempo.defaultUnitsConv}}
@@ -100,7 +100,7 @@
                                 rounded
                               ></v-text-field>
                             </strong>
-                          </v-flex> -->
+                          </v-flex>-->
                         </v-col>
                         <v-col cols="2" class="mt-4 pb-0 text-md-center">
                           {{itempo.suggestedQtyConv}} {{itempo.defaultUnitsConv}}
@@ -120,7 +120,7 @@
                                 rounded
                               ></v-text-field>
                             </strong>
-                          </v-flex> -->
+                          </v-flex>-->
                         </v-col>
                         <v-col cols="2" class="mb-2 pb-0">
                           <v-flex shrink class="text-xl-left">
@@ -224,7 +224,12 @@
                           <v-icon dark>mdi-email</v-icon>
                           </v-btn>-->
                         </v-col>
-                        <v-col cols="3" style="color:#33691E; font-weight:bold" class="mt-2 pb-0" justify="end">
+                        <v-col
+                          cols="3"
+                          style="color:#33691E; font-weight:bold"
+                          class="mt-2 pb-0"
+                          justify="end"
+                        >
                           [ Unit Price $ {{item.actPriceFinal}} / {{item.defaultUnits}} ]
                           <!-- <v-chip class="ma-0 pa-0"  label>
                             <v-text-field
@@ -241,7 +246,7 @@
                         </v-col>
                         <v-col cols="2" class="mt-2 pl-6">Total Packed Qty:</v-col>
                         <v-col cols="2" style="font-weight:bold" class="mt-2 pa-3">
-                          {{grandTotal}} 
+                          {{grandTotal}}
                           <!-- <strong>
                             <v-text-field
                               hide-details="auto"
@@ -250,7 +255,7 @@
                               disabled
                               label
                             ></v-text-field>
-                          </strong> -->
+                          </strong>-->
                         </v-col>
                         <v-col cols="1" class="mb-0 pb-3">
                           <v-btn
@@ -296,9 +301,8 @@ export default {
       itemUnitPrice: 0
     };
   },
-  mounted() {
-    this.getItems();
-    this.getPurchaseOrderByOrderIdAction(this.getCurrentOrder.id);
+  async mounted() {
+    await this.getItems();
   },
   created() {
     this.getUsers();
@@ -308,6 +312,7 @@ export default {
       "getOrdersAction",
       "getItemsAction",
       "getPurchaseOrderByOrderIdAction",
+      "getBulkOrderByOrderIdAction",
       "updatePurchaseOrderAction",
       "updateBulkOrderAction"
     ]),
@@ -352,10 +357,17 @@ export default {
         itempo.actQty = itempo.actQtyConv * 0.453592;
       else itempo.actQty = itempo.actQtyConv;
       if (parseInt(item.totalPrice) > 0)
-        this.itemUnitPrice = itempo.actPriceFinal = item.actPriceFinal = (
-          item.totalPrice / this.grandTotalAct
+        this.itemUnitPrice = itempo.actPriceFinal = item.actPriceFinal = this.roundUp(
+          item.totalPrice / this.grandTotalAct,
+          2
         ).toFixed(2);
     },
+
+    roundUp(num, precision) {
+      precision = Math.pow(10, precision);
+      return Math.ceil(num * precision) / precision;
+    },
+
     getDefaultUnits(defaultUnits) {
       //console.log(this.isPounds);
       if (defaultUnits !== "kgs" && defaultUnits !== "lbs") return defaultUnits;
@@ -363,6 +375,8 @@ export default {
       else return "kgs";
     },
     async getItems() {
+      await this.getPurchaseOrderByOrderIdAction(this.getCurrentOrder.id);
+      await this.getBulkOrderByOrderIdAction(this.getCurrentOrder.id);
       await this.bulkOrders.forEach(bo => {
         bo.orderId === this.getCurrentOrder.id;
         var item = this.items.find(
@@ -386,7 +400,7 @@ export default {
               actQty: bo.actQty,
               actPrice: bo.actPrice,
               actPriceFinal: bo.actPriceFinal
-                ? parseFloat(bo.actPriceFinal).toFixed(2)
+                ? parseFloat(this.roundUp(bo.actPriceFinal, 2)).toFixed(2)
                 : 0,
               totalPrice: bo.totalPrice,
               defaultUnits: item.defaultUnits
@@ -405,15 +419,18 @@ export default {
         return 0;
       });
     },
-    getItemPo(item) {
+    async getItemPo(item) {
+      //await this.getPurchaseOrderByOrderIdAction(this.getCurrentOrder.id);
+      //await this.getBulkOrderByOrderIdAction(this.getCurrentOrder.id);
+
       this.localItemPo = [];
-      let pos = this.purchaseOrders.filter(
+      let pos = await this.purchaseOrders.filter(
         po =>
           parseInt(po.itemId) === parseInt(item.itemId) &&
           parseInt(po.isCancelled) === 0
       );
 
-      pos.forEach(lp => {
+      await pos.forEach(lp => {
         var po = this.purchaseOrders.find(
           po => parseInt(po.itemId) === parseInt(lp.itemId)
         );
@@ -447,6 +464,8 @@ export default {
         }
       });
 
+      await this.calcItemPrice(this.localItemPo[0], item);
+
       this.localItemPo.sort(function(a, b) {
         if (a.buyer < b.buyer) {
           return -1;
@@ -458,6 +477,7 @@ export default {
       });
     },
     async savePo(item) {
+      console.log(item);
       await this.localItemPo.forEach(lp => {
         this.tempPO = {
           id: lp.id,

@@ -128,7 +128,6 @@ export default {
       this.snackbar = true;
     },
     async toggleOrderLock() {
-      console.log(this.isOrderLocked);
       this.isOrderLocked = parseInt(this.isOrderLocked) === 1 ? 0 : 1;
       await this.updateOrderAction({
         id: this.getCurrentOrder.id,
@@ -152,12 +151,15 @@ export default {
     // },
     async getData() {
       await this.getUsers();
+      await this.getPurchaseOrderByOrderIdAction(this.getCurrentOrder.id);
       this.bulkOrders.forEach(bo => {
         //if (bo.qty > 0) {
         let item = this.items.find(
           i => i.id === bo.itemId && parseInt(i.isActive) === 1
         );
-        if (item) this.allItems.push({ id: bo.itemId, name: item.name });
+        if (item) {
+          this.allItems.push({ id: bo.itemId, name: item.name });
+        }
         //}
       });
 
@@ -191,7 +193,7 @@ export default {
         align: "start",
         class: "grey"
       });
-      
+
       this.localUsers
         .sort(function(a, b) {
           if (a.firstname < b.firstname) {
@@ -216,7 +218,13 @@ export default {
             }
           });
 
-          this.reportData.push(this.reportRow);
+          let user = this.purchaseOrders.find(
+            po =>
+              po.userId === u.id &&
+              po.orderId === this.getCurrentOrder.id &&
+              parseInt(po.isCancelled) === 0
+          );
+          if (user) this.reportData.push(this.reportRow);
         });
 
       this.allItems.forEach(i => {

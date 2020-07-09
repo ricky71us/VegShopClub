@@ -2,6 +2,7 @@
   <div>
     <v-card class="overflow-hidden mb-2">
       <v-app-bar color="blue-grey accent-4" elevate-on-scroll dense dark fixed>
+        
         <!-- <v-menu offset-y>
           <template v-slot:activator="{ on }">
             <v-btn v-on="on" dense small text>
@@ -44,7 +45,9 @@
               <!-- <v-tooltip bottom>
                 <template v-slot:activator="{ on:tooltip  }"> -->
                   <v-btn v-on="{...menu}" dense small text>
-                    <v-icon dark>mdi-dots-vertical</v-icon>
+                    <v-icon small dark>mdi-dots-vertical</v-icon>
+                    <!-- <v-toolbar-title>VBC</v-toolbar-title> -->
+                    <h3>VBC</h3>
                   </v-btn>
                 </template>
               <!--  <span>Menu</span>
@@ -57,7 +60,7 @@
             </v-list>
           </v-menu>
         </div>
-
+<!-- <v-toolbar-title>VBC</v-toolbar-title> -->
         <!-- <v-divider v-if="displayAdminMenu" class="mx-2" inset vertical></v-divider>
         <v-toolbar-title v-if="displayAdminMenu">
           <v-tooltip bottom>
@@ -72,8 +75,8 @@
 
         
 
-        <v-divider v-if="displayMenu" class="mx-2" inset vertical></v-divider>
-        <v-toolbar-title v-if="displayMenu">
+        <v-divider v-if="displayMenu" class="mx-2 hidden-xs-and-down" inset vertical></v-divider>
+        <v-toolbar-title v-if="displayMenu" class="hidden-xs-and-down" >
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-btn v-on="on" dense small text to="/orderEntry">
@@ -84,8 +87,8 @@
           </v-tooltip>
         </v-toolbar-title>
 
-        <v-divider v-if="displayAdminMenu" class="mx-2" inset vertical></v-divider>
-        <v-toolbar-title v-if="displayAdminMenu">
+        <v-divider v-if="displayAdminMenu" class="mx-2 hidden-xs-and-down" inset vertical></v-divider>
+        <v-toolbar-title v-if="displayAdminMenu" class="hidden-xs-and-down">
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-btn v-on="on" dense small text to="/orderReport">
@@ -96,8 +99,8 @@
           </v-tooltip>
         </v-toolbar-title>
 
-        <v-divider v-if="displayAdminMenu" class="mx-2" inset vertical></v-divider>
-        <v-toolbar-title v-if="displayAdminMenu">
+        <v-divider v-if="displayAdminMenu" class="mx-2 hidden-xs-and-down" inset vertical></v-divider>
+        <v-toolbar-title v-if="displayAdminMenu" class="hidden-xs-and-down">
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-btn v-on="on" dense small text to="/bulkOrder">
@@ -108,8 +111,8 @@
           </v-tooltip>
         </v-toolbar-title>
 
-        <v-divider v-if="displayMenu" class="mx-2" inset vertical></v-divider>
-        <v-toolbar-title v-if="displayMenu">
+        <v-divider v-if="displayMenu" class="mx-2 hidden-xs-and-down" inset vertical></v-divider>
+        <v-toolbar-title v-if="displayMenu" class="hidden-xs-and-down">
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-btn v-on="on" dense small text to="/packagingByItem">
@@ -120,8 +123,8 @@
           </v-tooltip>
         </v-toolbar-title>
 
-        <v-divider v-if="displayMenu" class="mx-2" inset vertical></v-divider>
-        <v-toolbar-title v-if="displayMenu">
+        <v-divider v-if="displayMenu" class="mx-2 hidden-xs-and-down" inset vertical></v-divider>
+        <v-toolbar-title v-if="displayMenu" class="hidden-xs-and-down">
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-btn v-on="on" dense small text to="/allUserOrders">
@@ -131,7 +134,7 @@
             <span>Send Email</span>
           </v-tooltip>
         </v-toolbar-title>
-
+ 
         <!-- <v-divider v-if="displayAdminMenu" class="mx-2" inset vertical></v-divider>
         <v-toolbar-title v-if="displayAdminMenu">
           <v-tooltip bottom>
@@ -258,7 +261,8 @@ export default {
     multiLine: true,
     isValidUser: false,
     displayMenu: false,
-    displayAdminMenu: false
+    displayAdminMenu: false,
+    viewPortFlag: true
   }),
   created() {
     this.items = [];
@@ -289,7 +293,7 @@ export default {
       set(value) {
         this.$store.commit("toggleOrderLocked", value);
       }
-    }
+    },    
   },
   methods: {
     ...mapActions([
