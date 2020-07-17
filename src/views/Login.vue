@@ -11,6 +11,7 @@
           v-model="email"
           required
           :rules="emailRules"
+          @keyup.enter="signInUser"
         />
         <v-text-field
           :type="showPassword ? 'text' : 'password'"
@@ -21,6 +22,7 @@
           v-model="password"
           required
           :rules="passwordRules"
+          @keyup.enter="signInUser"
         />
       </v-form>
     </v-card-text>
@@ -28,7 +30,7 @@
     <v-card-actions>
       <!-- <v-btn color="success" to="/register">Register</v-btn> -->
       <v-spacer></v-spacer>
-      <v-btn color="info" v-on:click="signInUser">Login</v-btn>
+      <v-btn color="info" @click="signInUser" ref="login">Login</v-btn>
     </v-card-actions>
     <!-- <v-sheet v-if="this.msg" color="orange lighten-2">{{ this.msg }}</v-sheet> -->
     <v-snackbar v-model="isMsg" :bottom="true" :right="true" :timeout="4000">
@@ -63,21 +65,22 @@ export default {
   methods: {
     ...mapActions(["signInAction"]),
 
-    async signInUser() {
+    async signInUser() {      
       this.$refs.form.validate();
       if (this.valid) {
         var userInfo = {
           email: this.email,
           password: this.password
         };
-        await this.signInAction(userInfo);
-        if (this.currentUser !== null) this.$router.push({ path: "/" });
+        await this.signInAction(userInfo);        
+        if (this.currentUser !== null && this.currentUser.id > 0)
+          this.$router.push({ path: "/" });
         else {
           this.msg = "Invalid Credentials";
           this.isMsg = !(this.msg === "");
         }
       }
-    },
+    },   
     async register() {
       console.log("test");
       await this.$router.push({ path: "/" }).catch(err => {
@@ -86,15 +89,9 @@ export default {
       });
     }
   },
-  created() {
-    
-  },
-  mounted() {
-    
-  },
-  destroyed() {
-    
-  },
+  created() {},
+  mounted() {},
+  destroyed() {},
   computed: {
     ...mapState({ currentUser: "user" })
   }

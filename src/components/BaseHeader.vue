@@ -1,8 +1,7 @@
 <template>
   <div>
-    <v-card class="overflow-hidden mb-2">
+    <v-card class="overflow-hidden mb-10">
       <v-app-bar color="blue-grey accent-4" elevate-on-scroll dense dark fixed>
-        
         <!-- <v-menu offset-y>
           <template v-slot:activator="{ on }">
             <v-btn v-on="on" dense small text>
@@ -43,24 +42,25 @@
             <template v-slot:activator="{ on: menu }">
               <!-- <v-btn color="primary" dark v-bind="attrs" v-on="on">Dropdown</v-btn> -->
               <!-- <v-tooltip bottom>
-                <template v-slot:activator="{ on:tooltip  }"> -->
-                  <v-btn v-on="{...menu}" dense small text>
-                    <v-icon small dark>mdi-dots-vertical</v-icon>
-                    <!-- <v-toolbar-title>VBC</v-toolbar-title> -->
-                    <h3>VBC</h3>
-                  </v-btn>
-                </template>
-              <!--  <span>Menu</span>
+              <template v-slot:activator="{ on:tooltip  }">-->
+              <v-btn v-on="{...menu}" dense small text>
+                 <v-icon class="hidden-sm-and-down">mdi-dots-vertical</v-icon>
+                <v-icon small class="hidden-md-and-up">mdi-dots-vertical</v-icon>
+                <!-- <v-toolbar-title>VBC</v-toolbar-title> -->
+                <h3>VBC</h3>
+              </v-btn>
+            </template>
+            <!--  <span>Menu</span>
                </v-tooltip>
-            </template> -->
+            </template>-->
             <v-list v-if="displayMenu">
-              <v-list-item v-for="(item, index) in getMenuItems()" :key="index" :to="item.path">
+              <v-list-item v-for="(item, index) in getMenuItems()" :key="index" :to="item.path" @click.stop="item.title === 'Logout'? 'resetState' : false;"  >
                 <v-list-item-title>{{ item.title }}</v-list-item-title>
               </v-list-item>
             </v-list>
           </v-menu>
         </div>
-<!-- <v-toolbar-title>VBC</v-toolbar-title> -->
+        <!-- <v-toolbar-title>VBC</v-toolbar-title> -->
         <!-- <v-divider v-if="displayAdminMenu" class="mx-2" inset vertical></v-divider>
         <v-toolbar-title v-if="displayAdminMenu">
           <v-tooltip bottom>
@@ -71,70 +71,73 @@
             </template>
             <span>Manage Items</span>
           </v-tooltip>
-        </v-toolbar-title> -->
+        </v-toolbar-title>-->
 
-        
-
-        <v-divider v-if="displayMenu" class="mx-2 hidden-xs-and-down" inset vertical></v-divider>
-        <v-toolbar-title v-if="displayMenu" class="hidden-xs-and-down" >
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on }">
-              <v-btn v-on="on" dense small text to="/orderEntry">
-                <v-icon>mdi-cart-outline</v-icon>
+        <v-divider v-if="displayMenu" class="mx-2 hidden-sm-and-down" inset vertical></v-divider>
+        <v-toolbar-title v-if="displayMenu" class="hidden-xs-and-down">
+          <v-tooltip dense bottom>
+            <template dense v-slot:activator="{ on }">
+              <v-btn v-on="on" class="ma-2" text icon small to="/orderEntry">
+                <v-icon class="hidden-sm-and-down">mdi-cart-outline</v-icon>
+                <v-icon dense small class="ma-0 pr-0 hidden-md-and-up">mdi-cart-outline</v-icon>
               </v-btn>
             </template>
             <span>My Order</span>
           </v-tooltip>
         </v-toolbar-title>
 
-        <v-divider v-if="displayAdminMenu" class="mx-2 hidden-xs-and-down" inset vertical></v-divider>
+        <v-divider v-if="displayAdminMenu" class="mx-2 hidden-sm-and-down" inset vertical></v-divider>
         <v-toolbar-title v-if="displayAdminMenu" class="hidden-xs-and-down">
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
-              <v-btn v-on="on" dense small text to="/orderReport">
-                <v-icon>mdi-account-multiple</v-icon>
+              <v-btn v-on="on" class="ma-2" text icon small to="/orderReport">
+                <v-icon class="hidden-sm-and-down">mdi-account-multiple</v-icon>
+                <v-icon small class="hidden-md-and-up">mdi-account-multiple</v-icon>
               </v-btn>
             </template>
             <span>Order Summary</span>
           </v-tooltip>
         </v-toolbar-title>
 
-        <v-divider v-if="displayAdminMenu" class="mx-2 hidden-xs-and-down" inset vertical></v-divider>
+        <v-divider v-if="displayAdminMenu" class="mx-2 hidden-sm-and-down" inset vertical></v-divider>
         <v-toolbar-title v-if="displayAdminMenu" class="hidden-xs-and-down">
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
-              <v-btn v-on="on" dense small text to="/bulkOrder">
-                <v-icon>mdi-receipt</v-icon>
+              <v-btn v-on="on" class="ma-2" text icon small to="/bulkOrder">
+                <v-icon class="hidden-sm-and-down">mdi-receipt</v-icon>
+                <v-icon small class="hidden-md-and-up">mdi-receipt</v-icon>
               </v-btn>
             </template>
             <span>Invoice</span>
           </v-tooltip>
         </v-toolbar-title>
 
-        <v-divider v-if="displayMenu" class="mx-2 hidden-xs-and-down" inset vertical></v-divider>
+        <v-divider v-if="displayMenu" class="mx-2 hidden-sm-and-down" inset vertical></v-divider>
         <v-toolbar-title v-if="displayMenu" class="hidden-xs-and-down">
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
-              <v-btn v-on="on" dense small text to="/packagingByItem">
-                <v-icon>mdi-scale-balance</v-icon>
+              <v-btn v-on="on" class="ma-2" text icon small to="/packagingByItem">
+                <v-icon class="hidden-sm-and-down">mdi-scale-balance</v-icon>
+                <v-icon small class="hidden-md-and-up">mdi-scale-balance</v-icon>
               </v-btn>
             </template>
             <span>Pack Items</span>
           </v-tooltip>
         </v-toolbar-title>
 
-        <v-divider v-if="displayMenu" class="mx-2 hidden-xs-and-down" inset vertical></v-divider>
+        <v-divider v-if="displayMenu" class="mx-2 hidden-sm-and-down" inset vertical></v-divider>
         <v-toolbar-title v-if="displayMenu" class="hidden-xs-and-down">
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
-              <v-btn v-on="on" dense small text to="/allUserOrders">
-                <v-icon>mdi-email-outline</v-icon>
+              <v-btn v-on="on" class="ma-2" text icon small to="/allUserOrders">
+                <v-icon class="hidden-sm-and-down">mdi-email-outline</v-icon>
+                <v-icon small class="hidden-md-and-up">mdi-email-outline</v-icon>
               </v-btn>
             </template>
             <span>Send Email</span>
           </v-tooltip>
         </v-toolbar-title>
- 
+
         <!-- <v-divider v-if="displayAdminMenu" class="mx-2" inset vertical></v-divider>
         <v-toolbar-title v-if="displayAdminMenu">
           <v-tooltip bottom>
@@ -145,7 +148,7 @@
             </template>
             <span>Reconcile Order</span>
           </v-tooltip>
-        </v-toolbar-title> -->
+        </v-toolbar-title>-->
 
         <!-- <v-divider v-if="displayAdminMenu" class="mx-2" inset vertical></v-divider>
         <v-toolbar-title v-if="displayAdminMenu">
@@ -159,9 +162,9 @@
             </template>
             <span>Lock/Unlock Order</span>
           </v-tooltip>
-        </v-toolbar-title> -->
+        </v-toolbar-title>-->
 
-        <v-spacer></v-spacer>
+        <v-spacer ></v-spacer>
         <!-- <v-toolbar-title>
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
@@ -173,28 +176,25 @@
           </v-tooltip>
         </v-toolbar-title>
         <v-divider class="mx-2" inset vertical></v-divider>-->
-        <div class="text-center" v-if="displayMenu" >
-          <v-menu offset-y open-on-hover transition="expand-transition">
+        <div class="text-center hidden-sm-and-down" v-if="displayMenu" >
+          <v-menu offset-y open-on-hover transition="expand-transition" >
             <template v-slot:activator="{ on: menu }">
               <!-- <v-btn color="primary" dark v-bind="attrs" v-on="on">Dropdown</v-btn> -->
               <!-- <v-tooltip bottom>
-                <template v-slot:activator="{ on:tooltip  }"> -->
-                  <v-btn v-on="{...menu}" dense small text>
-                    <v-icon dark>mdi-account-circle</v-icon>
-                  </v-btn>
-                </template>
-                <!-- <span>{{getUserName}}</span>
+              <template v-slot:activator="{ on:tooltip  }">-->
+              <v-btn v-on="{...menu}" dense small text>
+                <v-icon dark class="hidden-sm-and-down">mdi-account-circle</v-icon>
+                <!-- <v-icon dark small class="hidden-md-and-up">mdi-account-circle</v-icon> -->
+              </v-btn>
+            </template>
+            <!-- <span>{{getUserName}}</span>
               </v-tooltip>
-            </template> -->
+            </template>-->
             <v-list>
               <!-- <template v-slot:activator="{ on: menuClick}"> -->
-                <v-list-item
-                  v-for="(item, index) in profileItems"
-                  :key="index"                                    
-                  :to="item.path"
-                >
-                  <v-list-item-title>{{ item.title }}</v-list-item-title>
-                </v-list-item>
+              <v-list-item v-for="(item, index) in profileItems" :key="index" :to="item.path">
+                <v-list-item-title>{{ item.title }}</v-list-item-title>
+              </v-list-item>
               <!-- </template> -->
             </v-list>
           </v-menu>
@@ -209,8 +209,9 @@
         </v-tooltip>
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
-            <v-btn v-on="on" v-if="isUserSignedIn" to="/login" dense small text>
-              <v-icon v-on:click="resetState">mdi-logout</v-icon>
+            <v-btn class="ma-2" text icon v-on="on" v-if="isUserSignedIn" @click="resetState" to="/login" dense small >
+                <v-icon dark class="hidden-sm-and-down">mdi-logout</v-icon>
+                <v-icon dark x-small class="hidden-md-and-up">mdi-logout</v-icon>
             </v-btn>
           </template>
           <span>Logout</span>
@@ -238,22 +239,24 @@ import { mapActions, mapState, mapGetters } from "vuex";
 export default {
   data: () => ({
     menuItems: [
-      
       { title: "My Order", path: "/", admin: false },
       { title: "Order Summary", path: "/OrderReport", admin: true },
       { title: "Bulkorder Invoice", path: "/BulkOrder", admin: true },
       { title: "Pack Items", path: "/PackagingByItem", admin: false },
       { title: "Send Email", path: "/AllUserOrders", admin: false },
       { title: "Reconcile Order", path: "/OrderRecon", admin: true },
-      
 
       // { title: "Add User", path: "/Register", admin: true },
       { title: "Manage Items", path: "/ManageItems", admin: true },
       { title: "Manage Users", path: "/ManageUsers", admin: true },
       // { title: "FAQ", path: "/About", admin: false }
+
+      { title: "Profile", path: "/profile", admin: false },    
+      { title: "Logout", path: "/login", admin: false, onClick: "resetState" }
     ],
     profileItems: [
-      { title: "Profile", path: "/profile", admin: false, onClick: "" },      
+      { title: "Profile", path: "/profile", admin: false, onClick: "" }
+      
     ],
     valid: false,
     snackbar: false,
@@ -293,7 +296,7 @@ export default {
       set(value) {
         this.$store.commit("toggleOrderLocked", value);
       }
-    },    
+    }
   },
   methods: {
     ...mapActions([
@@ -310,7 +313,7 @@ export default {
       if (this.isUserSignedIn) {
         this.displayMenu = true;
         if (this.isAdminUser) this.displayAdminMenu = true;
-      } else {        
+      } else {
         this.displayMenu = false;
       }
     },
@@ -340,6 +343,7 @@ export default {
     resetState: function() {
       this.resetStateAction();
       this.setDisplayMenu();
+      this.$router.push({ path: "/login" });
     },
     signInUser: function() {}
   }

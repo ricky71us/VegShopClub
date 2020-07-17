@@ -1,15 +1,7 @@
 <template>
   <div>
     <v-form v-if="pageLoaded" v-model="valid">
-      <div class="text-center" v-if="isOrderLocked">
-        <v-sheet color="orange lighten-2">
-          This order is
-          <v-icon>mdi-lock</v-icon>. No more changes allowed to this order.
-        </v-sheet>
-      </div>
-      <v-divider></v-divider>
-
-      <v-card class="mx-auto mt-12" max-width="1100" color="orange" rounded>
+      <v-card class="mx-auto mt-4" max-width="1100" color="orange" rounded>
         <v-list-item dense>
           <v-list-item-content dens class="ma-0 pa-0">
             <v-container class="ma-0 pa-0">
@@ -20,14 +12,26 @@
           </v-list-item-content>
         </v-list-item>
       </v-card>
+      <div class="text-center mx-auto mt-3" v-if="isOrderLocked">
+        <v-sheet>
+          <div
+            style="color:red;"
+          >This order is now locked. We will let you know when we are ready for the next order.</div>
+        </v-sheet>
+      </div>
+      <div class="text-center mx-auto mt-3" v-if="isTestOrder">
+        <v-sheet>
+          <div style="color:red;">This is a test order, do not place your order yet..</div>
+        </v-sheet>
+      </div>
       <v-card class="mx-auto mt-3" max-width="1100" tile dense shaped>
         <v-list-item dense>
           <v-list-item-content dens class="ma-0 pa-0">
             <v-container class="ma-0 pa-0">
               <v-row>
-                <v-col class="text-md-center" cols="4">Item</v-col>
+                <v-col class="text-md-center" cols="5">Item</v-col>
                 <v-col class="text-md-center" cols="4">Quantity</v-col>
-                <v-col class="text-md-right" cols="4">Item Total</v-col>
+                <v-col class="text-md-right" cols="3">Total ($)</v-col>
               </v-row>
             </v-container>
           </v-list-item-content>
@@ -35,10 +39,10 @@
       </v-card>
       <v-card class="mx-auto mt-2" max-width="1100" tile dense shaped>
         <v-list-item v-for="item in localItems" :key="item.id" dense>
-          <v-list-item-content dens class="ma-0 pa-0">
+          <v-list-item-content dense class="ma-0 pa-0">
             <v-container class="ma-0 pa-0">
               <v-row class="ma-0 pa-0">
-                <v-col cols="4" class="mb-0 pb-0 text-md-left">
+                <v-col cols="5" class="mb-0 pb-0 text-md-left">
                   <v-checkbox
                     v-model="selected"
                     :label="item.name"
@@ -46,6 +50,7 @@
                     class="ma-0 pa-0"
                     @change="validateForm"
                     dense
+                    style="font-size:10px"
                   ></v-checkbox>
                 </v-col>
 
@@ -59,26 +64,19 @@
                       :value="parseFloat(item.qty).toFixed(2)"
                       @change="calcItemPrice(item)"
                       color="success"
-                      :rules="checkMinQty(item)"
+                      :rules="qtyRules(item)"
                       dense
-                      outlined
+                      outlined                      
+                      type="decimal"
+                      onclick="this.select();"
                     ></v-text-field>
                   </v-flex>
+                </v-col>                
+                <v-col cols="3" class="mb-0 pt-6 text-sm-right hidden-md-and-up">
+                  {{item.totalPrice}}                
                 </v-col>
-                <v-col cols="4" class="mb-0 pb-0 text-md-right">
-                  $ {{item.totalPrice}}
-                  <!-- <strong>
-                    <v-text-field
-                      v-model="item.totalPrice"
-                      hide-details="auto"
-                      class="custom ma-0 pa-0 text-md-end"
-                      :value="item.totalPrice"
-                      disabled
-                      label
-                      prefix="$"
-                      dense
-                    ></v-text-field>
-                  </strong>-->
+                 <v-col cols="3" class="mb-0 pb-0 text-md-right hidden-sm-and-down">
+                  $ {{item.totalPrice}}                
                 </v-col>
               </v-row>
             </v-container>
@@ -90,20 +88,9 @@
           <v-list-item-content dens class="ma-0 pa-0">
             <v-container class="ma-0 pa-0">
               <v-row>
-                <v-col cols="4" class="mb-0 pb-0"></v-col>
-                <v-col cols="4" class="text-md-right ml-0 pt-4">(Approximate Total)</v-col>
-                <v-col cols="4" class="pr-6 text-md-right" style="font-weight:bold">
-                  ${{grandTotal}}
-                  <!-- <strong>
-                    <v-text-field
-                      hide-details="auto"
-                      class="custom ma-0 pa-0 text-md-end"
-                      :value="grandTotal"
-                      disabled
-                      label
-                      prefix="$"
-                    ></v-text-field>
-                  </strong>-->
+                <!-- <v-col cols="8" class="text-md-right ml-0 pt-4">(Approximate Total)</v-col> -->
+                <v-col cols="12" class="pr-9" style="font-weight:bold; text-align:right;">
+                  Approximate Total  -  ${{grandTotal}}                 
                 </v-col>
               </v-row>
             </v-container>
@@ -118,7 +105,7 @@
                   <v-btn
                     v-if="!isOrderLocked && !orderPlaced"
                     color="success"
-                    @click="saveOrder()"
+                    @click="sendAndEmail()"
                     :disabled="!valid"
                     class="float-right"
                   >Place Order</v-btn>
@@ -140,6 +127,8 @@
 
 <script>
 import { mapState, mapActions, mapGetters } from "vuex";
+import { dataService } from "../shared";
+
 export default {
   name: "OrderEntry",
   data() {
@@ -179,7 +168,8 @@ export default {
       multiLine: true,
       isOrderLocked: false,
       orderPlaced: false,
-      pageLoaded: false
+      pageLoaded: false,
+      isTestOrder: true
     };
   },
   mounted() {
@@ -199,6 +189,7 @@ export default {
       "updatePurchaseOrderAction"
     ]),
     calcItemPrice: function(item) {
+      if (isNaN(item.qty)) return 0;
       item.totalPrice = (parseFloat(item.price) * parseFloat(item.qty)).toFixed(
         2
       );
@@ -207,12 +198,15 @@ export default {
       this.message = message;
       this.snackbar = true;
     },
-    checkMinQty(item) {
-      //&& this.selected.indexOf(item.id) > 0
-      if (item.qty < item.minQty && this.selected.length > 0) {
-        //console.log(item);
-        return [false || `Min Qty ${item.minQty} ${item.defaultUnits}`];
-      }
+    qtyRules(item) {
+      let minQty = item.minQty;
+      let maxQty = item.maxQty;
+      let rules = [
+        v => !isNaN(v) || `Please enter a number`,
+        v => !(v < minQty) || `Min Qty ${item.minQty} ${item.defaultUnits}`,
+        v => (maxQty !== 0) ? !(v > maxQty) || `Max Qty ${item.maxQty} ${item.defaultUnits}` : true
+      ];     
+      return rules;
     },
     setSelectedItems() {
       this.getPurchaseOrderByUser.forEach(po => {
@@ -234,7 +228,7 @@ export default {
 
       this.localItems.forEach(li => {
         if (this.selected.indexOf(li.id) === -1) {
-          li.qty = li.minQty.toFixed(2);
+          li.qty = li.minQty.toFixed(2);          
           li.totalPrice = (0).toFixed(2);
         } else {
           li.totalPrice = (li.qty * li.price).toFixed(2);
@@ -251,6 +245,8 @@ export default {
         return (parseFloat(lQty) * parseFloat(price)).toFixed(2);
       } else return (0).toFixed(2);
     },
+
+    /// Get purchase order
     async getItems() {
       await this.getOrderStatusAction();
       await this.getOrdersAction();
@@ -273,6 +269,7 @@ export default {
               id: item.id,
               name: item.name,
               minQty: parseFloat(item.minQty),
+              maxQty: parseFloat(item.maxQty),
               qty: po.qty > 0 ? po.qty : parseFloat(item.minQty),
               defaultUnits: item.defaultUnits,
               price: parseFloat(item.price),
@@ -288,6 +285,7 @@ export default {
               id: item.id,
               name: item.name,
               minQty: parseFloat(item.minQty),
+              maxQty: parseFloat(item.maxQty),
               qty: parseFloat(item.minQty).toFixed(2),
               defaultUnits: item.defaultUnits,
               price: parseFloat(item.price),
@@ -308,10 +306,12 @@ export default {
       });
       this.pageLoaded = true;
     },
+
+    ///Save Purchase Order
     async saveOrder() {
       this.orderPlaced = true;
       await this.validateForm();
-      if (this.user) {
+      if (await this.user) {
         var selList = [];
         if (this.selected.length > 0) {
           this.selected.forEach(a => {
@@ -324,8 +324,8 @@ export default {
               );
           });
         }
-        if (selList.length > 0) {
-          selList.forEach(item => {
+        if ((await selList.length) > 0) {
+          await selList.forEach(item => {
             var pod = this.getPurchaseOrderByUser.find(
               po =>
                 po.orderId === this.getCurrentOrder.id &&
@@ -344,34 +344,12 @@ export default {
                   suggestedQty: pod.suggestedQty,
                   actPrice: 0,
                   isCancelled: 0
-                };
-
-              // console.log({
-              //   id: pod.id,
-              //   orderId: this.getCurrentOrder.id,
-              //   itemId: item.id,
-              //   userId: this.user.id,
-              //   qty: item.qty,
-              //   actQty: 0,
-              //   actPrice: 0,
-              //   isCancelled: 0
-              //});
+                };              
               this.updatePurchaseOrderAction(this.tempPO);
               this.snackMessage(
-                `Thank you for your Order! We'll email you, when it is ready for pick up. Please note, items are subject to availability and prices shown here are approximate.`
+                `Thank you for your Order! We'll email you, when it is ready for pick up. Please note, items are subject to availability and prices shown here are approximate. A copy of the order has been emailed to you.`
               );
             } else {
-              // console.log({
-              //   orderId: this.getCurrentOrder.id,
-              //   itemId: item.id,
-              //   qty: item.qty,
-              //   actQty: 0,
-              //   suggestedQty: 0,
-              //   actPrice: 0,
-              //   userId: this.user.id,
-              //   isCancelled: 0
-              //});
-
               this.addPurchaseOrderAction({
                 orderId: this.getCurrentOrder.id,
                 itemId: item.id,
@@ -402,7 +380,7 @@ export default {
           });
         }
 
-        this.getPurchaseOrderByUser.forEach(po => {
+        await this.getPurchaseOrderByUser.forEach(po => {
           if (!selList.find(item => item.id === po.itemId)) {
             if (po.id)
               this.tempPO = {
@@ -416,12 +394,26 @@ export default {
                 isCancelled: 1
               };
 
-            this.updatePurchaseOrderAction(this.tempPO);
+            this.updatePurchaseOrderAction(this.tempPO).then(
+              );
           }
           if (this.selected.length === 0) this.snackMessage(`Data Updated.`);
         });
       }
+
       this.orderPlaced = false;
+    },
+
+    async sendAndEmail() {
+      let wait =  (time) => new Promise(resolve => setTimeout(resolve, time));
+      await this.saveOrder();      
+      await wait(10000)
+      await dataService
+        .sendEmailOrderPlaced(this.getCurrentOrder.id, this.user.id)        
+        .catch(error => {
+          console.log(error);
+          this.snackMessage("Failed to send Email.");
+        });
     }
   },
   computed: {

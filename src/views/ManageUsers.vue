@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-card class="mx-auto mt-12" max-width="1100" color="orange" rounded>
+    <v-card class="mx-auto mt-5" max-width="1100" color="orange" rounded>
       <v-list-item dense>
         <v-list-item-content dens class="ma-0 pa-0">
           <v-container class="ma-0 pa-0">
@@ -147,7 +147,6 @@ export default {
         }
       });
       this.dataReady = true;
-      console.log(this.users);
       return this.users;
     },
     async getUsers() {

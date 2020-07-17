@@ -1,13 +1,14 @@
 <template>
   <div>
-    <v-form v-if="pageLoaded" v-model="valid">
+    <v-form v-if="pageLoaded && parseInt(this.getCurrentOrder.isLocked) === 1" v-model="valid">
       <v-divider></v-divider>
-      <v-card class="mx-auto mt-12" max-width="1100" dense color="orange" rounded>
+      <v-card class="mx-auto mt-5" max-width="1100" dense color="orange" rounded>
         <v-list-item dense>
           <v-list-item-content dens class="ma-0 pa-0">
             <v-container class="ma-0 pa-0">
               <v-row>
-                <v-col cols="12" class="text-md-center">Bulkorder Invoice</v-col>
+                <v-col cols="12" class="text-md-center hidden-sm-and-down">Bulkorder Invoice</v-col>
+                <v-col cols="12" class="text-sm-center hidden-md-and-up">Bulkorder Invoice</v-col>
               </v-row>
             </v-container>
           </v-list-item-content>
@@ -18,10 +19,26 @@
           <v-list-item-content dens class="ma-0 pa-0">
             <v-container class="ma-0 pa-0">
               <v-row>
-                <v-col cols="6">Item</v-col>
-                <v-col class="text-md-center" cols="2">Ordered Qty</v-col>
-                <v-col class="text-md-center" cols="2">Act Qty</v-col>
-                <v-col class="text-md-center" cols="2">Total</v-col>
+                <v-col cols="4" class="hidden-md-and-up" style="font-size:12px">Item</v-col>
+                <v-col cols="4" class="hidden-sm-and-down">Item</v-col>
+                <v-col class="text-md-center hidden-sm-and-down" cols="2">Ordered Qty</v-col>
+                <v-col
+                  class="text-md-center hidden-md-and-up"
+                  style="font-size:12px"
+                  cols="2"
+                >Ord Qty</v-col>
+                <v-col
+                  class="text-md-center hidden-md-and-up"
+                  style="font-size:12px"
+                  cols="3"
+                >Act Qty</v-col>
+                <v-col class="text-md-center hidden-sm-and-down" cols="3">Act Qty</v-col>
+                <v-col class="text-md-center hidden-sm-and-down" cols="3">Total</v-col>
+                <v-col
+                  class="text-md-center hidden-md-and-up"
+                  style="font-size:12px"
+                  cols="3"
+                >Total($)</v-col>
                 <!-- <v-col cols="2">Unit Price</v-col> -->
               </v-row>
             </v-container>
@@ -32,60 +49,54 @@
         <v-list-item v-for="item in localItems" :key="item.id" dense>
           <v-list-item-content dens class="ma-0 pa-0">
             <v-container class="ma-0 pa-0">
-              <v-row cols="6" class="ma-0 pa-0">
-                <v-col class="mt-2">
-                  <v-flex shrink class="text-xl-left">
-                    {{item.name}}
-                    <!-- <strong>
-                      <v-text-field
-                        v-model="item.name"
-                        hide-details="auto"
-                        class="ma-0 pa-0 text-xl-left custom"
-                        :value="item.name"
-                        color="success"
-                        dense
-                        disabled
-                        flat
-                        solo
-                      ></v-text-field>
-                    </strong>-->
-                  </v-flex>
+              <v-row cols="4" class="ma-0 pa-0">
+                <v-col class="mt-2 hidden-md-and-up" style="font-size:12px">
+                  <div class="tooltip">
+                    {{item.name.length > 15 ? item.name.substring(0,15) + '...' : item.name}}
+                    <span class="tooltiptext">{{item.name}}</span>
+                  </div>
                 </v-col>
-                <v-col cols="2" class="mt-2 pb-0 text-md-center">
-                  {{item.qty}} {{item.defaultUnits}}
-                  <!-- <v-flex shrink class="text-xl-left">
-                    
-                    <strong>
-                      <v-text-field
-                        v-model="item.qty"
-                        :label="item.defaultUnits"
-                        hide-details="auto"
-                        class="ma-0 pa-0 text-xl-left"
-                        :value="parseInt(item.qty).toFixed(2)"
-                        color="success"
-                        disabled
-                        dense
-                        flat
-                      ></v-text-field>
-                    </strong>
-                  </v-flex>-->
+                <v-col class="mt-2 hidden-sm-and-down">{{item.name}}</v-col>
+                <v-col
+                  cols="2"
+                  class="mt-2 pb-0 text-md-center hidden-md-and-up"
+                  style="font-size:12px"
+                >{{item.qty}} {{item.defaultUnits}}</v-col>
+                <v-col
+                  cols="2"
+                  class="mt-2 pb-0 text-md-center hidden-sm-and-down"
+                >{{item.qty}} {{item.defaultUnits}}</v-col>
+                <v-col cols="3" class="mb-0 pb-2 hidden-sm-and-down">
+                  <v-text-field
+                    v-model="item.actQty"
+                    :label="item.defaultUnits"
+                    hide-details="auto"
+                    class="ma-0 pa-0 text-xl-left"
+                    :value="parseInt(item.qty).toFixed(2)"
+                    @change="calcItemPrice(item)"
+                    color="success"
+                    dense
+                    outlined
+                    onclick="this.select();"
+                  ></v-text-field>
                 </v-col>
-                <v-col cols="2" class="mb-0 pb-2">
-                  <v-flex shrink class="text-xl-left">
-                    <v-text-field
-                      v-model="item.actQty"
-                      :label="item.defaultUnits"
-                      hide-details="auto"
-                      class="ma-0 pa-0 text-xl-left"
-                      :value="parseInt(item.qty).toFixed(2)"
-                      @change="calcItemPrice(item)"
-                      color="success"
-                      dense
-                      outlined
-                    ></v-text-field>
-                  </v-flex>
+                <v-col cols="3" class="mb-0 pb-2 hidden-md-and-up">
+                  <v-text-field
+                    v-model="item.actQty"
+                    :label="item.defaultUnits"
+                    hide-details="auto"
+                    class="ma-0 pa-0 text-xl-left"
+                    :value="parseInt(item.qty).toFixed(2)"
+                    @change="calcItemPrice(item)"
+                    color="success"
+                    background-color="grey"
+                    height="26"
+                    single-line
+                    onclick="this.select();"
+                    style="font-size:14px"
+                  ></v-text-field>
                 </v-col>
-                <v-col cols="2" class="mb-0 pb-0">
+                <v-col cols="3" class="mb-0 pb-0 hidden-sm-and-down">
                   <v-text-field
                     v-model="item.totalPrice"
                     hide-details="auto"
@@ -97,24 +108,24 @@
                     prefix="$"
                     dense
                     outlined
+                    onclick="this.select();"
                   ></v-text-field>
                 </v-col>
-                <!-- <v-col cols="2" class="mb-0 pb-0">
-                  <strong>
-                    <v-text-field
-                      v-model="item.actPriceFinal"
-                      hide-details="auto"
-                      class="ma-0 pa-0 centered-input"
-                      :value="parseFloat(item.actPriceFinal).toFixed(2)"
-                      height="26"
-                      disabled
-                      prepend-inner-icon="mdi-currency-usd"
-                      dense
-                      flat
-                      solo
-                    ></v-text-field>
-                  </strong>
-                </v-col>-->
+                <v-col cols="3" class="mb-0 pb-0 hidden-md-and-up">
+                  <v-text-field
+                    v-model="item.totalPrice"
+                    hide-details="auto"
+                    class="ma-0 pa-0 centered-input"
+                    :value="parseInt(item.totalPrice).toFixed(2)"
+                    label
+                    @change="calcItemPrice(item)"
+                    height="26"
+                    background-color="grey"
+                    single-line
+                    onclick="this.select();"
+                    style="font-size:14px"
+                  ></v-text-field>
+                </v-col>
               </v-row>
             </v-container>
             <v-divider></v-divider>
@@ -125,25 +136,7 @@
           <v-list-item-content dens class="ma-0 pa-0">
             <v-container class="ma-0 pa-0">
               <v-row>
-                <v-col cols="6" class="mb-0 pb-0"></v-col>
-                <v-col cols="2" class="mb-0 pb-0"></v-col>
-                <v-col cols="2" class="mb-0 pb-0 float-right"></v-col>
-                <v-col cols="2" style="font-weight:bold" class="mb-0 pb-3">
-                  ${{grandTotal}}
-                  <!-- <strong>
-                    <v-text-field
-                      hide-details="auto"
-                      class="ma-0 pa-0 float-right"
-                      disabled
-                      label
-                      :value="grandTotal"
-                      prefix="$"
-                      flat
-                      solo
-                    ></v-text-field>
-                  </strong>-->
-                </v-col>
-                <v-col cols="2" class="mb-0 pb-0"></v-col>
+                <v-col cols="12" style="font-weight:bold; text-align:right;">Total - ${{grandTotal}}</v-col>
               </v-row>
             </v-container>
             <v-divider></v-divider>
@@ -180,6 +173,16 @@
               </v-row>
             </v-container>
             <v-divider></v-divider>
+          </v-list-item-content>
+        </v-list-item>
+      </v-card>
+    </v-form>
+    <v-form v-if="parseInt(this.getCurrentOrder.isLocked) === 0" v-model="valid">
+      <v-card class="mx-auto mt-4" max-width="344" outlined>
+        <v-list-item three-line>
+          <v-list-item-content>
+            <v-list-item-title class="headline mb-1">Order is Not Locked</v-list-item-title>
+            <v-list-item-subtitle>Please lock the order from Order Summary page before accessing this page.</v-list-item-subtitle>
           </v-list-item-content>
         </v-list-item>
       </v-card>
@@ -278,6 +281,8 @@ export default {
         this.updateBulkOrderAction(this.tempBO);
       });
 
+      let wait = time => new Promise(resolve => setTimeout(resolve, time));
+      await wait(1000);
       await this.updateQty();
       this.snackMessage(`Updated Data!`);
     },
@@ -290,7 +295,6 @@ export default {
       await this.getOrdersAction();
       await this.getPurchaseOrderByOrderIdAction(this.getCurrentOrder.id);
       await this.getBulkOrderByOrderIdAction(this.getCurrentOrder.id);
-      //console.log(this.getActiveBulkOrders);
       this.getActiveBulkOrders.forEach(item => {
         if (item) {
           if (
@@ -298,14 +302,15 @@ export default {
             !this.localItems.find(li => {
               li.id === item.id;
             })
-          )
+          ) {
+            let itemqty = this.itemQty.find(iq => iq.itemId === item.itemId);
             this.localItems.push({
               id: item.id,
               itemId: item.itemId,
               name: this.getItemById(item.itemId).name,
               defaultUnits: this.getItemById(item.itemId).defaultUnits,
               orderId: item.orderId,
-              qty: this.itemQty.find(iq => iq.itemId === item.itemId).qty,
+              qty: itemqty ? itemqty.qty : 0,
               actQty: item.actQty > 0 ? parseFloat(item.actQty) : null,
               totalPrice:
                 item.totalPrice > 0 ? parseFloat(item.totalPrice) : null,
@@ -318,6 +323,7 @@ export default {
                   : 0,
               actPriceFinal: parseFloat(item.actPriceFinal).toFixed(2)
             });
+          }
         }
       });
       this.pageLoaded = true;
@@ -355,4 +361,50 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+/* Tooltip container */
+.tooltip {
+  position: relative;
+  display: inline-block;
+  //border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 6px;
+
+  /* Position the tooltip text */
+  position: absolute;
+  z-index: 1;
+  bottom: -5%;
+  left: 155%;
+  margin-left: -60px;
+
+  /* Fade in tooltip */
+  opacity: 0;
+  transition: opacity 0.6s;
+}
+
+/* Tooltip arrow */
+// .tooltip .tooltiptext::after {
+//   content: "";
+//   position: absolute;
+//   top: 100%;
+//   left: 50%;
+//   margin-left: -5px;
+//   border-width: 5px;
+//   border-style: solid;
+//   border-color: #555 transparent transparent transparent;
+// }
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
 </style>

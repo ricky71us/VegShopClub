@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <v-card class="mx-auto mt-12" max-width="1100" color="orange" rounded>
+    <v-card class="mx-auto mt-5" max-width="1100" color="orange" rounded>
       <v-list-item dense>
         <v-list-item-content dens class="ma-0 pa-0">
           <v-container class="ma-0 pa-0">
@@ -36,6 +36,7 @@
 
                         <v-text-field v-model="updatedItem.description" label="Description"></v-text-field>
                         <v-text-field v-model="updatedItem.minQty" label="Minimum Quantity"></v-text-field>
+                        <v-text-field v-model="updatedItem.maxQty" label="Maximum Quantity"></v-text-field>
                         <v-select
                           v-model="updatedItem.defaultUnits"
                           :items="units"
@@ -96,17 +97,38 @@
                           :rules="nameRules"
                           label="Item Name"
                           required
+                          onclick="this.select();"
                         ></v-text-field>
 
-                        <v-text-field v-model="tempItem.description" label="Description"></v-text-field>
-                        <v-text-field v-model="tempItem.minQty" :value="parseFloat(tempItem.minQty).toFixed(2)" label="Minimum Quantity"></v-text-field>
+                        <v-text-field
+                          v-model="tempItem.description"
+                          label="Description"
+                          onclick="this.select();"
+                        ></v-text-field>
+                        <v-text-field
+                          v-model="tempItem.minQty"
+                          :value="parseFloat(tempItem.minQty).toFixed(2)"
+                          label="Minimum Quantity"
+                          onclick="this.select();"
+                        ></v-text-field>
+                        <v-text-field
+                          v-model="tempItem.maxQty"
+                          :value="parseFloat(tempItem.maxQty).toFixed(2)"
+                          label="Maximum Quantity"
+                          onclick="this.select();"
+                        ></v-text-field>
+
                         <v-select
                           v-model="tempItem.defaultUnits"
                           :items="units"
                           label="Unit"
                           required
                         ></v-select>
-                        <v-text-field v-model="tempItem.price" label="Price"></v-text-field>
+                        <v-text-field
+                          v-model="tempItem.price"
+                          label="Price"
+                          onclick="this.select();"
+                        ></v-text-field>
 
                         <v-btn
                           color="success"
@@ -185,6 +207,7 @@ export default {
         name: null,
         description: null,
         minQty: null,
+        maxQty: null,
         defaultunits: "",
         price: null,
         isActive: true
@@ -194,6 +217,7 @@ export default {
         name: null,
         description: null,
         minQty: null,
+        maxQty: null,
         defaultUnits: "",
         price: null,
         isActive: true
@@ -203,6 +227,7 @@ export default {
         name: null,
         description: null,
         minQty: null,
+        maxQty: null,
         defaultUnits: "",
         price: null,
         isActive: true
@@ -257,6 +282,7 @@ export default {
         name: item.name,
         description: item.description,
         minQty: parseFloat(item.minQty).toFixed(2),
+        maxQty: parseFloat(item.maxQty).toFixed(2),
         price: parseFloat(item.price).toFixed(2),
         defaultUnits: item.defaultUnits
       };
@@ -268,6 +294,7 @@ export default {
         name: "",
         description: "",
         minQty: "",
+        maxQty: "",
         price: "",
         defaultUnits: null
       };
@@ -296,6 +323,7 @@ export default {
         name: item.name,
         description: item.description,
         minQty: item.minQty,
+        maxQty: item.maxQty,
         price: item.price,
         defaultUnits: item.defaultUnits,
         isActive: item.isActive
@@ -311,6 +339,7 @@ export default {
         name: this.tempItem.name,
         description: this.tempItem.description,
         minQty: this.tempItem.minQty,
+        maxQty: this.tempItem.maxQty,
         price: this.tempItem.price,
         defaultUnits: this.tempItem.defaultUnits,
         isActive: item.isActive

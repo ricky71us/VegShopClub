@@ -38,8 +38,10 @@ const mutations = {
     state.isUserLoggedIn = false;
   },
   signIn(state, signInUser) {
-    state.user = signInUser;
-    state.isUserLoggedIn = true;
+    if (signInUser) {
+      state.user = signInUser;
+      state.isUserLoggedIn = true;
+    }
   },
   // Order Status
   getOrderStatus(state, orderstatus) {
@@ -121,9 +123,9 @@ const actions = {
     commit("resetState");
   },
   async signInAction({ commit }, user) {
-    const signInUser = await dataService.signIn(user)
+    const signInUser = await dataService.signIn(user);
     //.then(() => {
-      //localStorage.setItem("userId", signInUser.id);
+    //localStorage.setItem("userId", signInUser.id);
     //});
     commit("signIn", signInUser);
   },

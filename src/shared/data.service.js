@@ -214,7 +214,7 @@ const updatePurchaseOrder = async function(purchaseOrder) {
     const response = await axios.put(
       `${API}/purchaseorder?id=${purchaseOrder.id}`,
       purchaseOrder
-    );
+    );    
     parseItem(response, 200);
     return purchaseOrder;
   } catch (error) {
@@ -224,11 +224,11 @@ const updatePurchaseOrder = async function(purchaseOrder) {
 };
 
 const updateActQty = async function(orderId) {
-  try {
+  try {    
     const response = await axios.post(
       `${API}/purchaseorder/calcQty?orderId=${orderId}`
     );
-    parseItem(response, 200);
+    parseItem(response, 200);    
     return true;
   } catch (error) {
     console.error(error);
@@ -250,11 +250,36 @@ const deletePurchaseOrder = async function(purchaseOrder) {
   }
 };
 
+const sendEmailOrderPlaced = async function(orderId, userId) {
+  try {    
+    const response = await axios.post(
+      `${API}/purchaseorder/sendemailOrderPlaced?orderId=${orderId}&userId=${userId}`,
+    );
+    let data = parseList(response);
+    return data;
+  } catch (error) {
+    console.log(error);
+    return [];
+  }
+};
+
+const sendEmailConsolidatedOrder = async function(orderId, userId) {
+  try {    
+    const response = await axios.post(
+      `${API}/purchaseorder/sendemailConsolidatedOrder?orderId=${orderId}&userId=${userId}`,
+    );    
+    let data = parseList(response);
+    return data;
+  } catch (error) {
+    console.log(error);
+    return [];
+  }
+};
+
 const sendEmailPurchaseOrder = async function(purchaseOrder, fromUserId) {
   try {
     const response = await axios.post(
-      `${API}/purchaseorder/sendemail?toUserId=${purchaseOrder.userId}&orderId=${purchaseOrder.orderId}&fromUserId=${fromUserId}`,
-      purchaseOrder
+      `${API}/purchaseorder/sendemail?toUserId=${purchaseOrder.userId}&orderId=${purchaseOrder.orderId}&fromUserId=${fromUserId}`
     );
     let data = parseList(response);
     return data;
@@ -369,6 +394,8 @@ export const dataService = {
   updatePurchaseOrder,
   updateActQty,
   deletePurchaseOrder,
+  sendEmailConsolidatedOrder,
+  sendEmailOrderPlaced,
   sendEmailPurchaseOrder,
   getBulkOrder,
   getBulkOrderByOrderId,

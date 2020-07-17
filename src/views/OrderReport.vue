@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-card class="mx-auto mt-12" max-width="1100" color="orange" rounded>
+    <v-card class="mx-auto mt-5" max-width="1100" color="orange" rounded>
       <v-list-item dense>
         <v-list-item-content dens class="ma-0 pb-0">
           <v-container class="ma-0 pa-0">
@@ -19,12 +19,21 @@
                   </v-tooltip>
                 </v-toolbar-title>-->
 
-                <v-btn v-if="isOrderLocked" @click="toggleOrderLock" text>
+                <v-btn v-if="isOrderLocked" @click="toggleOrderLock"  class="hidden-sm-and-down" text>
                   <v-icon left>mdi-lock-open</v-icon>unlock
                 </v-btn>
-                <v-btn v-if="!isOrderLocked" @click="toggleOrderLock" text>
+                <v-btn v-if="!isOrderLocked" @click="toggleOrderLock" class="hidden-sm-and-down" text>
                   <v-icon left>mdi-lock</v-icon>lock
                 </v-btn>
+
+                <v-btn v-if="isOrderLocked" @click="toggleOrderLock"  class="hidden-md-and-up" text>
+                  <v-icon left>mdi-lock-open</v-icon>
+                </v-btn>
+                <v-btn v-if="!isOrderLocked" @click="toggleOrderLock" class="hidden-md-and-up" text>
+                  <v-icon left>mdi-lock</v-icon>
+                </v-btn>
+
+                
 
                 <!-- <v-col cols="1" class="mb-2 pl-8">
                   <v-icon >mdi-lock</v-icon>
@@ -46,23 +55,27 @@
         </v-list-item-content>
       </v-list-item>
     </v-card>
-    <v-data-table
-      :headers="reportHeader"
-      :items="reportData"
-      hide-default-footer
-      :items-per-page="5"
-      class="elevation-1 mt-8; text-align:right; pa-3"
-    >
-      <template slot="body.append">
-        <tr>
-          <th
-            style="background-color: grey;"
-            v-for="(item, index) in reportTotalRow"
-            :key="index"
-          >{{item}}</th>
-        </tr>
-      </template>
-    </v-data-table>
+    <v-layout v-resize="onResize" column style="padding-top:7px">
+      <v-data-table
+        :headers="reportHeader"
+        :items="reportData"
+        hide-default-footer
+        :items-per-page="100"
+        class="elevation-1 mt-8; text-align:right; pa-0"
+        :class="{mobile: isMobile}"
+        :mobile="isMobile"
+      >
+        <template slot="body.append">
+          <tr class="hidden-sm-and-down">
+            <td
+              style="background-color: grey;"
+              v-for="(item, index) in reportTotalRow"
+              :key="index"
+            >{{item}}</td>
+          </tr>
+        </template>
+      </v-data-table>
+    </v-layout>
     <v-snackbar id="header-snackbar" v-model="snackbar" :multi-line="multiLine">
       {{ this.message }}
       <v-btn color="red" text @click="snackbar = false">Close</v-btn>
@@ -88,18 +101,22 @@ export default {
       snackbar: false,
       message: null,
       multiLine: true,
-      isOrderLocked: false
+      isOrderLocked: 0,
+      isMobile: false,
     };
   },
-  async created() {
+  async created() {},
+  async mounted() {
     await this.setOrderLock();
-  },
-  mounted() {
-    this.getQtyByItem();
-    this.getData();
+    await this.getQtyByItem();
+    await this.getData();
   },
   methods: {
     ...mapActions(["getPurchaseOrderByOrderIdAction", "updateOrderAction"]),
+    onResize() {
+      if (window.innerWidth < 769) this.isMobile = true;
+      else this.isMobile = false;
+    },
     getQtyByItem() {
       this.itemQty = [];
       this.purchaseOrders.forEach(i => {
@@ -128,7 +145,8 @@ export default {
       this.snackbar = true;
     },
     async toggleOrderLock() {
-      this.isOrderLocked = parseInt(this.isOrderLocked) === 1 ? 0 : 1;
+      this.isOrderLocked =
+        parseInt(this.getCurrentOrder.isLocked) === 1 ? 0 : 1;
       await this.updateOrderAction({
         id: this.getCurrentOrder.id,
         orderDt: this.getCurrentOrder.orderDt,
@@ -136,19 +154,21 @@ export default {
         orderStatus: this.getCurrentOrder.orderStatus,
         isLocked: this.isOrderLocked
       });
-      if (parseInt(this.isOrderLocked) === 1)
+      if (parseInt(this.isOrderLocked) === 1) {
         this.snackMessage("This order is now closed for changes!");
-      else if (parseInt(this.isOrderLocked) === 0)
+        this.sendEmail();
+      } else if (parseInt(this.isOrderLocked) === 0) {
         this.snackMessage("This order is Unlocked!");
+      }
     },
-    //  isOrderLocked: {
-    //   get() {
-    //     return this.$store.state.isOrderLocked;
-    //   },
-    //   set(value) {
-    //     this.$store.commit("toggleOrderLocked", value);
-    //   }
-    // },
+    async sendEmail() {
+      await dataService
+        .sendEmailConsolidatedOrder(this.getCurrentOrder.id, this.user.id)
+        .catch(error => {
+          console.log(error);
+          this.snackMessage("Failed to send Email.");
+        });
+    },
     async getData() {
       await this.getUsers();
       await this.getPurchaseOrderByOrderIdAction(this.getCurrentOrder.id);
@@ -242,11 +262,69 @@ export default {
     }
   },
   computed: {
-    ...mapState(["purchaseOrders", "bulkOrders", "items"]),
+    ...mapState(["purchaseOrders", "bulkOrders", "items", "user"]),
     ...mapGetters(["getCurrentOrder"])
   }
 };
 </script>
 
-<style lang="scss" scoped>
+<style lang="css" scoped>
+.mobile {
+  color: #333;
+}
+
+@media screen and (max-width: 768px) {
+  .mobile table.v-table tr {
+    max-width: 100%;
+    position: relative;
+    display: block;
+  }
+
+  .mobile table.v-table tr:nth-child(odd) {
+    border-left: 6px solid deeppink;
+  }
+
+  .mobile table.v-table tr:nth-child(even) {
+    border-left: 6px solid cyan;
+  }
+
+  .mobile table.v-table tr td {
+    display: flex;
+    width: 100%;
+    border-bottom: 1px solid #f5f5f5;
+    height: auto;
+    padding: 10px;
+  }
+
+  .mobile table.v-table tr td ul li:before {
+    content: attr(data-label);
+    padding-right: 0.5em;
+    text-align: left;
+    display: block;
+    color: #999;
+  }
+  .v-datatable__actions__select {
+    width: 50%;
+    margin: 0px;
+    justify-content: flex-start;
+  }
+  .mobile .theme--light.v-table tbody tr:hover:not(.v-datatable__expand-row) {
+    background: transparent;
+  }
+}
+.flex-content {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.flex-item {
+  padding: 5px;
+  width: 50%;
+  height: 40px;
+  font-weight: bold;
+}
 </style>
