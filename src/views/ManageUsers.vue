@@ -1,12 +1,12 @@
 <template>
-  <div>
+  <div id="app">
     <v-card class="mx-auto mt-5" max-width="1100" color="orange" rounded>
       <v-list-item dense>
         <v-list-item-content dens class="ma-0 pa-0">
           <v-container class="ma-0 pa-0">
             <v-row no-gutters>
-              <v-col cols="10" class="mt-2 text-md-center">Manage Users</v-col>
-              <v-col cols="2" class="text-md-center ma-0 pa-0">
+              <v-col cols="10" class="pt-3 text-md-center">Manage Users</v-col>
+              <v-col cols="2" class="text-md-center pl-3">
                 <!-- <v-toolbar-title>
                   <v-tooltip bottom>
                     <template v-slot:activator="{ on }">
@@ -63,7 +63,6 @@
           hide-default-footer
           :items-per-page="100"
           class="elevation-1 mt-8"
-          
         >
           <template v-slot:item.isPacker="{ item }">
             <v-icon @click="toggleIsPacker(item)" v-if="item.isPacker" color="green">mdi-check</v-icon>
@@ -104,7 +103,7 @@ export default {
         // { text: "Admin", value: "isAdmin" },
         { text: "Active", value: "active" },
         { text: "Packer", value: "isPacker" },
-        { text: "Password", value: "resetpwd" }
+        { text: "Password", value: "resetpwd" },
       ],
       users: [],
       valid: false,
@@ -115,7 +114,7 @@ export default {
       newPwd: "",
       dialog: false,
       userPwdReset: "",
-      dataReady: false
+      dataReady: false,
     };
   },
   async created() {
@@ -126,7 +125,7 @@ export default {
     ...mapActions(["updateUserAction"]),
     async getData() {
       await this.getUsers();
-      this.localUsers.forEach(lu => {
+      this.localUsers.forEach((lu) => {
         this.users.push({
           name: `${lu.firstname} ${lu.lastname}`,
           isAdmin: parseInt(lu.isAdmin) === 1,
@@ -134,11 +133,11 @@ export default {
           active: parseInt(lu.active) === 1,
           id: lu.id,
           firstname: lu.firstname,
-          lastname: lu.lastname
+          lastname: lu.lastname,
         });
       });
 
-      this.users.sort(function(a, b) {
+      this.users.sort(function (a, b) {
         if (a.name < b.name) {
           return -1;
         }
@@ -150,16 +149,16 @@ export default {
       return this.users;
     },
     async getUsers() {
-      await dataService.getAllUsers().then(response => {        
+      await dataService.getAllUsers().then((response) => {
         this.localUsers = response;
       });
     },
     async updateUser(user) {
       await dataService.updateUser(user);
       //this.updateUserAction(this.localUser);
-      this.snackMessage("User Data updated!");
+      //this.snackMessage("User Data updated!");
     },
-    snackMessage: function(message) {
+    snackMessage: function (message) {
       this.message = message;
       this.snackbar = true;
     },
@@ -170,10 +169,13 @@ export default {
         isPacker: user.isPacker ? 1 : 0,
         isAdmin: user.isAdmin ? 1 : 0,
         active: user.active ? 1 : 0,
-        firstname: user.firstname
+        firstname: user.firstname,
       });
-
-      this.snackMessage(`Update Successful!`);
+      if (user.isPacker) {
+        this.snackMessage(`Packer updated!`);
+      } else {
+        this.snackMessage(`Packer has been reset`);
+      }
     },
     async toggleIsAdmin(user) {
       user.isAdmin = user.isAdmin ? false : true;
@@ -183,25 +185,23 @@ export default {
         isAdmin: user.isAdmin ? 1 : 0,
         active: user.active ? 1 : 0,
         firstname: user.firstname,
-        lastname: user.lastname
+        lastname: user.lastname,
       });
-      this.snackMessage(`Update Successful!`);
+      this.snackMessage(`Update Successful1!`);
       //await this.getUsers();
     },
     async toggleIsActive(user) {
       user.active = user.active ? false : true;
-      await this.updateUser({
-        id: user.id,
-        isPacker: user.isPacker ? 1 : 0,
-        isAdmin: user.isAdmin ? 1 : 0,
-        active: user.active ? 1 : 0,
-        firstname: user.firstname,
-        lastname: user.lastname
-      });
-      this.snackMessage(`Update Successful!`);
-      //await this.getUsers();
+
+      if (user.active) {
+        this.resetPwd(user);
+      } else {
+        this.passwordReset(user);
+        this.isNewPwd = false;
+        this.snackMessage(`This user has been made inactive`);
+      }
     },
-    async resetPwd(user) {      
+    async passwordReset(user) {
       this.newPwd = this.generatePassword;
       await this.updateUser({
         id: user.id,
@@ -210,12 +210,15 @@ export default {
         active: user.active ? 1 : 0,
         firstname: user.firstname,
         password: this.newPwd,
-        lastname: user.lastname
+        lastname: user.lastname,
       });
-      this.snackMessage(`Update Successful!`);
+    },
+    async resetPwd(user) {
+      this.passwordReset(user);
+      this.snackMessage(`Password has been reset Successfully!`);
       this.isNewPwd = true;
       this.userPwdReset = user.name;
-    }
+    },
   },
   computed: {
     ...mapState(["user"]),
@@ -228,8 +231,8 @@ export default {
         retVal += charset.charAt(Math.floor(Math.random() * n));
       }
       return retVal;
-    }
-  }
+    },
+  },
 };
 </script>
 

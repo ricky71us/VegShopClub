@@ -19,15 +19,10 @@
                 </v-tooltip>
               </v-col>
               <v-col cols="2" class="ma-0 pa-0 text-md-start hidden-md-and-up">
-                <v-tooltip bottom>
-                  <template v-slot:activator="{ on }">
-                    <v-btn v-on="on" dense small text>
-                      <v-icon v-if="!isPounds" @click="toggleGmsLbs">mdi-weight-kilogram</v-icon>
-                      <v-icon v-if="isPounds" @click="toggleGmsLbs">mdi-weight-pound</v-icon>
-                    </v-btn>
-                  </template>
-                  <span>lbs - kgs</span>
-                </v-tooltip>
+                <v-btn dense small text>
+                  <v-icon v-if="!isPounds" @click="toggleGmsLbs">mdi-weight-kilogram</v-icon>
+                  <v-icon v-if="isPounds" @click="toggleGmsLbs">mdi-weight-pound</v-icon>
+                </v-btn>
               </v-col>
             </v-row>
           </v-container>
@@ -37,10 +32,19 @@
     <v-card class="mx-auto ma-3" max-width="1100" tile dense shaped>
       <v-expansion-panels accordion>
         <v-expansion-panel v-for="item in ordItems" :key="item.itemId">
-          <v-expansion-panel-header ripple @click="getItemPo(item)">{{item.itemName}}</v-expansion-panel-header>
+          <v-expansion-panel-header ripple @click="getItemPo(item)" color="#ECEFF1">
+            <div
+              v-if="parseFloat(item.actPriceFinal) > 0"
+              style="color:#1B5E20"
+            >{{item.itemName}} ({{item.userCount}})</div>
+            <div
+              v-if="parseFloat(item.actPriceFinal) === 0"
+              style="color:red"
+            >{{item.itemName}} ({{item.userCount}})</div>
+          </v-expansion-panel-header>
           <v-expansion-panel-content>
             <v-form v-model="valid">
-              <v-card class="ma-auto mt-3" max-width="1000" dense dark>
+              <v-card class="ma-auto mt-3" max-width="1000" dense color="grey lighten-4">
                 <v-list-item dense>
                   <v-list-item-content dens class="ma-0 pa-0">
                     <v-container class="ma-0 pa-0">
@@ -83,8 +87,12 @@
                           class="hidden-md-and-up"
                           style="font-size:12px"
                         >Approx. Qty ({{getDefaultUnits(item.defaultUnits)}})</v-col>
-                        <v-col cols="2" class="hidden-sm-and-down">Actual Qty </v-col>
-                        <v-col cols="3" class="hidden-md-and-up" style="font-size:12px">Actual  ({{getDefaultUnits(item.defaultUnits)}})</v-col>
+                        <v-col cols="2" class="hidden-sm-and-down">Actual Qty</v-col>
+                        <v-col
+                          cols="3"
+                          class="hidden-md-and-up"
+                          style="font-size:12px"
+                        >Actual ({{getDefaultUnits(item.defaultUnits)}})</v-col>
                         <!-- <v-col cols="1">Packed</v-col> -->
                         <!-- <v-col cols="2">Unit Price</v-col>
                         <v-col cols="2">Total</v-col>-->
@@ -124,6 +132,7 @@
                               color="success"
                               dense
                               outlined
+                              :rules="qtyRules"
                               onclick="this.select();"
                             ></v-text-field>
                           </v-flex>
@@ -131,14 +140,18 @@
 
                         <v-col cols="3" class="mb-0 pb-0 hidden-md-and-up">
                           <v-text-field
-                            :label="getDefaultUnits(itempo.defaultUnitsConv)"
-                            :value="parseFloat(itempo.actQtyConv).toFixed(2)"
                             v-model="itempo.actQtyConv"
+                            hide-details="auto"
+                            class="mt-4 pa-0 centered-input"
+                            :value="parseFloat(itempo.actQtyConv).toFixed(2)"
+                            label
                             @change="calcItemPrice(itempo, item)"
-                            background-color="grey"   
-                            single-line     
-                            style="font-size:14px"                    
-                            onclick="this.select();"                            
+                            height="26"
+                            background-color="grey lighten-4"
+                            single-line
+                            onclick="this.select();"
+                            :rules="qtyRules"
+                            style="font-size:14px; border: 1px solid;border-radius:3px;display:block;text-decoration:none; text-align:center !default;"
                           ></v-text-field>
                         </v-col>
                         <!-- <v-col cols="1" class="mb-2 pl-8">
@@ -240,13 +253,16 @@ export default {
       multiLine: true,
       hiddenTextFlag: false,
       itemUnitPrice: 0,
-      allQtyEntered: true
+      allQtyEntered: true,
+      qtyRules: [(v) => !isNaN(v) || `Please enter a number`],
+      itemQty: [],
     };
   },
   async mounted() {
     await this.getItems();
   },
-  created() {
+  created() {    
+    this.getQtyByItem();
     this.getUsers();
   },
   methods: {
@@ -256,11 +272,11 @@ export default {
       "getPurchaseOrderByOrderIdAction",
       "getBulkOrderByOrderIdAction",
       "updatePurchaseOrderAction",
-      "updateBulkOrderAction"
+      "updateBulkOrderAction",
     ]),
     toggleGmsLbs() {
       this.isPounds = this.isPounds ? false : true;
-      this.localItemPo.forEach(po => {
+      this.localItemPo.forEach((po) => {
         po.qtyConv = this.convertGmsToLbs(po.qtyConv, po.defaultUnitsConv);
         po.suggestedQtyConv = this.convertGmsToLbs(
           po.suggestedQtyConv,
@@ -287,7 +303,7 @@ export default {
         return qty ? (parseFloat(qty) * 0.453592).toFixed(2) : null;
       }
     },
-    calcItemPrice: function(itempo, item) {    
+    calcItemPrice: function (itempo, item) {
       if (parseFloat(itempo.actQtyConv) === 0 || itempo.actQtyConv === "") {
         itempo.isPacked = 0;
       }
@@ -299,11 +315,20 @@ export default {
       )
         itempo.actQty = itempo.actQtyConv * 0.453592;
       else itempo.actQty = itempo.actQtyConv;
-      if (parseInt(item.totalPrice) > 0 && this.allQtyEntered )
-        this.itemUnitPrice = itempo.actPriceFinal = item.actPriceFinal =
-          this.grandTotalAct > 0
-            ? this.roundUp(item.totalPrice / this.grandTotalAct, 2).toFixed(2)
-            : 0;
+
+      this.allQtyEntered = true;
+      if (parseInt(item.totalPrice) > 0 && parseInt(this.grandTotalAct) > 0) {
+        if (this.allQtyEntered) {
+          this.itemUnitPrice = itempo.actPriceFinal = item.actPriceFinal =
+            this.grandTotalAct > 0
+              ? this.roundUp(item.totalPrice / this.grandTotalAct, 2).toFixed(2)
+              : 0;
+        }
+      }
+
+      if (!this.allQtyEntered) {
+        this.itemUnitPrice = itempo.actPriceFinal = item.actPriceFinal = 0;
+      }
     },
 
     roundUp(num, precision) {
@@ -317,42 +342,68 @@ export default {
       if (this.isPounds) return "lbs";
       else return "kgs";
     },
+    getQtyByItem() {
+      this.itemQty = [];
+      this.purchaseOrders.forEach((i) => {
+        if (parseFloat(i.isCancelled) === 0) {
+          if (
+            this.itemQty.length === 0 ||
+            !this.itemQty.find((iq) => iq.itemId === i.itemId)
+          ) {
+            this.itemQty.push({
+              itemId: i.itemId,
+              qty: parseFloat(i.qty),
+            });
+          } else {
+            let item = this.itemQty.find((iq) => iq.itemId === i.itemId);
+            item.qty = parseFloat(item.qty) + parseFloat(i.qty);
+          }
+        }
+      });
+    },
     async getItems() {
       await this.getPurchaseOrderByOrderIdAction(this.getCurrentOrder.id);
       await this.getBulkOrderByOrderIdAction(this.getCurrentOrder.id);
-      await this.bulkOrders.forEach(bo => {
+      await this.bulkOrders.forEach((bo) => {
         bo.orderId === this.getCurrentOrder.id;
-        var item = this.items.find(
-          it =>
-            parseInt(it.id) === parseInt(bo.itemId) &&
-            parseInt(it.isActive) === 1
-        );
-        if (item) {
-          let bulkItem = this.bulkOrders.find(
-            bo =>
-              bo.itemId === item.id &&
-              parseInt(bo.actQty) > 0 &&
-              parseFloat(bo.actPrice) > 0
+        let itemqty = this.itemQty.find((iq) => iq.itemId === bo.itemId);
+        if (itemqty) {
+          var item = this.items.find(
+            (it) =>
+              parseInt(it.id) === parseInt(bo.itemId) &&
+              parseInt(it.isActive) === 1
           );
-          if (bulkItem) {
-            this.ordItems.push({
-              id: bo.id,
-              orderId: bo.orderId,
-              itemId: item.id,
-              itemName: item.name,
-              actQty: bo.actQty,
-              actPrice: bo.actPrice,
-              actPriceFinal: bo.actPriceFinal
-                ? parseFloat(this.roundUp(bo.actPriceFinal, 2)).toFixed(2)
-                : 0,
-              totalPrice: bo.totalPrice,
-              defaultUnits: item.defaultUnits
-            });
+          if (item) {
+            let bulkItem = this.bulkOrders.find(
+              (bo) =>
+                bo.itemId === item.id &&
+                parseInt(bo.actQty) > 0 &&
+                parseFloat(bo.actPrice) > 0
+            );
+            if (bulkItem) {
+              this.ordItems.push({
+                id: bo.id,
+                orderId: bo.orderId,
+                itemId: item.id,
+                itemName: item.name,
+                actQty: bo.actQty,
+                actPrice: bo.actPrice,
+                actPriceFinal: bo.actPriceFinal
+                  ? parseFloat(this.roundUp(bo.actPriceFinal, 2)).toFixed(2)
+                  : 0,
+                totalPrice: bo.totalPrice,
+                defaultUnits: item.defaultUnits,
+                userCount: this.purchaseOrders.filter(
+                  (po) =>
+                    po.itemId === item.id && parseInt(po.isCancelled) === 0
+                ).length,
+              });
+            }
           }
         }
       });
 
-      this.ordItems.sort(function(a, b) {
+      this.ordItems.sort(function (a, b) {
         if (a.itemName < b.itemName) {
           return -1;
         }
@@ -368,14 +419,14 @@ export default {
 
       this.localItemPo = [];
       let pos = await this.purchaseOrders.filter(
-        po =>
+        (po) =>
           parseInt(po.itemId) === parseInt(item.itemId) &&
           parseInt(po.isCancelled) === 0
       );
 
-      await pos.forEach(lp => {
+      await pos.forEach((lp) => {
         var po = this.purchaseOrders.find(
-          po => parseInt(po.itemId) === parseInt(lp.itemId)
+          (po) => parseInt(po.itemId) === parseInt(lp.itemId)
         );
         if (po) {
           this.localItemPo.push({
@@ -402,14 +453,14 @@ export default {
             totalPrice: (
               (item.actPrice ? parseFloat(item.actPrice) : 0) *
               (lp.actQty ? parseFloat(lp.actQty) : 0)
-            ).toFixed(2)
+            ).toFixed(2),
           });
         }
       });
 
       //await this.calcItemPrice(this.localItemPo[0], item);
 
-      this.localItemPo.sort(function(a, b) {
+      this.localItemPo.sort(function (a, b) {
         if (a.buyer < b.buyer) {
           return -1;
         }
@@ -420,7 +471,7 @@ export default {
       });
     },
     async savePo(item) {
-      await this.localItemPo.forEach(lp => {
+      await this.localItemPo.forEach((lp) => {
         this.tempPO = {
           id: lp.id,
           orderId: lp.orderId,
@@ -431,7 +482,7 @@ export default {
           actPrice: parseFloat(lp.actPrice),
           suggestedQty: lp.suggestedQty,
           isCancelled: lp.isCancelled,
-          isPacked: lp.isPacked
+          isPacked: lp.isPacked,
         };
         this.updatePurchaseOrderAction(this.tempPO);
       });
@@ -442,20 +493,20 @@ export default {
       this.snackMessage(`Updated Data!`);
     },
     async getUsers() {
-      await dataService.getAllUsers().then(response => {
+      await dataService.getAllUsers().then((response) => {
         this.localUsers = response;
       });
-      this.localUsers.forEach(lo => {
+      this.localUsers.forEach((lo) => {
         lo["allPacked"] = false;
       });
     },
 
-    snackMessage: function(message) {
+    snackMessage: function (message) {
       this.message = message;
       this.snackbar = true;
     },
-    getUserName: function(userId) {
-      return this.localUsers.find(u => parseInt(u.id) === parseInt(userId));
+    getUserName: function (userId) {
+      return this.localUsers.find((u) => parseInt(u.id) === parseInt(userId));
     },
     async itemPacked(itempo) {
       if (itempo.actQty && itempo.actQty > 0) {
@@ -465,24 +516,31 @@ export default {
         this.snackMessage(
           `Please enter 'Actual Quantity' before marking it packed.`
         );
-    }
+    },
   },
   computed: {
-    ...mapState(["bulkOrders", "items", "purchaseOrders"]),
+    ...mapState([
+      "bulkOrders",
+      "items",
+      "purchaseOrders",
+      "getActiveBulkOrders",
+    ]),
     ...mapGetters(["getCurrentOrder"]),
-    grandTotal: function() {
+    grandTotal: function () {
       var totalQty = 0;
-      this.localItemPo.forEach(item => {
+      this.localItemPo.forEach((item) => {
         if (item) {
           //if (parseInt(item.isPacked) === 1)
-          totalQty += item.actQtyConv ? parseFloat(item.actQtyConv) : null;
+          if (!isNaN(item.actQtyConv))
+            totalQty += item.actQtyConv ? parseFloat(item.actQtyConv) : null;
         }
       });
       return totalQty.toFixed(2);
     },
-    grandTotalAct: function() {
+    grandTotalAct: function () {
       var totalQty = 0;
-      this.localItemPo.forEach(item => {
+
+      this.localItemPo.forEach((item) => {
         if (item) {
           if (this.allQtyEntered)
             this.allQtyEntered = parseInt(item.actQty) === 0 ? false : true;
@@ -498,9 +556,9 @@ export default {
       },
       set(value) {
         this.$store.commit("togglePounds", value);
-      }
-    }
-  }
+      },
+    },
+  },
 };
 </script>
 

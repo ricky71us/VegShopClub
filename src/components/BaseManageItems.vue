@@ -5,7 +5,58 @@
         <v-list-item-content dens class="ma-0 pa-0">
           <v-container class="ma-0 pa-0">
             <v-row no-gutters>
-              <v-col cols="12" class="text-md-center">Manage Items</v-col>
+              <v-col cols="10" class="pt-1 text-md-center">Manage Items</v-col>
+              <v-col cols="2" class="text-md-center pl-2">
+                <v-dialog v-model="dialog" width="500" :key="localItem.id" :id="localItem.id">
+                  <template v-slot:activator="{ on }">
+                    <v-icon color="black" dark v-on="on" @click="initializeItem()">mdi-plus</v-icon>
+                  </template>
+                  <v-card>
+                    <v-card-title class="headline grey lighten-2" primary-title>Item Details</v-card-title>
+                    <v-card-text>
+                      <v-text-field
+                        v-model="updatedItem.name"
+                        :counter="100"
+                        :rules="nameRules"
+                        label="Item Name"
+                        required
+                      ></v-text-field>
+
+                      <v-text-field v-model="updatedItem.description" label="Description"></v-text-field>
+                      <v-text-field v-model="updatedItem.minQty" label="Minimum Quantity"></v-text-field>
+                      <v-text-field v-model="updatedItem.maxQty" label="Maximum Quantity"></v-text-field>
+                      <v-select
+                        v-model="updatedItem.defaultUnits"
+                        :items="units"
+                        label="Unit"
+                        required
+                      ></v-select>
+                      <v-text-field v-model="updatedItem.price" label="Price"></v-text-field>
+
+                      <v-btn
+                        :disabled="!valid"
+                        color="success"
+                        class="mr-4"
+                        @click="addNewItem()"
+                        @click.stop="dialog = false"
+                      >Save</v-btn>
+
+                      <v-btn
+                        color="error"
+                        class="mr-4"
+                        @click="initializeItem()"
+                        @click.stop="dialog = false"
+                      >Cancel</v-btn>
+                    </v-card-text>
+
+                    <v-divider></v-divider>
+
+                    <v-card-actions>
+                      <v-spacer></v-spacer>
+                    </v-card-actions>
+                  </v-card>
+                </v-dialog>
+              </v-col>
             </v-row>
           </v-container>
         </v-list-item-content>
@@ -17,58 +68,7 @@
           <template v-slot:default>
             <thead>
               <tr>
-                <th class="text-left">
-                  Name
-                  <v-dialog v-model="dialog" width="500" :key="localItem.id" :id="localItem.id">
-                    <template v-slot:activator="{ on }">
-                      <v-icon color="primary" dark v-on="on" @click="initializeItem()">mdi-plus</v-icon>(Add New Item)
-                    </template>
-                    <v-card>
-                      <v-card-title class="headline grey lighten-2" primary-title>Item Details</v-card-title>
-                      <v-card-text>
-                        <v-text-field
-                          v-model="updatedItem.name"
-                          :counter="100"
-                          :rules="nameRules"
-                          label="Item Name"
-                          required
-                        ></v-text-field>
-
-                        <v-text-field v-model="updatedItem.description" label="Description"></v-text-field>
-                        <v-text-field v-model="updatedItem.minQty" label="Minimum Quantity"></v-text-field>
-                        <v-text-field v-model="updatedItem.maxQty" label="Maximum Quantity"></v-text-field>
-                        <v-select
-                          v-model="updatedItem.defaultUnits"
-                          :items="units"
-                          label="Unit"
-                          required
-                        ></v-select>
-                        <v-text-field v-model="updatedItem.price" label="Price"></v-text-field>
-
-                        <v-btn
-                          :disabled="!valid"
-                          color="success"
-                          class="mr-4"
-                          @click="addNewItem()"
-                          @click.stop="dialog = false"
-                        >Save</v-btn>
-
-                        <v-btn
-                          color="error"
-                          class="mr-4"
-                          @click="initializeItem()"
-                          @click.stop="dialog = false"
-                        >Cancel</v-btn>
-                      </v-card-text>
-
-                      <v-divider></v-divider>
-
-                      <v-card-actions>
-                        <v-spacer></v-spacer>
-                      </v-card-actions>
-                    </v-card>
-                  </v-dialog>
-                </th>
+                <th class="text-left">Name</th>
                 <th class="text-left">Item Details</th>
                 <th class="text-left">Active</th>
               </tr>
@@ -210,7 +210,7 @@ export default {
         maxQty: null,
         defaultunits: "",
         price: null,
-        isActive: true
+        isActive: true,
       },
       updatedItem: {
         id: 0,
@@ -220,7 +220,7 @@ export default {
         maxQty: null,
         defaultUnits: "",
         price: null,
-        isActive: true
+        isActive: true,
       },
       tempItem: {
         id: 0,
@@ -230,23 +230,23 @@ export default {
         maxQty: null,
         defaultUnits: "",
         price: null,
-        isActive: true
+        isActive: true,
       },
       valid: false,
       name: "",
-      nameRules: [v => !!v || "Name is required"],
+      nameRules: [(v) => !!v || "Name is required"],
       dialog: false,
       dialogEdit: [],
       message: null,
       multiLine: true,
       snackbar: false,
-      selected: []
+      selected: [],
     };
   },
 
   async mounted() {
     await this.getItemsAction();
-    this.items.sort(function(a, b) {
+    this.items.sort(function (a, b) {
       if (a.name < b.name) {
         return -1;
       }
@@ -262,19 +262,19 @@ export default {
       "getItemsAction",
       "addItemAction",
       "deleteItemAction",
-      "updateItemAction"
+      "updateItemAction",
     ]),
-    snackMessage: function(message) {
+    snackMessage: function (message) {
       this.message = message;
       this.snackbar = true;
     },
-    deleteItem: function(item) {
+    deleteItem: function (item) {
       if (confirm(`Do you really want to delete Item ${item.name}?`)) {
         this.deleteItemAction(item);
         this.snackMessage(`Category "${item.name}" deleted successfully!`);
       }
     },
-    editItem: function(item) {
+    editItem: function (item) {
       this.valid = true;
       //console.log(this.$refs.form.validate())
       this.tempItem = {
@@ -284,10 +284,10 @@ export default {
         minQty: parseFloat(item.minQty).toFixed(2),
         maxQty: parseFloat(item.maxQty).toFixed(2),
         price: parseFloat(item.price).toFixed(2),
-        defaultUnits: item.defaultUnits
+        defaultUnits: item.defaultUnits,
       };
     },
-    initializeItem: function() {
+    initializeItem: function () {
       this.$refs.form.validate();
       this.updatedItem = {
         id: 0,
@@ -296,10 +296,10 @@ export default {
         minQty: "",
         maxQty: "",
         price: "",
-        defaultUnits: null
+        defaultUnits: null,
       };
     },
-    addNewItem: function() {
+    addNewItem: function () {
       if (this.$refs.form.validate()) {
         this.addItemAction(this.updatedItem);
         this.snackMessage(
@@ -326,13 +326,13 @@ export default {
         maxQty: item.maxQty,
         price: item.price,
         defaultUnits: item.defaultUnits,
-        isActive: item.isActive
+        isActive: item.isActive,
       });
 
       this.snackMessage(`Item "${item.name}" ${msg}!`);
       //}
     },
-    updateItem: function(item) {
+    updateItem: function (item) {
       //if (this.$refs.form.validate()) {
       this.updateItemAction({
         id: this.tempItem.id,
@@ -342,7 +342,7 @@ export default {
         maxQty: this.tempItem.maxQty,
         price: this.tempItem.price,
         defaultUnits: this.tempItem.defaultUnits,
-        isActive: item.isActive
+        isActive: item.isActive,
       });
       this.snackMessage(`Item "${this.tempItem.name}" updated successfully!`);
       //}
@@ -351,13 +351,13 @@ export default {
       if (this.$refs.form.validate()) {
         this.snackbar = true;
       }
-    }
+    },
   },
   computed: {
     ...mapState(["items"]),
-    sortedItems: function() {
+    sortedItems: function () {
       return 0;
-    }
-  }
+    },
+  },
 };
 </script>

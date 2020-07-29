@@ -5,33 +5,62 @@
         <v-list-item-content dens class="ma-0 pa-0">
           <v-container class="ma-0 pa-0">
             <v-row no-gutters>
-              <v-col cols="11" class="ma-0 pt-2 text-md-center hidden-sm-and-down">
-                Confirm and Email
-                <v-btn class="ma-0" text color="red lighten-2">
-                  <v-icon
-                    v-if="readyToSendEmail"
-                    large
-                    color="#006064"
-                    @click="sendEmailAll()"
-                    class="pb-1"
-                  >mdi-email</v-icon>
-                  <!-- <v-icon v-if="!readyToSendEmail" color="red" class="pb-1">mdi-email-alert</v-icon> -->
+              <v-col cols="10" class="ma-0 pt-2 text-md-center hidden-sm-and-down">Final Check & Email</v-col>
+              <v-col cols="10" class="ma-0 pt-2 text-sm-center hidden-md-and-up">Final Check & Email</v-col>
+              <v-col cols="1" class="ma-0 pt-1 text-md-center hidden-sm-and-down">
+                <v-btn class="ma-0" color="primary" small @click.stop="dialog = true;">
+                  <v-icon @click="setReadyToSendEmailFlag()">mdi-email</v-icon>
                 </v-btn>
+                <v-dialog v-model="dialog" max-width="290" modal>
+                  <v-card>
+                    <v-card-title class="headline" color="red">
+                      Send Email
+                      <v-spacer></v-spacer>
+                      <v-icon v-if="readyToSendEmail " color="green" large>mdi-email-alert</v-icon>
+                      <v-icon v-if="!readyToSendEmail" color="red" large>mdi-email-alert</v-icon>
+                    </v-card-title>
+                    <v-card-text v-if="readyToSendEmail ">"Are you ready to send email?"</v-card-text>
+                    <v-card-text
+                      v-if="!readyToSendEmail"
+                    >Looks like there are items that needs to be packed</v-card-text>
+                    <v-card-actions v-if="readyToSendEmail ">
+                      <v-spacer></v-spacer>
+                      <v-btn color="green darken-1" text @click.stop="dialog = false">No</v-btn>
+                      <v-btn color="green darken-1" text @click="sendEmailAll(); dialog = false">Yes</v-btn>
+                    </v-card-actions>
+                  </v-card>
+                </v-dialog>
               </v-col>
-              <v-col cols="10" class="ma-0 pt-2 text-sm-center hidden-md-and-up">
-                Confirm and Email
-                <v-btn class="ma-0" text color="red lighten-2">
-                  <v-icon
-                    v-if="readyToSendEmail"
-                    large
-                    color="#006064"
-                    @click="sendEmailAll()"
-                    class="pb-1"
-                  >mdi-email</v-icon>
-                  <!-- <v-icon v-if="!readyToSendEmail" color="red" class="pb-1">mdi-email-alert</v-icon> -->
+              <v-col cols="2" class="ma-0 pt-0 text-sm-center hidden-md-and-up">
+                <v-btn
+                  class="ma-0"
+                  color="primary"
+                  small
+                  @click.stop="dialog = true;"
+                >
+                  <v-icon @click="setReadyToSendEmailFlag()">mdi-email</v-icon>
                 </v-btn>
+                <v-dialog v-model="dialog" max-width="290" modal>
+                  <v-card>
+                    <v-card-title class="headline" color="red">
+                      Send Email
+                      <v-spacer></v-spacer>
+                      <v-icon v-if="readyToSendEmail " color="green" large>mdi-email-alert</v-icon>
+                      <v-icon v-if="!readyToSendEmail" color="red" large>mdi-email-alert</v-icon>
+                    </v-card-title>
+                    <v-card-text v-if="readyToSendEmail ">"Are you ready to send email?"</v-card-text>
+                    <v-card-text
+                      v-if="!readyToSendEmail"
+                    >Looks like there are items that needs to be packed</v-card-text>
+                    <v-card-actions v-if="readyToSendEmail ">
+                      <v-spacer></v-spacer>
+                      <v-btn color="green darken-1" text @click.stop="dialog = false">No</v-btn>
+                      <v-btn color="green darken-1" text @click="sendEmailAll(); dialog = false">Yes</v-btn>
+                    </v-card-actions>
+                  </v-card>
+                </v-dialog>
               </v-col>
-              <v-col cols="1" class="ma-0 pt-2 text-md-end hidden-sm-and-down">
+              <v-col cols="1" class="ma-0 pt-1 text-md-end hidden-sm-and-down">
                 <v-tooltip bottom>
                   <template v-slot:activator="{ on }">
                     <v-btn v-on="on" dense small text>
@@ -68,8 +97,14 @@
       <v-expansion-panels accordion>
         <v-expansion-panel v-for="user in localUsers" :key="user.id">
           <v-expansion-panel-header ripple @click="getUserPo(user.id)" color="#ECEFF1">
-            <div v-if="user.allPacked" style="color:#1B5E20">{{user.firstname}} {{user.lastname}}</div>
-            <div v-if="!user.allPacked" style="color:#DD2C00">{{user.firstname}} {{user.lastname}}</div>
+            <div
+              v-if="user.allPacked"
+              style="color:#1B5E20"
+            >{{user.firstname}} {{user.lastname}} ({{user.itemCount}})</div>
+            <div
+              v-if="!user.allPacked"
+              style="color:#DD2C00"
+            >{{user.firstname}} {{user.lastname}} ({{user.itemCount}})</div>
           </v-expansion-panel-header>
           <v-expansion-panel-content>
             <v-form v-model="valid" v-if="displayItems">
@@ -83,8 +118,8 @@
                         <!-- <v-col cols="2">Orderd Qty</v-col>
                         <v-col cols="2">Suggested Qty</v-col>-->
                         <v-col class="pl-5 text-md-center hidden-sm-and-down" cols="2">Act Qty</v-col>
-                        <v-col cols="1" class="text-md-center hidden-sm-and-down">Packed</v-col>
-                        <v-col cols="3" class="text-sm-center hidden-md-and-up">Packed</v-col>
+                        <v-col cols="1" class="text-md-center hidden-sm-and-down">Verified</v-col>
+                        <v-col cols="3" class="text-sm-center hidden-md-and-up">Verified</v-col>
                         <v-col class="text-md-end hidden-sm-and-down" cols="2">Unit Price</v-col>
                         <v-col
                           style="text-align:right "
@@ -207,6 +242,19 @@
         </v-expansion-panel>
       </v-expansion-panels>
     </v-card>
+    <v-card class="mx-auto ma-3 text-md-end" max-width="1100" light dense>
+      <!-- <v-btn
+        :loading="loading3"
+        :disabled="loading3"
+        color="blue-grey"
+        class="ma-2 white--text"
+        @click="loader = 'loading3'"
+      >
+        Send Email
+        <v-icon right dark>mdi-email</v-icon>
+      </v-btn>-->
+    </v-card>
+
     <v-snackbar v-model="snackbar" :multi-line="multiLine">
       {{ this.message }}
       <v-btn color="red" text @click="snackbar = false">Close</v-btn>
@@ -248,10 +296,12 @@ export default {
     };
   },
   async created() {
-    await this.getUsers();
+   
   },
   async mounted() {
     await this.getPurchaseOrderByOrderIdAction(this.getCurrentOrder.id);
+    await this.getBulkOrderByOrderIdAction(this.getCurrentOrder.id);
+     await this.getUsers();
     this.actPriceList = this.getActualPrice;
   },
   methods: {
@@ -259,6 +309,7 @@ export default {
       "getOrdersAction",
       "getItemsAction",
       "getPurchaseOrderByOrderIdAction",
+      "getBulkOrderByOrderIdAction",
       "updatePurchaseOrderAction"
     ]),
 
@@ -308,7 +359,22 @@ export default {
       if (this.isPounds) return "lbs";
       else return "kgs";
     },
-
+    setReadyToSendEmailFlag() {
+      this.readyToSendEmail = true;
+      let pos = this.purchaseOrders.filter(
+        po => parseInt(po.isPacked) === 0 && parseInt(po.isCancelled) === 0
+      );
+      let boItems = this.bulkOrders.filter(
+        bo => parseInt(bo.isCancelled) === 0 && bo.actQty > 0
+      );
+      pos.forEach(po => {
+        if (this.readyToSendEmail) {
+          if (boItems.find(bo => parseInt(bo.itemId) === parseInt(po.itemId))) {
+            this.readyToSendEmail = false;
+          }
+        }
+      });
+    },
     async getUsers() {
       await dataService.getAllUsers().then(response => {
         if (response && response.length > 0)
@@ -326,30 +392,40 @@ export default {
             if (user) this.localUsers.push(u);
           });
       });
-      this.localUsers.forEach(lo => {
+      let boItems = await this.bulkOrders.filter(
+        bo => parseInt(bo.isCancelled) === 0 && parseFloat(bo.actQty) > 0
+      );
+      await this.localUsers.forEach(lo => {
         let pos = this.purchaseOrders.filter(
           po =>
             parseInt(po.userId) === parseInt(lo.id) &&
             parseInt(po.isPacked) === 0 &&
             parseInt(po.isCancelled) === 0
         );
+
         lo["allPacked"] = true;
         pos.forEach(po => {
           if (
             this.bulkOrders.find(
               bo =>
                 parseInt(bo.itemId) === parseInt(po.itemId) &&
-                parseFloat(bo.actQty) > 0 &&
-                lo["allPacked"]
+                parseFloat(bo.actQty) > 0
             )
           ) {
-            lo["allPacked"] = false;
+            if (lo["allPacked"]) lo["allPacked"] = false;
             if (this.readyToSendEmail) this.readyToSendEmail = false;
           }
-        });
+        });      
 
+        lo["itemCount"] = this.purchaseOrders.filter(
+          po =>
+            parseInt(po.userId) === parseInt(lo.id) &&
+            parseInt(po.isCancelled) === 0 &&
+            boItems.find(i => parseInt(i.itemId) === parseInt(po.itemId))
+        ).length;
         //this.setPackedFlags(lo, lo.id);
       });
+
       this.localUsers.sort(function(a, b) {
         if (a.firstname < b.firstname) {
           return -1;
@@ -385,7 +461,10 @@ export default {
       // }
     },
     sendEmailAll() {
-      this.localUsers.forEach(lu => this.sendEmail(lu.id));
+      //this.setReadyToSendEmailFlag();
+      if (this.readyToSendEmail)
+        this.localUsers.forEach(lu => this.sendEmail(lu.id));
+      else this.snackMessage("Please make sure all the items have been packed");
     },
     sendEmail(id) {
       let pol = this.purchaseOrders.find(
@@ -443,24 +522,11 @@ export default {
       if (user) {
         user.allPacked = unPackedItems ? false : true;
         user.nonePacked = packedItems ? false : true;
-        // console.log(packedItems);
-        // console.log(unPackedItems);
-        //   if (packedItems) {
-        //     user.nonePacked = false;
-        //     if (unPackedItems) {
-        //       user.allPacked = false;
-        //     } else {
-        //       user.allPacked = true;
-        //     }
-        //   } else {
-        //     user.nonePacked = true;
-        //   }
-        if (!user.allPacked) this.readyToSendEmail = false;
+        this.setReadyToSendEmailFlag();
       }
     },
 
-    itemPacked(itempo) {
-      this.readyToSendEmail = true;
+    async itemPacked(itempo) {
       let unitPriceNotSet = this.bulkOrders.find(
         bo => bo.itemId === itempo.itemId && parseFloat(bo.actPriceFinal) === 0
       )
@@ -471,24 +537,17 @@ export default {
       }
       if (unitPriceNotSet) {
         this.snackMessage(
-          `Please go back to Pack Items page & enter Actual Quantity for all entries of this item to calculate the Unit Price, before setting 'packed'`
+          `Please go back to Pack Items page & enter Actual Quantity for all buyers of this item to calculate the Unit Price, before setting 'packed'`
         );
       } else if (itempo.actQty && itempo.actQty > 0) {
         let flag = parseInt(itempo.isPacked) === 1 ? 0 : 1;
         itempo.isPacked = flag;
-        this.updatePurchaseOrderAction(itempo);
+        await this.updatePurchaseOrderAction(itempo);
+        await this.setPackedFlags(this.localUserPo, itempo.userId);
       } else
         this.snackMessage(
           `Please enter Actual Quantity before selecting 'packed'`
         );
-
-      // let pos = this.localUsers.filter(
-      //   po =>
-      //     parseInt(po.userId) === parseInt(itempo.userId) &&
-      //     parseInt(po.isCancelled) === 0
-      // );
-
-      this.setPackedFlags(this.localUserPo, itempo.userId);
     },
 
     getUserPo(id) {

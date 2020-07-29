@@ -4,11 +4,11 @@
       <v-card class="mx-auto mt-4" max-width="1100" color="orange" rounded>
         <v-list-item dense>
           <v-list-item-content dens class="ma-0 pa-0">
-            <v-container class="ma-0 pa-0">
+            <!-- <v-container class="ma-0 pa-0"> -->
               <v-row>
-                <v-col cols="12" class="text-md-center">My Order</v-col>
+                <v-col cols="12" class="pt-14 text-md-center">My Order</v-col>
               </v-row>
-            </v-container>
+            <!-- </v-container> -->
           </v-list-item-content>
         </v-list-item>
       </v-card>
@@ -169,7 +169,7 @@ export default {
       isOrderLocked: false,
       orderPlaced: false,
       pageLoaded: false,
-      isTestOrder: true
+      isTestOrder: false
     };
   },
   mounted() {

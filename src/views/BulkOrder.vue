@@ -7,8 +7,12 @@
           <v-list-item-content dens class="ma-0 pa-0">
             <v-container class="ma-0 pa-0">
               <v-row>
-                <v-col cols="12" class="text-md-center hidden-sm-and-down">Bulkorder Invoice</v-col>
-                <v-col cols="12" class="text-sm-center hidden-md-and-up">Bulkorder Invoice</v-col>
+                <v-col cols="12" class="text-md-center">
+                  Bulkorder Invoice
+                  <v-btn @click="generatePdf" text>
+                    <v-icon left>mdi-file-pdf</v-icon>
+                  </v-btn>
+                </v-col>
               </v-row>
             </v-container>
           </v-list-item-content>
@@ -33,12 +37,12 @@
                   cols="3"
                 >Act Qty</v-col>
                 <v-col class="text-md-center hidden-sm-and-down" cols="3">Act Qty</v-col>
-                <v-col class="text-md-center hidden-sm-and-down" cols="3">Total</v-col>
+                <v-col class="text-md-center hidden-sm-and-down" cols="3">Total ($)</v-col>
                 <v-col
                   class="text-md-center hidden-md-and-up"
                   style="font-size:12px"
                   cols="3"
-                >Total($)</v-col>
+                >Total ($)</v-col>
                 <!-- <v-col cols="2">Unit Price</v-col> -->
               </v-row>
             </v-container>
@@ -53,7 +57,9 @@
                 <v-col class="mt-2 hidden-md-and-up" style="font-size:12px">
                   <div class="tooltip">
                     {{item.name.length > 15 ? item.name.substring(0,15) + '...' : item.name}}
-                    <span class="tooltiptext">{{item.name}}</span>
+                    <span
+                      class="tooltiptext"
+                    >{{item.name}}</span>
                   </div>
                 </v-col>
                 <v-col class="mt-2 hidden-sm-and-down">{{item.name}}</v-col>
@@ -69,61 +75,66 @@
                 <v-col cols="3" class="mb-0 pb-2 hidden-sm-and-down">
                   <v-text-field
                     v-model="item.actQty"
-                    :label="item.defaultUnits"
                     hide-details="auto"
-                    class="ma-0 pa-0 text-xl-left"
+                    class="textActQty ma-0 pa-0 text-xl-left"
                     :value="parseInt(item.qty).toFixed(2)"
                     @change="calcItemPrice(item)"
                     color="success"
                     dense
                     outlined
+                    :rules="rules"
                     onclick="this.select();"
                   ></v-text-field>
                 </v-col>
                 <v-col cols="3" class="mb-0 pb-2 hidden-md-and-up">
                   <v-text-field
                     v-model="item.actQty"
-                    :label="item.defaultUnits"
                     hide-details="auto"
-                    class="ma-0 pa-0 text-xl-left"
+                    class="textActQty text-xs-center ma-0 pa-0"
                     :value="parseInt(item.qty).toFixed(2)"
                     @change="calcItemPrice(item)"
                     color="success"
-                    background-color="grey"
+                    background-color="grey lighten-4"
                     height="26"
-                    single-line
                     onclick="this.select();"
-                    style="font-size:14px"
+                    style="font-size:14px; border: 1px solid;border-radius:3px;text-align: end"
+                    :rules="rules"
                   ></v-text-field>
                 </v-col>
-                <v-col cols="3" class="mb-0 pb-0 hidden-sm-and-down">
-                  <v-text-field
-                    v-model="item.totalPrice"
-                    hide-details="auto"
-                    class="ma-0 pa-0 centered-input"
-                    :value="parseInt(item.totalPrice).toFixed(2)"
-                    label
-                    @change="calcItemPrice(item)"
-                    height="26"
-                    prefix="$"
-                    dense
-                    outlined
-                    onclick="this.select();"
-                  ></v-text-field>
+                <v-col cols="3" class="mb-0 pb-0 hidden-sm-and-down text-md-center">
+                  <div
+                    class="mb-0 pb-0 hidden-sm-and-down text-md-center"
+                    style="text-align:center"
+                  >
+                    <v-text-field
+                      v-model="item.totalPrice"
+                      hide-details="auto"
+                      class="ma-0 pa-0"
+                      :value="parseInt(item.totalPrice).toFixed(2)"
+                      label
+                      @change="calcItemPrice(item)"
+                      height="26"
+                      dense
+                      outlined
+                      onclick="this.select();"
+                      :rules="rules"
+                    ></v-text-field>
+                  </div>
                 </v-col>
                 <v-col cols="3" class="mb-0 pb-0 hidden-md-and-up">
                   <v-text-field
                     v-model="item.totalPrice"
                     hide-details="auto"
-                    class="ma-0 pa-0 centered-input"
+                    class="ma-0 pa-0"
                     :value="parseInt(item.totalPrice).toFixed(2)"
                     label
                     @change="calcItemPrice(item)"
                     height="26"
-                    background-color="grey"
+                    background-color="grey lighten-4"
                     single-line
                     onclick="this.select();"
-                    style="font-size:14px"
+                    style="font-size:14px; border: 1px solid;border-radius:3px;display:block;text-decoration:none; text-align:center !default;"
+                    :rules="rules"
                   ></v-text-field>
                 </v-col>
               </v-row>
@@ -197,6 +208,7 @@
 <script>
 import { mapState, mapActions, mapGetters } from "vuex";
 import { dataService } from "../shared";
+import * as jsPDF from "jspdf";
 export default {
   name: "BulkOrder",
   data() {
@@ -213,9 +225,25 @@ export default {
         itemId: 0,
         actQty: 0,
         actPrice: 0,
-        isCancelled: 0
+        isCancelled: 0,
       },
-      pageLoaded: false
+      pageLoaded: false,
+      rules: [(v) => !isNaN(v) || `Please enter a number`],
+      pdfColumns: [],
+      pdfRows: [],
+      prfRow: {
+        actPrice: "",
+        actPriceFinal: "",
+        actQty: "",
+        defaultUnits: "",
+        id: "",
+        isCancelled: "",
+        itemId: "",
+        name: "",
+        orderId: "",
+        qty: "",
+        totalPrice: "",
+      },
     };
   },
   mounted() {
@@ -233,31 +261,31 @@ export default {
       "getOrderStatusAction",
       "getPurchaseOrderByOrderIdAction",
       "getBulkOrderByOrderIdAction",
-      "updateBulkOrderAction"
+      "updateBulkOrderAction",
     ]),
-    calcItemPrice: function(item) {
+    calcItemPrice: function (item) {
       if (parseInt(item.actQty) > 0)
         item.actPrice = (
           parseFloat(item.totalPrice) / parseFloat(item.actQty)
         ).toFixed(4);
     },
-    getItemById: function(id) {
-      return this.items.find(i => i.id === id);
+    getItemById: function (id) {
+      return this.items.find((i) => i.id === id);
     },
     getQtyByItem() {
       this.itemQty = [];
-      this.purchaseOrders.forEach(i => {
+      this.purchaseOrders.forEach((i) => {
         if (parseFloat(i.isCancelled) === 0) {
           if (
             this.itemQty.length === 0 ||
-            !this.itemQty.find(iq => iq.itemId === i.itemId)
+            !this.itemQty.find((iq) => iq.itemId === i.itemId)
           ) {
             this.itemQty.push({
               itemId: i.itemId,
-              qty: parseFloat(i.qty)
+              qty: parseFloat(i.qty),
             });
           } else {
-            let item = this.itemQty.find(iq => iq.itemId === i.itemId);
+            let item = this.itemQty.find((iq) => iq.itemId === i.itemId);
             item.qty = parseFloat(item.qty) + parseFloat(i.qty);
           }
         }
@@ -267,7 +295,7 @@ export default {
       dataService.updateActQty(this.getCurrentOrder.id);
     },
     async saveBo() {
-      await this.localItems.forEach(lp => {
+      await this.localItems.forEach((lp) => {
         this.tempBO = {
           id: lp.id,
           orderId: lp.orderId,
@@ -276,58 +304,116 @@ export default {
           actPrice: parseFloat(lp.actPrice),
           actPriceFinal: parseFloat(lp.actPriceFinal),
           totalPrice: parseFloat(lp.totalPrice),
-          isCancelled: lp.isCancelled
+          isCancelled: lp.isCancelled,
         };
         this.updateBulkOrderAction(this.tempBO);
       });
 
-      let wait = time => new Promise(resolve => setTimeout(resolve, time));
+      let wait = (time) => new Promise((resolve) => setTimeout(resolve, time));
       await wait(1000);
       await this.updateQty();
       this.snackMessage(`Updated Data!`);
     },
-    snackMessage: function(message) {
+    snackMessage: function (message) {
       this.message = message;
       this.snackbar = true;
+    },
+    generatePdf() {
+      var doc = new jsPDF("p", "pt", "A4");
+
+      doc.setProperties({
+        title: `Vegetable Buying Club Invoice - Order No: ${this.getCurrentOrder.id}`,
+        subject: "Order Invoice",
+        author: "Vegetable Buying Club",
+        keywords: "generated, javascript, web 2.0, ajax",
+        creator: "MEEE",
+      });
+
+      doc.setFont("PTSans"); // set font
+      doc.setFontSize(10);
+      doc.setFontStyle("italic");
+      doc.text(
+        `Vegetable Buying Club Invoice - Order No: ${this.getCurrentOrder.id}`,
+        200,
+        15
+      );
+
+      doc.autoTable({
+        headStyles: {
+          valign: "middle",
+          halign: "center",
+        },
+        columnStyles: {
+          totalPrice: { halign: "right" },
+          qty: { halign: "center" },
+          actQty: { halign: "center" },
+        },
+        styles: { fontSize: 8, cellWidth: "auto", font: "helvetica" },
+        theme: "striped",
+        body: this.pdfRows,
+        columns: this.pdfColumns,
+      });
+      doc.save(`OrderSummary_${this.getCurrentOrder.id}.pdf`);
     },
     async getItems() {
       await this.getOrderStatusAction();
       await this.getOrdersAction();
       await this.getPurchaseOrderByOrderIdAction(this.getCurrentOrder.id);
       await this.getBulkOrderByOrderIdAction(this.getCurrentOrder.id);
-      this.getActiveBulkOrders.forEach(item => {
+      this.getActiveBulkOrders.forEach((item) => {
         if (item) {
           if (
             this.localItems.length === 0 ||
-            !this.localItems.find(li => {
+            !this.localItems.find((li) => {
               li.id === item.id;
             })
           ) {
-            let itemqty = this.itemQty.find(iq => iq.itemId === item.itemId);
-            this.localItems.push({
-              id: item.id,
-              itemId: item.itemId,
-              name: this.getItemById(item.itemId).name,
-              defaultUnits: this.getItemById(item.itemId).defaultUnits,
-              orderId: item.orderId,
-              qty: itemqty ? itemqty.qty : 0,
-              actQty: item.actQty > 0 ? parseFloat(item.actQty) : null,
-              totalPrice:
-                item.totalPrice > 0 ? parseFloat(item.totalPrice) : null,
-              isCancelled: item.isCancelled,
-              actPrice:
-                item.actQty > 0
-                  ? (
-                      parseFloat(item.totalPrice) / parseFloat(item.actQty)
-                    ).toFixed(4)
-                  : 0,
-              actPriceFinal: parseFloat(item.actPriceFinal).toFixed(2)
-            });
+            let itemqty = this.itemQty.find((iq) => iq.itemId === item.itemId);
+            if (itemqty)
+              this.localItems.push({
+                id: item.id,
+                itemId: item.itemId,
+                name: this.getItemById(item.itemId).name,
+                defaultUnits: this.getItemById(item.itemId).defaultUnits,
+                orderId: item.orderId,
+                qty: itemqty ? itemqty.qty : 0,
+                actQty: item.actQty > 0 ? parseFloat(item.actQty) : null,
+                totalPrice:
+                  item.totalPrice > 0 ? parseFloat(item.totalPrice) : null,
+                isCancelled: item.isCancelled,
+                actPrice:
+                  item.actQty > 0
+                    ? (
+                        parseFloat(item.totalPrice) / parseFloat(item.actQty)
+                      ).toFixed(4)
+                    : 0,
+                actPriceFinal: parseFloat(item.actPriceFinal).toFixed(2),
+              });
           }
         }
       });
       this.pageLoaded = true;
-      this.localItems.sort(function(a, b) {
+
+      this.pdfColumns.push(
+        {
+          title: `Item`,
+          dataKey: "name",
+        },
+        {
+          title: `Ordered Qty`,
+          dataKey: "qty",
+        },
+        {
+          title: `Actual Qty`,
+          dataKey: "actQty",
+        },
+        {
+          title: "Total",
+          dataKey: "totalPrice",
+        }
+      );
+
+      this.localItems.sort(function (a, b) {
         if (a.name < b.name) {
           return -1;
         }
@@ -336,15 +422,35 @@ export default {
         }
         return 0;
       });
+
+      this.localItems.forEach((li) => {
+        this.pdfRows.push({
+          name: `${li.name} `,
+          qty: `${li.qty} ${li.defaultUnits} `,
+          actQty: `${li.actQty} ${li.defaultUnits}`,
+          totalPrice: `$ ${li.totalPrice.toFixed(2)}`,
+          defaultUnits: li.defaultUnits,
+        });
+      });
+
+      let localRow = {
+        actQty: "",
+        defaultUnits: "",
+        name: "",
+        qty: "",
+        totalPrice: `Total: $ ${this.grandTotal}`,
+      };
+
+      this.pdfRows.push(localRow);
       return this.localItems;
-    }
+    },
   },
   computed: {
     ...mapState(["bulkOrders", "items", "purchaseOrders"]),
     ...mapGetters(["getCurrentOrder", "getActiveItems", "getActiveBulkOrders"]),
-    grandTotal: function() {
+    grandTotal: function () {
       var total = 0;
-      this.localItems.forEach(item => {
+      this.localItems.forEach((item) => {
         if (item) {
           if (item.totalPrice) {
             if (!isNaN(item.totalPrice)) {
@@ -355,12 +461,15 @@ export default {
       });
 
       return total.toFixed(2);
-    }
-  }
+    },
+  },
 };
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
+.v-text-field__slot input {
+  text-align: center;
+}
 /* Tooltip container */
 .tooltip {
   position: relative;

@@ -5,7 +5,12 @@
         <v-list-item-content dens class="ma-0 pb-0">
           <v-container class="ma-0 pa-0">
             <v-row>
-              <v-col cols="10" class="text-md-center">Order Summary</v-col>
+              <v-col cols="10" class="text-md-center">
+                Order Summary
+                <v-btn @click="generatePdf" text>
+                  <v-icon left>mdi-file-pdf</v-icon>
+                </v-btn>
+              </v-col>
               <v-col cols="2" class="text-md-center ma-0 pa-0">
                 <!-- <v-toolbar-title>
                   <v-tooltip bottom>
@@ -19,21 +24,29 @@
                   </v-tooltip>
                 </v-toolbar-title>-->
 
-                <v-btn v-if="isOrderLocked" @click="toggleOrderLock"  class="hidden-sm-and-down" text>
+                <v-btn
+                  v-if="isOrderLocked"
+                  @click="toggleOrderLock"
+                  class="hidden-sm-and-down"
+                  text
+                >
                   <v-icon left>mdi-lock-open</v-icon>unlock
                 </v-btn>
-                <v-btn v-if="!isOrderLocked" @click="toggleOrderLock" class="hidden-sm-and-down" text>
+                <v-btn
+                  v-if="!isOrderLocked"
+                  @click="toggleOrderLock"
+                  class="hidden-sm-and-down"
+                  text
+                >
                   <v-icon left>mdi-lock</v-icon>lock
                 </v-btn>
 
-                <v-btn v-if="isOrderLocked" @click="toggleOrderLock"  class="hidden-md-and-up" text>
+                <v-btn v-if="isOrderLocked" @click="toggleOrderLock" class="hidden-md-and-up" text>
                   <v-icon left>mdi-lock-open</v-icon>
                 </v-btn>
                 <v-btn v-if="!isOrderLocked" @click="toggleOrderLock" class="hidden-md-and-up" text>
                   <v-icon left>mdi-lock</v-icon>
                 </v-btn>
-
-                
 
                 <!-- <v-col cols="1" class="mb-2 pl-8">
                   <v-icon >mdi-lock</v-icon>
@@ -55,6 +68,9 @@
         </v-list-item-content>
       </v-list-item>
     </v-card>
+    <v-card class="mx-auto pa-0 mt-1" max-width="1100">
+      <v-sheet rounded class="ml-2" style="color:#006064">Total No of Orders: {{userCount}}</v-sheet>
+    </v-card>
     <v-layout v-resize="onResize" column style="padding-top:7px">
       <v-data-table
         :headers="reportHeader"
@@ -64,7 +80,11 @@
         class="elevation-1 mt-8; text-align:right; pa-0"
         :class="{mobile: isMobile}"
         :mobile="isMobile"
+        id="testHtml"
       >
+        <template v-slot:item.userName="{ item }">
+          <v-chip label ripple draggable>{{ item.userName }}</v-chip>
+        </template>
         <template slot="body.append">
           <tr class="hidden-sm-and-down">
             <td
@@ -86,6 +106,10 @@
 <script>
 import { mapActions, mapState, mapGetters } from "vuex";
 import { dataService } from "../shared";
+import * as jsPDF from "jspdf";
+import "jspdf-autotable";
+//import autoTable from "jspdf-autotable";
+
 export default {
   name: "orderReport",
   data() {
@@ -96,6 +120,10 @@ export default {
       reportHeader: [],
       reportRow: [],
       reportTotalRow: [],
+      pdfRow: [],
+      pdfRows: [],
+      pdfColumns: [],
+      pdfTotalsRow: [],
       itemQty: [],
       valid: false,
       snackbar: false,
@@ -103,6 +131,8 @@ export default {
       multiLine: true,
       isOrderLocked: 0,
       isMobile: false,
+      userCount: 0,
+      userItemCount: 0,
     };
   },
   async created() {},
@@ -119,28 +149,28 @@ export default {
     },
     getQtyByItem() {
       this.itemQty = [];
-      this.purchaseOrders.forEach(i => {
+      this.purchaseOrders.forEach((i) => {
         if (parseInt(i.isCancelled) === 0) {
           if (
             this.itemQty.length === 0 ||
-            !this.itemQty.find(iq => iq.itemId === i.itemId)
+            !this.itemQty.find((iq) => iq.itemId === i.itemId)
           ) {
             this.itemQty.push({
               itemId: i.itemId,
-              qty: parseFloat(i.qty)
+              qty: parseFloat(i.qty),
             });
           } else {
-            let item = this.itemQty.find(iq => iq.itemId === i.itemId);
+            let item = this.itemQty.find((iq) => iq.itemId === i.itemId);
             item.qty = parseFloat(item.qty) + parseFloat(i.qty);
           }
         }
       });
     },
-    setOrderLock: function() {
+    setOrderLock: function () {
       this.isOrderLocked =
         parseInt(this.getCurrentOrder.isLocked) === 1 ? true : false;
     },
-    snackMessage: function(message) {
+    snackMessage: function (message) {
       this.message = message;
       this.snackbar = true;
     },
@@ -152,7 +182,7 @@ export default {
         orderDt: this.getCurrentOrder.orderDt,
         cutOffDt: null,
         orderStatus: this.getCurrentOrder.orderStatus,
-        isLocked: this.isOrderLocked
+        isLocked: this.isOrderLocked,
       });
       if (parseInt(this.isOrderLocked) === 1) {
         this.snackMessage("This order is now closed for changes!");
@@ -164,18 +194,45 @@ export default {
     async sendEmail() {
       await dataService
         .sendEmailConsolidatedOrder(this.getCurrentOrder.id, this.user.id)
-        .catch(error => {
+        .catch((error) => {
           console.log(error);
           this.snackMessage("Failed to send Email.");
         });
     },
+    generatePdf() {
+      var doc = new jsPDF("l", "pt", "4A0");
+      doc.setProperties({
+        title: `Vegetable Buying Club Summary - Order No: ${this.getCurrentOrder.id}`,
+        subject: "Order Summary",
+        author: "Vegetable Buying Club",
+        keywords: "generated, javascript, web 2.0, ajax",
+        creator: "MEEE",
+      });
+      doc.setFont("PTSans"); // set font
+      doc.setFontSize(10);
+      doc.setFontStyle("italic");
+      doc.text(
+        `Vegetable Buying Club Summary - Order No: ${this.getCurrentOrder.id}`,
+        300,
+        15
+      );
+      doc.autoTable({
+        columnStyles: { userName: { halign: "center" } }, // European countries centered
+
+        styles: { fontSize: 5, cellWidth: "auto", font: "helvetica" },
+        theme: "striped",
+        body: this.pdfRows,
+        columns: this.pdfColumns,
+      });
+      doc.save(`OrderSummary_${this.getCurrentOrder.id}.pdf`);
+    },
     async getData() {
       await this.getUsers();
       await this.getPurchaseOrderByOrderIdAction(this.getCurrentOrder.id);
-      this.bulkOrders.forEach(bo => {
+      this.bulkOrders.forEach((bo) => {
         //if (bo.qty > 0) {
         let item = this.items.find(
-          i => i.id === bo.itemId && parseInt(i.isActive) === 1
+          (i) => i.id === bo.itemId && parseInt(i.isActive) === 1
         );
         if (item) {
           this.allItems.push({ id: bo.itemId, name: item.name });
@@ -183,7 +240,7 @@ export default {
         //}
       });
 
-      this.allItems.sort(function(a, b) {
+      this.allItems.sort(function (a, b) {
         if (a.name < b.name) {
           return -1;
         }
@@ -193,15 +250,19 @@ export default {
         return 0;
       });
 
-      this.allItems.forEach(ai => {
+      this.allItems.forEach((ai) => {
         let item = this.items.find(
-          i => i.id === ai.id && parseInt(i.isActive) === 1
+          (i) => i.id === ai.id && parseInt(i.isActive) === 1
         );
         if (item) {
           this.reportHeader.push({
             text: `${item.name} (${item.defaultUnits})`,
             value: "i_" + item.id,
-            class: "grey"
+            class: "grey",
+          });
+          this.pdfColumns.push({
+            title: `${item.name} (${item.defaultUnits})`,
+            dataKey: "i_" + item.id,
           });
         }
       });
@@ -211,11 +272,16 @@ export default {
         value: "userName",
         sortable: true,
         align: "start",
-        class: "grey"
+        class: "grey",
+      });
+
+      this.pdfColumns.unshift({
+        title: "Buyer",
+        dataKey: "userName",
       });
 
       this.localUsers
-        .sort(function(a, b) {
+        .sort(function (a, b) {
           if (a.firstname < b.firstname) {
             return -1;
           }
@@ -224,51 +290,78 @@ export default {
           }
           return 0;
         })
-        .forEach(u => {
+        .forEach((u) => {
+          this.userItemCount = 0;
           // clear report Row
-          this.reportRow = [];
+          this.reportRow = {};
           this.reportTotalRow = [];
-          this.reportRow = { userName: `${u.firstname} ${u.lastname} ` };
+          this.reportRow = {
+            userName: `${u.firstname} ${u.lastname} - ${this.userItemCount} `,
+          };
 
-          this.purchaseOrders.forEach(po => {
+          this.purchaseOrders.forEach((po) => {
             if (po.userId === u.id && parseInt(po.isCancelled) === 0) {
               this.reportRow["i_" + po.itemId] = po.qty
                 .toString()
                 .replace(/\.00$/, "");
+              this.userItemCount++;
             }
           });
+          //console.log(this.pdfRows);
+          this.reportRow[
+            "userName"
+          ] = `${u.firstname} ${u.lastname} - (${this.userItemCount}) `;
 
           let user = this.purchaseOrders.find(
-            po =>
+            (po) =>
               po.userId === u.id &&
               po.orderId === this.getCurrentOrder.id &&
               parseInt(po.isCancelled) === 0
           );
-          if (user) this.reportData.push(this.reportRow);
+          if (user) {
+            this.reportData.push(this.reportRow);
+            this.userCount++;
+          }
         });
 
-      this.allItems.forEach(i => {
-        let tot = this.itemQty.find(iq => iq.itemId === i.id);
-        if (tot) this.reportTotalRow.push(tot.qty);
-        else this.reportTotalRow.push("");
+      this.pdfTotalsRow = { userName: `Total` };
+      this.allItems.forEach((i) => {
+        let tot = this.itemQty.find((iq) => iq.itemId === i.id);
+        if (tot) {
+          this.reportTotalRow.push(tot.qty);
+          this.pdfTotalsRow["i_" + i.id] = tot.qty;
+        } else {
+          this.reportTotalRow.push("");
+          this.pdfTotalsRow["i_" + i.id] = "";
+        }
       });
 
       this.reportTotalRow.unshift("Total");
+
+      this.reportData.forEach((rd) => {
+        this.pdfRow = {};
+        Object.keys(this.pdfTotalsRow).forEach((key) => {
+          if (rd[key]) this.pdfRow[key] = rd[key];
+          else this.pdfRow[key] = "";
+        });
+        this.pdfRows.push(this.pdfRow);
+      });
+      this.pdfRows.push(this.pdfTotalsRow);
     },
     async getUsers() {
-      await dataService.getAllUsers().then(response => {
+      await dataService.getAllUsers().then((response) => {
         this.localUsers = response;
       });
-    }
+    },
   },
   computed: {
     ...mapState(["purchaseOrders", "bulkOrders", "items", "user"]),
-    ...mapGetters(["getCurrentOrder"])
-  }
+    ...mapGetters(["getCurrentOrder"]),
+  },
 };
 </script>
 
-<style lang="css" scoped>
+<style lang="css" >
 .mobile {
   color: #333;
 }
@@ -326,5 +419,9 @@ export default {
   width: 50%;
   height: 40px;
   font-weight: bold;
+}
+
+tbody tr:nth-of-type(odd) {
+  background-color: rgba(0, 0, 0, 0.05);
 }
 </style>

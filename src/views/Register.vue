@@ -144,7 +144,7 @@ export default {
       };
     },
     cancel() {
-      this.$router.push({ path: "login" });
+      this.$router.push({ path: "manageUsers" });
     },
     validate() {
       this.$refs.form.validate();
