@@ -5,10 +5,20 @@
         <v-list-item-content dens class="ma-0 pa-0">
           <v-container class="ma-0 pa-0">
             <v-row no-gutters>
-              <v-col cols="12" class="text-md-center">
+              <v-col cols="10" class="pt-2 hidden-md-and-up text-md-center">
                 Reconcile Order
+              </v-col>
+              <v-col cols="2" class="text-md-center hidden-md-and-up">
                 <v-btn @click="generatePdf" text>
-                  <v-icon left>mdi-file-pdf</v-icon>
+                  <span class="pr-4" left>pdf</span>
+                </v-btn>
+              </v-col>
+              <v-col cols="11" class="pt-2 text-md-center hidden-sm-and-down">
+                Reconcile Order
+              </v-col>
+              <v-col cols="1" class="text-md-center hidden-sm-and-down">
+                <v-btn @click="generatePdf" text>                  
+                  <span class="pr-4" left>pdf</span>
                 </v-btn>
               </v-col>
             </v-row>

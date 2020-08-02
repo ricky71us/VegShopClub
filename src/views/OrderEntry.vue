@@ -5,9 +5,9 @@
         <v-list-item dense>
           <v-list-item-content dens class="ma-0 pa-0">
             <!-- <v-container class="ma-0 pa-0"> -->
-              <v-row>
-                <v-col cols="12" class="pt-14 text-md-center">My Order</v-col>
-              </v-row>
+            <v-row>
+              <v-col cols="12" class="pt-14 text-md-center">My Order</v-col>
+            </v-row>
             <!-- </v-container> -->
           </v-list-item-content>
         </v-list-item>
@@ -66,18 +66,17 @@
                       color="success"
                       :rules="qtyRules(item)"
                       dense
-                      outlined                      
+                      outlined
                       type="decimal"
                       onclick="this.select();"
                     ></v-text-field>
                   </v-flex>
-                </v-col>                
-                <v-col cols="3" class="mb-0 pt-6 text-sm-right hidden-md-and-up">
-                  {{item.totalPrice}}                
                 </v-col>
-                 <v-col cols="3" class="mb-0 pb-0 text-md-right hidden-sm-and-down">
-                  $ {{item.totalPrice}}                
-                </v-col>
+                <v-col cols="3" class="mb-0 pt-6 text-sm-right hidden-md-and-up">{{item.totalPrice}}</v-col>
+                <v-col
+                  cols="3"
+                  class="mb-0 pb-0 text-md-right hidden-sm-and-down"
+                >$ {{item.totalPrice}}</v-col>
               </v-row>
             </v-container>
             <v-divider></v-divider>
@@ -89,9 +88,11 @@
             <v-container class="ma-0 pa-0">
               <v-row>
                 <!-- <v-col cols="8" class="text-md-right ml-0 pt-4">(Approximate Total)</v-col> -->
-                <v-col cols="12" class="pr-9" style="font-weight:bold; text-align:right;">
-                  Approximate Total  -  ${{grandTotal}}                 
-                </v-col>
+                <v-col
+                  cols="12"
+                  class="pr-9"
+                  style="font-weight:bold; text-align:right;"
+                >Approximate Total - ${{grandTotal}}</v-col>
               </v-row>
             </v-container>
             <v-divider></v-divider>
@@ -103,12 +104,18 @@
               <v-row>
                 <v-col cols="12" class="mb-0 pb-3">
                   <v-btn
-                    v-if="!isOrderLocked && !orderPlaced"
+                    v-if="!isOrderLocked"
                     color="success"
                     @click="sendAndEmail()"
-                    :disabled="!valid"
+                    :loading="placingOrder"
+                    :disabled="!valid || placingOrder"
                     class="float-right"
-                  >Place Order</v-btn>
+                  >
+                    Place Order
+                    <template v-slot:loader>
+                      <span>Sending Email...</span>
+                    </template>
+                  </v-btn>
                 </v-col>
               </v-row>
             </v-container>
@@ -142,7 +149,7 @@ export default {
         qty: 0,
         defaultUnits: 0,
         price: 0,
-        totalPrice: 0
+        totalPrice: 0,
       },
       bulkItem: {
         id: 0,
@@ -150,7 +157,7 @@ export default {
         itemId: 0,
         actQty: 0,
         actPrice: 0,
-        isCancelled: 0
+        isCancelled: 0,
       },
       localItems: [],
       tempPO: {
@@ -161,15 +168,15 @@ export default {
         qty: 0,
         actQty: 0,
         actPrice: 0,
-        isCancelled: 0
+        isCancelled: 0,
       },
       snackbar: false,
       message: null,
       multiLine: true,
       isOrderLocked: false,
-      orderPlaced: false,
+      placingOrder: false,
       pageLoaded: false,
-      isTestOrder: false
+      isTestOrder: false,
     };
   },
   mounted() {
@@ -186,15 +193,15 @@ export default {
       "getBulkOrderByOrderIdAction",
       "addPurchaseOrderAction",
       "addBulkOrderAction",
-      "updatePurchaseOrderAction"
+      "updatePurchaseOrderAction",
     ]),
-    calcItemPrice: function(item) {
+    calcItemPrice: function (item) {
       if (isNaN(item.qty)) return 0;
       item.totalPrice = (parseFloat(item.price) * parseFloat(item.qty)).toFixed(
         2
       );
     },
-    snackMessage: function(message) {
+    snackMessage: function (message) {
       this.message = message;
       this.snackbar = true;
     },
@@ -202,14 +209,17 @@ export default {
       let minQty = item.minQty;
       let maxQty = item.maxQty;
       let rules = [
-        v => !isNaN(v) || `Please enter a number`,
-        v => !(v < minQty) || `Min Qty ${item.minQty} ${item.defaultUnits}`,
-        v => (maxQty !== 0) ? !(v > maxQty) || `Max Qty ${item.maxQty} ${item.defaultUnits}` : true
-      ];     
+        (v) => !isNaN(v) || `Please enter a number`,
+        (v) => !(v < minQty) || `Min Qty ${item.minQty} ${item.defaultUnits}`,
+        (v) =>
+          maxQty !== 0
+            ? !(v > maxQty) || `Max Qty ${item.maxQty} ${item.defaultUnits}`
+            : true,
+      ];
       return rules;
     },
     setSelectedItems() {
-      this.getPurchaseOrderByUser.forEach(po => {
+      this.getPurchaseOrderByUser.forEach((po) => {
         if (parseInt(po.isCancelled) === 0) {
           this.selected.push(po.itemId);
         }
@@ -217,7 +227,7 @@ export default {
     },
     validateForm() {
       let po = this.purchaseOrders.find(
-        po => parseInt(po.isCancelled) === 0 && po.userId === this.user.id
+        (po) => parseInt(po.isCancelled) === 0 && po.userId === this.user.id
       );
       if (po) this.valid = true;
       else if (this.selected.length === 0) {
@@ -226,21 +236,21 @@ export default {
         this.valid = true;
       }
 
-      this.localItems.forEach(li => {
+      this.localItems.forEach((li) => {
         if (this.selected.indexOf(li.id) === -1) {
-          li.qty = li.minQty.toFixed(2);          
+          li.qty = li.minQty.toFixed(2);
           li.totalPrice = (0).toFixed(2);
         } else {
           li.totalPrice = (li.qty * li.price).toFixed(2);
         }
       });
     },
-    setOrderLock: function() {
+    setOrderLock: function () {
       this.isOrderLocked =
         parseInt(this.getCurrentOrder.isLocked) === 1 ? true : false;
     },
     getItemPrice(qty, minQty, price, id) {
-      if (this.selected.find(i => i === id)) {
+      if (this.selected.find((i) => i === id)) {
         let lQty = qty > 0 ? qty : parseFloat(minQty);
         return (parseFloat(lQty) * parseFloat(price)).toFixed(2);
       } else return (0).toFixed(2);
@@ -258,11 +268,12 @@ export default {
 
       let localPo = this.getPurchaseOrderByUser;
       //if (this.localItems.length === 0) {
-      this.getActiveItems.forEach(item => {
-        let po = localPo.find(lp => lp.itemId === item.id);
+      this.getActiveItems.forEach((item) => {
+        let po = localPo.find((lp) => lp.itemId === item.id);
         if (
-          this.localItems.indexOf(i => parseInt(i.id) === parseInt(item.id)) ===
-          -1
+          this.localItems.indexOf(
+            (i) => parseInt(i.id) === parseInt(item.id)
+          ) === -1
         ) {
           if (po) {
             this.localItems.push({
@@ -278,7 +289,7 @@ export default {
                 item.minQty,
                 item.price,
                 item.id
-              )
+              ),
             });
           } else {
             this.localItems.push({
@@ -289,13 +300,18 @@ export default {
               qty: parseFloat(item.minQty).toFixed(2),
               defaultUnits: item.defaultUnits,
               price: parseFloat(item.price),
-              totalPrice: this.getItemPrice(0, item.minQty, item.price, item.id)
+              totalPrice: this.getItemPrice(
+                0,
+                item.minQty,
+                item.price,
+                item.id
+              ),
             });
           }
         }
       });
 
-      this.localItems.sort(function(a, b) {
+      this.localItems.sort(function (a, b) {
         if (a.name < b.name) {
           return -1;
         }
@@ -309,25 +325,24 @@ export default {
 
     ///Save Purchase Order
     async saveOrder() {
-      this.orderPlaced = true;
       await this.validateForm();
       if (await this.user) {
         var selList = [];
         if (this.selected.length > 0) {
-          this.selected.forEach(a => {
+          this.selected.forEach((a) => {
             if (
               selList.length === 0 ||
-              selList.find(sl => parseInt(sl.id) !== parseInt(a))
+              selList.find((sl) => parseInt(sl.id) !== parseInt(a))
             )
               selList.push(
-                this.localItems.find(li => parseInt(li.id) === parseInt(a))
+                this.localItems.find((li) => parseInt(li.id) === parseInt(a))
               );
           });
         }
         if ((await selList.length) > 0) {
-          await selList.forEach(item => {
+          await selList.forEach((item) => {
             var pod = this.getPurchaseOrderByUser.find(
-              po =>
+              (po) =>
                 po.orderId === this.getCurrentOrder.id &&
                 po.itemId === item.id &&
                 po.userId === this.user.id
@@ -343,8 +358,8 @@ export default {
                   actQty: pod.actQty,
                   suggestedQty: pod.suggestedQty,
                   actPrice: 0,
-                  isCancelled: 0
-                };              
+                  isCancelled: 0,
+                };
               this.updatePurchaseOrderAction(this.tempPO);
               this.snackMessage(
                 `Thank you for your Order! We'll email you, when it is ready for pick up. Please note, items are subject to availability and prices shown here are approximate. A copy of the order has been emailed to you.`
@@ -358,13 +373,13 @@ export default {
                 suggestedQty: 0,
                 actPrice: 0,
                 userId: this.user.id,
-                isCancelled: 0
+                isCancelled: 0,
               });
 
               if (
                 this.bulkOrders.length === 0 ||
                 !this.bulkOrders.find(
-                  bo => parseInt(bo.itemId) === parseInt(item.id)
+                  (bo) => parseInt(bo.itemId) === parseInt(item.id)
                 )
               ) {
                 this.addBulkOrderAction({
@@ -373,15 +388,15 @@ export default {
                   actQty: 0,
                   actPrice: item.price,
                   isCancelled: 0,
-                  totalPrice: 0
+                  totalPrice: 0,
                 });
               }
             }
           });
         }
 
-        await this.getPurchaseOrderByUser.forEach(po => {
-          if (!selList.find(item => item.id === po.itemId)) {
+        await this.getPurchaseOrderByUser.forEach((po) => {
+          if (!selList.find((item) => item.id === po.itemId)) {
             if (po.id)
               this.tempPO = {
                 id: po.id,
@@ -391,60 +406,59 @@ export default {
                 qty: po.qty,
                 actQty: po.actQty,
                 actPrice: 0,
-                isCancelled: 1
+                isCancelled: 1,
               };
 
-            this.updatePurchaseOrderAction(this.tempPO).then(
-              );
+            this.updatePurchaseOrderAction(this.tempPO).then();
           }
           if (this.selected.length === 0) this.snackMessage(`Data Updated.`);
         });
       }
-
-      this.orderPlaced = false;
     },
 
     async sendAndEmail() {
-      let wait =  (time) => new Promise(resolve => setTimeout(resolve, time));
-      await this.saveOrder();      
-      await wait(10000)
+      this.placingOrder = true;
+      let wait = (time) => new Promise((resolve) => setTimeout(resolve, time));
+      await this.saveOrder();
+      await wait(10000);
       await dataService
-        .sendEmailOrderPlaced(this.getCurrentOrder.id, this.user.id)        
-        .catch(error => {
+        .sendEmailOrderPlaced(this.getCurrentOrder.id, this.user.id)
+        .catch((error) => {
           console.log(error);
           this.snackMessage("Failed to send Email.");
         });
-    }
+      this.placingOrder = false;
+    },
   },
   computed: {
     ...mapState(["items", "user", "purchaseOrders", "bulkOrders", "isPounds"]),
     ...mapGetters(["getCurrentOrder", "getUserName", "getActiveItems"]),
     getPurchaseOrderByUser() {
-      return this.purchaseOrders.filter(po => po.userId === this.user.id);
+      return this.purchaseOrders.filter((po) => po.userId === this.user.id);
     },
-    getHeaderText: function() {
+    getHeaderText: function () {
       return this.isOrderLocked
         ? "<p class='font-weight-black'>(This Order is Locked)</p>"
         : "";
     },
-    grandTotal: function() {
+    grandTotal: function () {
       var total = 0;
       var selList = [];
       if (this.selected.length > 0) {
-        this.selected.forEach(a => {
+        this.selected.forEach((a) => {
           selList.push(
-            this.localItems.find(li => parseInt(li.id) === parseInt(a))
+            this.localItems.find((li) => parseInt(li.id) === parseInt(a))
           );
         });
       }
       if (selList.length > 0) {
-        selList.forEach(item => {
+        selList.forEach((item) => {
           if (item) total += parseFloat(item.totalPrice);
         });
       }
       return total.toFixed(2);
-    }
-  }
+    },
+  },
 };
 </script>
 

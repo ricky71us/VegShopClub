@@ -57,7 +57,7 @@
             color="orange lighten-2"
           >Password of {{userPwdReset}} has been reset to {{newPwd}}</v-sheet>
         </div>
-        <v-data-table
+        <!-- <v-data-table
           :headers="header"
           :items="users"
           hide-default-footer
@@ -78,9 +78,38 @@
           </template>
           <template v-slot:item.resetpwd="{item }">
             <v-btn @click="resetPwd(item)">reset</v-btn>
-            <!-- <v-chip  class="ma-2 text-md-center">{{newPwd}}</v-chip> -->
           </template>
-        </v-data-table>
+        </v-data-table>-->
+        <v-simple-table>
+          <template v-slot:default>
+            <thead>
+              <tr>
+                <th class="text-left">User Name        </th>
+                <th class="text-left">Active</th>
+                <th class="text-left">Packer</th>
+                <th class="text-left">Password</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="user in users" :key="user.id">
+                <td>{{ user.name }}</td>
+                <td>
+                  <v-icon @click="toggleIsActive(user)" v-if="user.active" color="green">mdi-check</v-icon>
+                  <v-icon @click="toggleIsActive(user)" v-if="!user.active" color="red">mdi-close</v-icon>
+                </td>
+                <td>
+                  <v-icon @click="toggleIsPacker(user)" v-if="user.isPacker" color="green">mdi-check</v-icon>
+                  <v-icon @click="toggleIsPacker(user)" v-if="!user.isPacker" color="red">mdi-close</v-icon>
+                </td>
+                <td class="ma-0 pa-0">
+                  <v-btn class="ma-0 pa-0" @click="resetPwd(user)" text>
+                    <v-icon>mdi-refresh</v-icon>
+                  </v-btn>
+                </td>
+              </tr>
+            </tbody>
+          </template>
+        </v-simple-table>
       </v-form>
     </v-card>
     <v-snackbar v-model="snackbar" :multi-line="multiLine">
@@ -172,9 +201,9 @@ export default {
         firstname: user.firstname,
       });
       if (user.isPacker) {
-        this.snackMessage(`Packer updated!`);
+        this.snackMessage(`${user.name} has been assigned as packer`);
       } else {
-        this.snackMessage(`Packer has been reset`);
+        this.snackMessage(`${user.name} is not a packer anymore`);
       }
     },
     async toggleIsAdmin(user) {
@@ -194,30 +223,61 @@ export default {
       user.active = user.active ? false : true;
 
       if (user.active) {
-        this.resetPwd(user);
+        console.log("user being made active");
+        if (
+          await this.passwordReset(
+            user,
+            `Do you want to make ${user.name} active?`
+          )
+        ) {
+          this.snackMessage(
+            `${user.name} has been made active. Please note the password above.`
+          );
+          this.isNewPwd = true;
+          this.userPwdReset = user.name;
+        }
       } else {
-        this.passwordReset(user);
-        this.isNewPwd = false;
-        this.snackMessage(`This user has been made inactive`);
+        let flag = await this.passwordReset(
+          user,
+          `Are you sure you want to make ${user.name} inactive?`
+        );
+        if (flag) {
+          this.isNewPwd = false;
+          this.snackMessage(`${user.name} has been made inactive`);
+        } else {
+          user.active = user.active ? false : true;
+        }
       }
     },
-    async passwordReset(user) {
-      this.newPwd = this.generatePassword;
-      await this.updateUser({
-        id: user.id,
-        isPacker: user.isPacker ? 1 : 0,
-        isAdmin: user.isAdmin ? 1 : 0,
-        active: user.active ? 1 : 0,
-        firstname: user.firstname,
-        password: this.newPwd,
-        lastname: user.lastname,
-      });
+    async passwordReset(user, message) {
+      var con = confirm(`${message}`);
+      if (con == true) {
+        this.newPwd = this.generatePassword;
+        await this.updateUser({
+          id: user.id,
+          isPacker: user.isPacker ? 1 : 0,
+          isAdmin: user.isAdmin ? 1 : 0,
+          active: user.active ? 1 : 0,
+          firstname: user.firstname,
+          password: this.newPwd,
+          lastname: user.lastname,
+        });
+        return true;
+      } else {
+        return false;
+      }
     },
     async resetPwd(user) {
-      this.passwordReset(user);
-      this.snackMessage(`Password has been reset Successfully!`);
-      this.isNewPwd = true;
-      this.userPwdReset = user.name;
+      if (
+        await this.passwordReset(
+          user,
+          `Are you sure you want to reset the password for ${user.name}?`
+        )
+      ) {
+        this.snackMessage(`Password has been reset Successfully! Please note the password above.`);
+        this.isNewPwd = true;
+        this.userPwdReset = user.name;
+      }
     },
   },
   computed: {

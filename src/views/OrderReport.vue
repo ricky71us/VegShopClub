@@ -5,73 +5,93 @@
         <v-list-item-content dens class="ma-0 pb-0">
           <v-container class="ma-0 pa-0">
             <v-row>
-              <v-col cols="10" class="text-md-center">
-                Order Summary
-                <v-btn @click="generatePdf" text>
-                  <v-icon left>mdi-file-pdf</v-icon>
-                </v-btn>
-              </v-col>
-              <v-col cols="2" class="text-md-center ma-0 pa-0">
-                <!-- <v-toolbar-title>
-                  <v-tooltip bottom>
-                    <template v-slot:activator="{ on }">
-                      <v-btn v-on="on" dense small text>
-                        <v-icon v-if="isOrderLocked" @click="toggleOrderLock">mdi-lock</v-icon>
-                        <v-icon v-if="!isOrderLocked" @click="toggleOrderLock">mdi-lock-open</v-icon>
-                      </v-btn>
-                    </template>
-                    <span>Order Locked</span>
-                  </v-tooltip>
-                </v-toolbar-title>-->
-
+              <v-col cols="7" class="hidden-md-and-up pt-2 ma-0">Order Summary</v-col>
+              <v-col cols="5" class="hidden-md-and-up pt-2 ma-0">
                 <v-btn
                   v-if="isOrderLocked"
                   @click="toggleOrderLock"
-                  class="hidden-sm-and-down"
+                  class="hidden-md-and-up mr-1 pa-0"
+                  style="font-size:12px"
                   text
+                  min-width="1"
+                  max-height="3"
                 >
-                  <v-icon left>mdi-lock-open</v-icon>unlock
+                  <!-- <v-icon left>mdi-lock-open</v-icon> -->
+                  closed
                 </v-btn>
                 <v-btn
                   v-if="!isOrderLocked"
                   @click="toggleOrderLock"
-                  class="hidden-sm-and-down"
+                  class="hidden-md-and-up mr-1 pa-0"
+                  style="font-size:12px"
                   text
+                  min-width="1"
+                  max-height="3"
                 >
-                  <v-icon left>mdi-lock</v-icon>lock
+                  <!-- <v-icon small left>mdi-lock</v-icon> -->
+                  open
                 </v-btn>
-
-                <v-btn v-if="isOrderLocked" @click="toggleOrderLock" class="hidden-md-and-up" text>
-                  <v-icon left>mdi-lock-open</v-icon>
+                <v-btn
+                  @click="generatePdf"
+                  class="ma-0 pa-0 hidden-md-and-up"
+                  style="font-size:12px"
+                  text
+                  min-width="4"
+                  max-height="3"
+                >
+                  <!-- <v-icon small left>mdi-file-pdf</v-icon> -->
+                  | PDF
                 </v-btn>
-                <v-btn v-if="!isOrderLocked" @click="toggleOrderLock" class="hidden-md-and-up" text>
-                  <v-icon left>mdi-lock</v-icon>
-                </v-btn>
-
-                <!-- <v-col cols="1" class="mb-2 pl-8">
-                  <v-icon >mdi-lock</v-icon>
-                  <v-icon
-                    @click="toggleOrderLock"
-                    v-if="!isOrderLocked"
-                    color="green"
-                  >mdi-toggle-switch</v-icon>
-                  <v-icon
-                    @click="toggleOrderLock"
+              </v-col>
+              <v-col cols="9" class="text-md-center hidden-sm-and-down">Order Summary</v-col>
+              <v-col
+                cols="3"
+                class="text-md-center hidden-sm-and-down ma-0 pa-0"
+                style="display: inline"
+              >
+                <span>
+                  <v-btn
                     v-if="isOrderLocked"
-                    color="red"
-                  >mdi-toggle-switch-off</v-icon>
-                   <v-icon >mdi-lock-open</v-icon>
-                </v-col>-->
+                    @click="toggleOrderLock"
+                    class="hidden-sm-and-down"
+                    text
+                    style="font-size:11px"
+                  >
+                    <!-- <v-icon left>mdi-lock-open</v-icon> -->
+                    closed
+                  </v-btn>
+                  <v-btn
+                    v-if="!isOrderLocked"
+                    @click="toggleOrderLock"
+                    class="hidden-sm-and-down"
+                    text
+                    style="font-size:11px"
+                  >
+                    <!-- <v-icon left>mdi-lock</v-icon> -->
+                    open
+                  </v-btn>|
+                  <v-btn
+                    @click="generatePdf"
+                    class="ma-0 pa-0 hidden-sm-and-down"
+                    style="font-size:11px"
+                    text
+                  >PDF</v-btn>
+                </span>
               </v-col>
             </v-row>
           </v-container>
         </v-list-item-content>
       </v-list-item>
     </v-card>
-    <v-card class="mx-auto pa-0 mt-1" max-width="1100">
+    <v-card class="mx-auto pa-0 mt-3" max-width="1100">
       <v-sheet rounded class="ml-2" style="color:#006064">Total No of Orders: {{userCount}}</v-sheet>
+      <v-sheet
+        rounded
+        class="ml-2"
+        style="color:#006064; font-style:italic; color: green; font-size: 14px"
+      >Packer(s): {{getPacker()}}</v-sheet>
     </v-card>
-    <v-layout v-resize="onResize" column style="padding-top:7px">
+    <v-layout v-resize="onResize" class="mt-2" column style="padding-top:7px">
       <v-data-table
         :headers="reportHeader"
         :items="reportData"
@@ -80,10 +100,13 @@
         class="elevation-1 mt-8; text-align:right; pa-0"
         :class="{mobile: isMobile}"
         :mobile="isMobile"
-        id="testHtml"
+        :disable-sort = "isMobile"
+        :disable-filtering ="isMobile"
+        :disable-pagination = "isMobile"
+        :hide-default-header="isMobile"
       >
         <template v-slot:item.userName="{ item }">
-          <v-chip label ripple draggable>{{ item.userName }}</v-chip>
+          <v-chip label ripple>{{ item.userName }}</v-chip>
         </template>
         <template slot="body.append">
           <tr class="hidden-sm-and-down">
@@ -130,9 +153,9 @@ export default {
       message: null,
       multiLine: true,
       isOrderLocked: 0,
-      isMobile: false,
       userCount: 0,
       userItemCount: 0,
+      isMobile: false,
     };
   },
   async created() {},
@@ -144,7 +167,7 @@ export default {
   methods: {
     ...mapActions(["getPurchaseOrderByOrderIdAction", "updateOrderAction"]),
     onResize() {
-      if (window.innerWidth < 769) this.isMobile = true;
+      if (parseInt(window.innerWidth) < 769) this.isMobile = true;
       else this.isMobile = false;
     },
     getQtyByItem() {
@@ -216,6 +239,7 @@ export default {
         300,
         15
       );
+      doc.text(`Packer(s) : ${this.getPacker()}`, 50, 25);
       doc.autoTable({
         columnStyles: { userName: { halign: "center" } }, // European countries centered
 
@@ -273,13 +297,13 @@ export default {
         sortable: true,
         align: "start",
         class: "grey",
+        style: "background-color: grey"
       });
 
       this.pdfColumns.unshift({
         title: "Buyer",
         dataKey: "userName",
       });
-
       this.localUsers
         .sort(function (a, b) {
           if (a.firstname < b.firstname) {
@@ -352,6 +376,16 @@ export default {
       await dataService.getAllUsers().then((response) => {
         this.localUsers = response;
       });
+    },
+    getPacker() {
+      let packers = "";
+      this.localUsers.forEach((lu) => {
+        if (parseInt(lu.isPacker) === 1) {
+          if (packers) packers += ", ";
+          packers += `${lu.firstname} ${lu.lastname}`;
+        }
+      });
+      return packers;
     },
   },
   computed: {

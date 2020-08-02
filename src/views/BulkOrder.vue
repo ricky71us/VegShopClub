@@ -428,7 +428,7 @@ export default {
           name: `${li.name} `,
           qty: `${li.qty} ${li.defaultUnits} `,
           actQty: `${li.actQty} ${li.defaultUnits}`,
-          totalPrice: `$ ${li.totalPrice.toFixed(2)}`,
+          totalPrice: li.totalPrice ? `$ ${li.totalPrice.toFixed(2)}` : 0,
           defaultUnits: li.defaultUnits,
         });
       });

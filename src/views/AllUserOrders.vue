@@ -5,7 +5,10 @@
         <v-list-item-content dens class="ma-0 pa-0">
           <v-container class="ma-0 pa-0">
             <v-row no-gutters>
-              <v-col cols="10" class="ma-0 pt-2 text-md-center hidden-sm-and-down">Final Check & Email</v-col>
+              <v-col
+                cols="10"
+                class="ma-0 pt-2 text-md-center hidden-sm-and-down"
+              >Final Check & Email</v-col>
               <v-col cols="10" class="ma-0 pt-2 text-sm-center hidden-md-and-up">Final Check & Email</v-col>
               <v-col cols="1" class="ma-0 pt-1 text-md-center hidden-sm-and-down">
                 <v-btn class="ma-0" color="primary" small @click.stop="dialog = true;">
@@ -32,12 +35,7 @@
                 </v-dialog>
               </v-col>
               <v-col cols="2" class="ma-0 pt-0 text-sm-center hidden-md-and-up">
-                <v-btn
-                  class="ma-0"
-                  color="primary"
-                  small
-                  @click.stop="dialog = true;"
-                >
+                <v-btn class="ma-0" color="primary" small @click.stop="dialog = true;">
                   <v-icon @click="setReadyToSendEmailFlag()">mdi-email</v-icon>
                 </v-btn>
                 <v-dialog v-model="dialog" max-width="290" modal>
@@ -283,7 +281,7 @@ export default {
         qty: 0,
         actQty: 0,
         actPrice: 0,
-        isCancelled: 0
+        isCancelled: 0,
       },
       dialog: false,
       emailDialogText: "",
@@ -292,16 +290,14 @@ export default {
       localNonePacked: false,
       actPriceList: [],
       displayItems: false,
-      readyToSendEmail: true
+      readyToSendEmail: true,
     };
   },
-  async created() {
-   
-  },
+  async created() {},
   async mounted() {
     await this.getPurchaseOrderByOrderIdAction(this.getCurrentOrder.id);
     await this.getBulkOrderByOrderIdAction(this.getCurrentOrder.id);
-     await this.getUsers();
+    await this.getUsers();
     this.actPriceList = this.getActualPrice;
   },
   methods: {
@@ -310,16 +306,16 @@ export default {
       "getItemsAction",
       "getPurchaseOrderByOrderIdAction",
       "getBulkOrderByOrderIdAction",
-      "updatePurchaseOrderAction"
+      "updatePurchaseOrderAction",
     ]),
 
-    snackMessage: function(message) {
+    snackMessage: function (message) {
       this.message = message;
       this.snackbar = true;
     },
     toggleGmsLbs() {
       this.isPounds = this.isPounds ? false : true;
-      this.localUserPo.forEach(po => {
+      this.localUserPo.forEach((po) => {
         po.qtyConv = this.convertGmsToLbs(po.qtyConv, po.defaultUnitsConv);
         po.suggestedQtyConv = this.convertGmsToLbs(
           po.suggestedQtyConv,
@@ -346,7 +342,7 @@ export default {
         return qty ? (parseFloat(qty) * 0.453592).toFixed(2) : null;
       }
     },
-    calcPrice: function(item) {
+    calcPrice: function (item) {
       if (item.defaultUnits === "lbs" && item.defaultUnitsConv === "kgs")
         item.actQty = item.actQtyConv * 2.20462;
       else if (item.defaultUnits === "kgs" && item.defaultUnitsConv === "lbs")
@@ -362,29 +358,32 @@ export default {
     setReadyToSendEmailFlag() {
       this.readyToSendEmail = true;
       let pos = this.purchaseOrders.filter(
-        po => parseInt(po.isPacked) === 0 && parseInt(po.isCancelled) === 0
+        (po) => parseInt(po.isPacked) === 0 && parseInt(po.isCancelled) === 0
       );
       let boItems = this.bulkOrders.filter(
-        bo => parseInt(bo.isCancelled) === 0 && bo.actQty > 0
+        (bo) => parseInt(bo.isCancelled) === 0 && bo.actQty > 0
       );
-      pos.forEach(po => {
+      if (boItems.length === 0) this.readyToSendEmail = false;
+      pos.forEach((po) => {
         if (this.readyToSendEmail) {
-          if (boItems.find(bo => parseInt(bo.itemId) === parseInt(po.itemId))) {
+          if (
+            boItems.find((bo) => parseInt(bo.itemId) === parseInt(po.itemId))
+          ) {
             this.readyToSendEmail = false;
           }
         }
       });
     },
     async getUsers() {
-      await dataService.getAllUsers().then(response => {
+      await dataService.getAllUsers().then((response) => {
         if (response && response.length > 0)
-          response.forEach(u => {
+          response.forEach((u) => {
             // let user = this.purchaseOrders.find(
             //   po => po.userId === u.id && parseInt(po.isPacked) === 1
             // );
 
             let user = this.purchaseOrders.find(
-              po =>
+              (po) =>
                 po.userId === u.id &&
                 parseInt(po.isCancelled) === 0 &&
                 parseInt(po.suggestedQty) > 0
@@ -393,21 +392,21 @@ export default {
           });
       });
       let boItems = await this.bulkOrders.filter(
-        bo => parseInt(bo.isCancelled) === 0 && parseFloat(bo.actQty) > 0
+        (bo) => parseInt(bo.isCancelled) === 0 && parseFloat(bo.actQty) > 0
       );
-      await this.localUsers.forEach(lo => {
+      await this.localUsers.forEach((lo) => {
         let pos = this.purchaseOrders.filter(
-          po =>
+          (po) =>
             parseInt(po.userId) === parseInt(lo.id) &&
             parseInt(po.isPacked) === 0 &&
             parseInt(po.isCancelled) === 0
         );
 
         lo["allPacked"] = true;
-        pos.forEach(po => {
+        pos.forEach((po) => {
           if (
             this.bulkOrders.find(
-              bo =>
+              (bo) =>
                 parseInt(bo.itemId) === parseInt(po.itemId) &&
                 parseFloat(bo.actQty) > 0
             )
@@ -415,18 +414,18 @@ export default {
             if (lo["allPacked"]) lo["allPacked"] = false;
             if (this.readyToSendEmail) this.readyToSendEmail = false;
           }
-        });      
+        });
 
         lo["itemCount"] = this.purchaseOrders.filter(
-          po =>
+          (po) =>
             parseInt(po.userId) === parseInt(lo.id) &&
             parseInt(po.isCancelled) === 0 &&
-            boItems.find(i => parseInt(i.itemId) === parseInt(po.itemId))
+            boItems.find((i) => parseInt(i.itemId) === parseInt(po.itemId))
         ).length;
         //this.setPackedFlags(lo, lo.id);
       });
 
-      this.localUsers.sort(function(a, b) {
+      this.localUsers.sort(function (a, b) {
         if (a.firstname < b.firstname) {
           return -1;
         }
@@ -436,7 +435,7 @@ export default {
         return 0;
       });
     },
-    calcItemPrice: function(item) {
+    calcItemPrice: function (item) {
       this.calcPrice(item);
       item.totalPrice = (
         parseFloat(item.actPrice) * parseFloat(item.actQty)
@@ -463,12 +462,12 @@ export default {
     sendEmailAll() {
       //this.setReadyToSendEmailFlag();
       if (this.readyToSendEmail)
-        this.localUsers.forEach(lu => this.sendEmail(lu.id));
+        this.localUsers.forEach((lu) => this.sendEmail(lu.id));
       else this.snackMessage("Please make sure all the items have been packed");
     },
     sendEmail(id) {
       let pol = this.purchaseOrders.find(
-        pos =>
+        (pos) =>
           parseInt(pos.isPacked) === 1 && parseInt(pos.userId) === parseInt(id)
       );
       if (pol) {
@@ -480,7 +479,7 @@ export default {
           .then(() => {
             this.snackMessage("Email sent successfully!");
           })
-          .catch(error => {
+          .catch((error) => {
             console.log(error);
             this.snackMessage("Failed to send Email.");
           });
@@ -489,7 +488,7 @@ export default {
       }
     },
     savePo() {
-      this.localUserPo.forEach(lp => {
+      this.localUserPo.forEach((lp) => {
         this.tempPO = {
           id: lp.id,
           orderId: lp.orderId,
@@ -500,7 +499,7 @@ export default {
           suggestedQty: parseFloat(lp.suggestedQty),
           actPrice: parseFloat(lp.actPrice),
           isCancelled: lp.isCancelled,
-          isPacked: lp.isPacked
+          isPacked: lp.isPacked,
         };
         this.updatePurchaseOrderAction(this.tempPO);
         //console.log(this.tempPO);
@@ -509,16 +508,18 @@ export default {
     },
 
     getActPrice(item) {
-      let actItem = this.actPriceList.find(ap => ap.itemId === item.id);
+      let actItem = this.actPriceList.find((ap) => ap.itemId === item.id);
       if (actItem) return actItem;
       else return { itemId: 0, price: 0 };
     },
 
     setPackedFlags(pos, userId) {
       //console.log(pos);
-      let unPackedItems = pos.find(po => parseInt(po.isPacked) === 0);
-      let packedItems = pos.find(po => parseInt(po.isPacked) === 1);
-      let user = this.localUsers.find(u => parseInt(u.id) === parseInt(userId));
+      let unPackedItems = pos.find((po) => parseInt(po.isPacked) === 0);
+      let packedItems = pos.find((po) => parseInt(po.isPacked) === 1);
+      let user = this.localUsers.find(
+        (u) => parseInt(u.id) === parseInt(userId)
+      );
       if (user) {
         user.allPacked = unPackedItems ? false : true;
         user.nonePacked = packedItems ? false : true;
@@ -528,7 +529,8 @@ export default {
 
     async itemPacked(itempo) {
       let unitPriceNotSet = this.bulkOrders.find(
-        bo => bo.itemId === itempo.itemId && parseFloat(bo.actPriceFinal) === 0
+        (bo) =>
+          bo.itemId === itempo.itemId && parseFloat(bo.actPriceFinal) === 0
       )
         ? true
         : false;
@@ -553,19 +555,19 @@ export default {
     getUserPo(id) {
       this.localUserPo = [];
       let pos = this.purchaseOrders.filter(
-        po =>
+        (po) =>
           parseInt(po.userId) === parseInt(id) && parseInt(po.isCancelled) === 0
       );
 
-      pos.forEach(lp => {
-        let item = this.getActiveItems.find(i => i.id === lp.itemId);
+      pos.forEach((lp) => {
+        let item = this.getActiveItems.find((i) => i.id === lp.itemId);
 
         if (item) {
           let actItems = this.getActPrice(item);
 
           let actPrice = actItems.itemId > 0 ? actItems.price : 0.0;
           let bulkItem = this.bulkOrders.find(
-            bo =>
+            (bo) =>
               bo.itemId === item.id &&
               parseInt(bo.actQty) > 0 &&
               parseFloat(bo.actPrice) > 0
@@ -595,12 +597,12 @@ export default {
               totalPrice: (
                 (actPrice ? parseFloat(actPrice) : 0) *
                 (lp.actQty ? parseFloat(lp.actQty) : 0)
-              ).toFixed(2)
+              ).toFixed(2),
             });
           }
         }
       });
-      this.localUserPo.sort(function(a, b) {
+      this.localUserPo.sort(function (a, b) {
         if (a.itemName < b.itemName) {
           return -1;
         }
@@ -611,16 +613,16 @@ export default {
       });
 
       this.setPackedFlags(this.localUserPo, id);
-    }
+    },
   },
 
   computed: {
     ...mapState(["purchaseOrders", "items", "user", "bulkOrders"]),
     ...mapGetters(["getCurrentOrder", "getActiveItems", "getActualPrice"]),
 
-    grandTotal: function() {
+    grandTotal: function () {
       var total = 0;
-      this.localUserPo.forEach(item => {
+      this.localUserPo.forEach((item) => {
         if (item) {
           if (parseInt(item.isPacked) === 1) {
             total += parseFloat(item.totalPrice);
@@ -636,9 +638,9 @@ export default {
       },
       set(value) {
         this.$store.commit("togglePounds", value);
-      }
-    }
-  }
+      },
+    },
+  },
 };
 </script>
 

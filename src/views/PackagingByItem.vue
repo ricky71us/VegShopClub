@@ -51,13 +51,13 @@
                       <v-row>
                         <v-col
                           cols="12"
-                          class="text-md-center hidden-sm-and-down"
-                        >Total Quantity Ordered - {{convertGmsToLbs(item.actQty, item.defaultUnits)}} {{getDefaultUnits(item.defaultUnits)}}</v-col>
+                          class="text-md-center hidden-sm-and-down"                          
+                        >Total Quantity Ordered - <span style="font-weight:bold;color:#33691E">{{convertGmsToLbs(item.actQty, item.defaultUnits)}} {{getDefaultUnits(item.defaultUnits)}}</span></v-col>
                         <v-col
                           cols="12"
                           class="text-sm-center hidden-md-and-up"
                           style="font-size:12px"
-                        >Total Quantity Ordered - {{convertGmsToLbs(item.actQty, item.defaultUnits)}} {{getDefaultUnits(item.defaultUnits)}}</v-col>
+                        >Total Quantity Ordered - <span style="font-weight:bold;color:#33691E">{{convertGmsToLbs(item.actQty, item.defaultUnits)}} {{getDefaultUnits(item.defaultUnits)}}</span></v-col>
                         <!-- <v-col
                           cols="6"
                           class="text-md-right hidden-sm-and-down"
@@ -177,12 +177,12 @@
                       <v-row>
                         <v-col
                           cols="6"
-                          style="color:#33691E; font-weight:bold"
+                          style="font-size:11px;font-style: italic;"
                           class="mt-2 pb-0 hidden-sm-and-down"
                         >Unit Price $ {{item.actPriceFinal}} / {{item.defaultUnits}}</v-col>
                         <v-col
                           cols="6"
-                          style="color:#33691E; font-size:12px"
+                          style="font-size:11px;font-style: italic;"
                           class="mt-2 pb-0 hidden-md-and-up"
                         >Unit Price $ {{item.actPriceFinal}} / {{item.defaultUnits}}</v-col>
                         <v-col
@@ -192,14 +192,14 @@
 
                         <v-col
                           cols="2"
-                          style="font-weight:bold"
-                          class="mt-2 pa-3 hidden-sm-and-down"
+                          style="font-weight:bold;color:#33691E"
+                          class="mt-2 pa-3 hidden-sm-and-down"                          
                         >{{grandTotal}}</v-col>
                         <v-col
                           cols="6"
                           style="font-size:12px; text-align:right;"
                           class="mt-2 pa-3 hidden-md-and-up"
-                        >Total Qty: {{grandTotal}}</v-col>
+                        >Total Qty: <span style="color:#33691E;font-weight:bold;">{{grandTotal}}</span> </v-col>
                       </v-row>
                       <v-row>
                         <v-col class="hidden-md-and-up">
