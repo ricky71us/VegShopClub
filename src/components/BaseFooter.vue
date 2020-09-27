@@ -1,43 +1,36 @@
 <template>
-  <v-footer
-    color="primary lighten-1"
-    padless
-  >
-    <v-row
-      justify="center"
-      no-gutters
-    >
-      <v-btn
-        v-for="link in links"
-        :key="link"
-        color="white"
-        text
-        rounded
-        class="my-2"
-      >
-        {{ link }}
+  <div>
+    <v-bottom-navigation v-model="bottomNav">
+      <v-btn  value="recent">
+        <span>Manage Users</span>
+        <v-icon small>mdi-history</v-icon>
       </v-btn>
-      <!-- <v-col
-        class="primary lighten-2 py-4 text-center white--text"
-        cols="12"
-      >
-        {{ new Date().getFullYear() }} — <strong>BMG Tech</strong>
-      </v-col> -->
-    </v-row>
-  </v-footer>
+
+      <v-btn value="favorites">
+        <span>Manage Orders</span>
+        <v-icon small>mdi-heart</v-icon>
+      </v-btn>
+
+      <v-btn value="nearby">
+        <span>Manage Items</span>
+        <v-icon small>mdi-map-marker</v-icon>
+      </v-btn>
+    </v-bottom-navigation>
+  </div>
 </template>
 
 <script>
-  export default {
-    data: () => ({
-      links: [
-        //'Home',
-        // 'About Us',
-        // 'Team',
-        // 'Services',
-        // 'Blog',
-        // 'Contact Us',
-      ],
-    }),
-  }
+export default {
+  data: () => ({
+    links: [
+      //'Home',
+      // 'About Us',
+      // 'Team',
+      // 'Services',
+      // 'Blog',
+      // 'Contact Us',
+    ],
+     bottomNav: 'recent',
+  }),
+};
 </script>

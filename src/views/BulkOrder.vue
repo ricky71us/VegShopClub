@@ -7,12 +7,35 @@
           <v-list-item-content dens class="ma-0 pa-0">
             <v-container class="ma-0 pa-0">
               <v-row>
-                <v-col cols="12" class="text-md-center">
-                  Bulkorder Invoice
-                  <v-btn @click="generatePdf" text>
-                    <v-icon left>mdi-file-pdf</v-icon>
-                  </v-btn>
-                </v-col>
+                 <v-col cols="9" class="hidden-md-and-up pt-2 ma-0">Order Summary</v-col>
+              <v-col cols="3" class="hidden-md-and-up pt-1 ma-0">               
+                <v-btn
+                  @click="generatePdf"
+                  class="ma-0 pa-0 hidden-md-and-up"
+                  style="font-size:12px"
+                  text
+                  min-width="4"
+                  max-height="3"
+                >
+                  <!-- <v-icon small left>mdi-file-pdf</v-icon> -->
+                  PDF
+                </v-btn>
+              </v-col>
+              <v-col cols="11" class="text-md-center hidden-sm-and-down">Order Summary</v-col>
+              <v-col
+                cols="1"
+                class="text-md-center hidden-sm-and-down ma-0 pa-0"
+                style="display: inline"
+              >
+                <span>                  
+                  <v-btn
+                    @click="generatePdf"
+                    class="ma-0 pa-0 hidden-sm-and-down"
+                    style="font-size:11px"
+                    text
+                  >PDF</v-btn>
+                </span>
+              </v-col>
               </v-row>
             </v-container>
           </v-list-item-content>

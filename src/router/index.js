@@ -16,6 +16,8 @@ import PackagingByItem from "../views/PackagingByItem.vue";
 import Profile from "../views/Profile.vue";
 import AccessDenied from "../views/AccessDenied.vue";
 import OrderReport from "../views/OrderReport.vue";
+import PackerSchedule from "../views/PackerSchedule.vue"
+import TestPage from "../views/TestPage.vue";
 
 import VueAnalytics from "vue-analytics";
 import store from "../store";
@@ -33,6 +35,12 @@ const routes = [
     name: "accessDenied",
     component: AccessDenied,
   },
+  {
+    path: "/testpage",
+    name: "TestPage",
+    component: TestPage,
+    meta: { requiresAuth: true, adminOnly: true },
+  },  
   {
     path: "/dashboard",
     name: "dashboard",
@@ -120,17 +128,23 @@ const routes = [
     component: ManageUsers,
     meta: { requiresAuth: true, adminOnly: true },
   },  
-
+  {
+    path: "/packerSchedule",
+    name: "PackerSchedule",
+    component: PackerSchedule,
+    meta: { requiresAuth: true, adminOnly: false },
+  },  
 ];
 
 
 const router = new VueRouter({
-  // mode: "history",
+  //mode: "history",
   base: process.env.BASE_URL,
   routes,
 });
 
 router.beforeEach((to, from, next) => {
+  Vue.$ga.set('userId', `${store.state.user.firstname} ${store.state.user.lastname}`)
   if (to.matched.some((record) => record.meta.requiresAuth)) {
     // console.log(to.name);
     // console.log(store.state.isUserLoggedIn);

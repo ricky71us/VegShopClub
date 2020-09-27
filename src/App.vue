@@ -1,10 +1,10 @@
 <template>
   <v-app>
     <BaseHeader v-if="isUserLoggedIn" />
-    <v-content>
+    <v-main>
       <router-view />
-    </v-content>
-    <BaseFooter />
+    </v-main>
+    <!-- <BaseFooter /> -->
   </v-app>
 </template>
 
@@ -20,6 +20,7 @@ export default {
     ...mapActions(["signInAction"]),
     track() {
       this.$ga.page("/");
+      
     },
     async signInUser() {
       var userInfo = {

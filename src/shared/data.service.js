@@ -173,6 +173,49 @@ const deleteItem = async function(item) {
   }
 };
 
+const getPackerSchedule = async function(filter) {
+  try {
+    const response = await axios.get(`${API}/packerschedule?filter=${filter}`);
+    let data = parseList(response);
+    return data;
+  } catch (error) {
+    return [];
+  }
+};
+
+const addPackerSchedule = async function(packerSchedule) {
+  try {
+    const response = await axios.post(`${API}/packerschedule`, packerSchedule);
+    const addedItem = parseItem(response, 201);
+    return addedItem;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+
+const updatePackerSchedule = async function(packerSchedule) {
+  try {
+    const response = await axios.put(`${API}/packerschedule?id=${packerSchedule.id}`, packerSchedule);
+    parseItem(response, 200);
+    return packerSchedule;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+
+const deletePackerSchedule = async function(packerSchedule) {
+  try {
+    const response = await axios.delete(`${API}/packerschedule?id=${packerSchedule.id}`, packerSchedule);
+    let data = parseList(response);
+    return data;
+  } catch (error) {
+    console.log(error);
+    return [];
+  }
+};
+
 // Purchase Order
 const getPurchaseOrder = async function() {
   try {
@@ -312,10 +355,10 @@ const getBulkOrderByOrderId = async function(orderId) {
 
 const addBulkOrder = async function(bulkOrder) {
   try {
-    //console.log(bulkOrder);
+    console.log(bulkOrder);
     const response = await axios.post(`${API}/bulkorder`, bulkOrder);
     const addedBulkOrder = parseItem(response, 201);
-    // console.log(addedBulkOrder);
+    console.log(addedBulkOrder);
     return addedBulkOrder;
   } catch (error) {
     console.error(error);
@@ -388,6 +431,10 @@ export const dataService = {
   addItem,
   updateItem,
   deleteItem,
+  getPackerSchedule,
+  addPackerSchedule,
+  updatePackerSchedule,
+  deletePackerSchedule,
   getPurchaseOrder,
   getPurchaseOrderByOrderId,
   addPurchaseOrder,

@@ -6,7 +6,7 @@
           <v-list-item-content dens class="ma-0 pa-0">
             <!-- <v-container class="ma-0 pa-0"> -->
             <v-row>
-              <v-col cols="12" class="pt-14 text-md-center">My Order</v-col>
+              <v-col cols="12" class="pt-2 text-md-center">My Order</v-col>
             </v-row>
             <!-- </v-container> -->
           </v-list-item-content>
@@ -225,7 +225,7 @@ export default {
         }
       });
     },
-    validateForm() {
+    validateForm() {      
       let po = this.purchaseOrders.find(
         (po) => parseInt(po.isCancelled) === 0 && po.userId === this.user.id
       );

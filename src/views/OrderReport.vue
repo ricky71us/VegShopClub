@@ -5,13 +5,15 @@
         <v-list-item-content dens class="ma-0 pb-0">
           <v-container class="ma-0 pa-0">
             <v-row>
-              <v-col cols="7" class="hidden-md-and-up pt-2 ma-0">Order Summary</v-col>
-              <v-col cols="5" class="hidden-md-and-up pt-2 ma-0">
+              <v-col cols="7" class="hidden-md-and-up pt-2 ma-0"
+                >Order Summary</v-col
+              >
+              <v-col cols="5" class="hidden-md-and-up pt-1 ma-0">
                 <v-btn
                   v-if="isOrderLocked"
                   @click="toggleOrderLock"
                   class="hidden-md-and-up mr-1 pa-0"
-                  style="font-size:12px"
+                  style="font-size: 12px"
                   text
                   min-width="1"
                   max-height="3"
@@ -23,7 +25,7 @@
                   v-if="!isOrderLocked"
                   @click="toggleOrderLock"
                   class="hidden-md-and-up mr-1 pa-0"
-                  style="font-size:12px"
+                  style="font-size: 12px"
                   text
                   min-width="1"
                   max-height="3"
@@ -34,7 +36,7 @@
                 <v-btn
                   @click="generatePdf"
                   class="ma-0 pa-0 hidden-md-and-up"
-                  style="font-size:12px"
+                  style="font-size: 12px"
                   text
                   min-width="4"
                   max-height="3"
@@ -43,7 +45,9 @@
                   | PDF
                 </v-btn>
               </v-col>
-              <v-col cols="9" class="text-md-center hidden-sm-and-down">Order Summary</v-col>
+              <v-col cols="9" class="text-md-center hidden-sm-and-down"
+                >Order Summary</v-col
+              >
               <v-col
                 cols="3"
                 class="text-md-center hidden-sm-and-down ma-0 pa-0"
@@ -55,7 +59,7 @@
                     @click="toggleOrderLock"
                     class="hidden-sm-and-down"
                     text
-                    style="font-size:11px"
+                    style="font-size: 11px"
                   >
                     <!-- <v-icon left>mdi-lock-open</v-icon> -->
                     closed
@@ -65,17 +69,18 @@
                     @click="toggleOrderLock"
                     class="hidden-sm-and-down"
                     text
-                    style="font-size:11px"
+                    style="font-size: 11px"
                   >
                     <!-- <v-icon left>mdi-lock</v-icon> -->
-                    open
-                  </v-btn>|
+                    open </v-btn
+                  >|
                   <v-btn
                     @click="generatePdf"
                     class="ma-0 pa-0 hidden-sm-and-down"
-                    style="font-size:11px"
+                    style="font-size: 11px"
                     text
-                  >PDF</v-btn>
+                    >PDF</v-btn
+                  >
                 </span>
               </v-col>
             </v-row>
@@ -83,27 +88,134 @@
         </v-list-item-content>
       </v-list-item>
     </v-card>
+
     <v-card class="mx-auto pa-0 mt-3" max-width="1100">
-      <v-sheet rounded class="ml-2" style="color:#006064">Total No of Orders: {{userCount}}</v-sheet>
-      <v-sheet
-        rounded
-        class="ml-2"
-        style="color:#006064; font-style:italic; color: green; font-size: 14px"
-      >Packer(s): {{getPacker()}}</v-sheet>
+      <v-row>
+        <v-col cols="10">
+          <v-sheet rounded class="ml-2" style="color: #006064"
+            >Total No of Orders: {{ userCount }}</v-sheet
+          >
+          <v-sheet
+            rounded
+            class="ml-2"
+            style="
+              color: #006064;
+              font-style: italic;
+              color: green;
+              font-size: 14px;
+            "
+            >Packer(s): {{ getPacker() }}</v-sheet
+          >
+        </v-col>
+        <v-col cols="2">
+          <!-- <v-btn color="primary" dark @click.stop="dialog = true">Adjust Quantities</v-btn> -->
+          <v-icon color="black" dark @click.stop="dialog = true"
+            >mdi-pencil</v-icon
+          >
+          <v-dialog v-model="dialog" max-width="500">
+            <v-card class="mx-auto ma-3" max-width="500">
+              <!-- <v-expansion-panels accordion>
+            <v-expansion-panel>
+              <v-expansion-panel-header color="grey lighten-1">Manage Existing Orders</v-expansion-panel-header>
+              <v-expansion-panel-content>-->
+              <!-- <v-card class="mx-auto" max-width="400" tile dense shaped> -->
+              <v-autocomplete
+                v-model="selectedItem"
+                item-value="id"
+                class="ma-3 pt-6"
+                item-text="name"
+                :items="sortedItems"
+                label="Items"
+                @change="OnItemChange"
+                required
+              ></v-autocomplete>
+              <!-- </v-card> -->
+              <v-card class="mx-auto" max-width="400" tile dense shaped>
+                <v-list-item v-for="user in localUsers" :key="user.id" dense>
+                  <v-list-item-content dense class="ma-0 pa-0">
+                    <v-container class="ma-0 pa-0">
+                      <v-row class="ma-0 pa-0">
+                        <v-col cols="6" class="mb-0 pb-0 text-md-left">
+                          <v-checkbox
+                            v-model="selected"
+                            :label="user.firstname"
+                            :value="user.id"
+                            class="ma-0 pa-0"
+                            @change="validateForm"
+                            dense
+                            style="font-size: 10px"
+                          ></v-checkbox>
+                        </v-col>
+
+                        <v-col cols="6" class="text-md-end mb-0 pb-0">
+                          <v-flex shrink class="text-xl-left">
+                            <v-text-field
+                              v-model="user.qty"
+                              :label="user.defaultUnits"
+                              hide-details="auto"
+                              class="ma-0 pa-0 text-md-right"
+                              color="success"
+                              dense
+                              @change="validateForm"
+                              outlined
+                              type="decimal"
+                              onclick="this.select();"
+                              :rules="qtyRules(user)"
+                            ></v-text-field>
+                          </v-flex>
+                        </v-col>
+                        <!--  <v-col cols="3" class="mb-0 pt-6 text-sm-right hidden-md-and-up">{{item.totalPrice}}</v-col>
+                <v-col
+                  cols="3"
+                  class="mb-0 pb-0 text-md-right hidden-sm-and-down"
+                        >$ {{item.totalPrice}}</v-col>-->
+                      </v-row>
+                    </v-container>
+                    <v-divider></v-divider>
+                  </v-list-item-content>
+                </v-list-item>
+                <v-divider></v-divider>
+
+                <v-list-item dense>
+                  <v-list-item-content dens class="ma-0 pa-0">
+                    <v-container class="ma-0 pa-0">
+                      <v-row>
+                        <v-col cols="12" class="mb-0 pb-3">
+                          <v-btn
+                            color="success"
+                            @click="saveItemPO()"
+                            class="float-right"
+                            :disabled="!valid"
+                            >Save</v-btn
+                          >
+                        </v-col>
+                      </v-row>
+                    </v-container>
+                  </v-list-item-content>
+                </v-list-item>
+              </v-card>
+              <!-- </v-expansion-panel-content>
+            </v-expansion-panel>
+              </v-expansion-panels>-->
+            </v-card>
+          </v-dialog>
+        </v-col>
+      </v-row>
     </v-card>
-    <v-layout v-resize="onResize" class="mt-2" column style="padding-top:7px">
+
+    <v-layout v-resize="onResize" class="mt-2" column style="padding-top: 7px">
       <v-data-table
         :headers="reportHeader"
         :items="reportData"
         hide-default-footer
         :items-per-page="100"
         class="elevation-1 mt-8; text-align:right; pa-0"
-        :class="{mobile: isMobile}"
+        :class="{ mobile: isMobile }"
         :mobile="isMobile"
-        :disable-sort = "isMobile"
-        :disable-filtering ="isMobile"
-        :disable-pagination = "isMobile"
-        :hide-default-header="isMobile"
+        :disable-sort="isMobile"
+        :disable-filtering="isMobile"
+        :disable-pagination="isMobile"
+        :hide-default-header="false"
       >
         <template v-slot:item.userName="{ item }">
           <v-chip label ripple>{{ item.userName }}</v-chip>
@@ -111,14 +223,17 @@
         <template slot="body.append">
           <tr class="hidden-sm-and-down">
             <td
-              style="background-color: grey;"
+              style="background-color: grey"
               v-for="(item, index) in reportTotalRow"
               :key="index"
-            >{{item}}</td>
+            >
+              {{ item }}
+            </td>
           </tr>
         </template>
       </v-data-table>
     </v-layout>
+
     <v-snackbar id="header-snackbar" v-model="snackbar" :multi-line="multiLine">
       {{ this.message }}
       <v-btn color="red" text @click="snackbar = false">Close</v-btn>
@@ -156,6 +271,11 @@ export default {
       userCount: 0,
       userItemCount: 0,
       isMobile: false,
+      selected: [],
+      selectedItem: null,
+      localItems: [],
+      dialog: false,
+      sortedItems: [],
     };
   },
   async created() {},
@@ -163,9 +283,16 @@ export default {
     await this.setOrderLock();
     await this.getQtyByItem();
     await this.getData();
+    this.getSortedItems();
   },
   methods: {
-    ...mapActions(["getPurchaseOrderByOrderIdAction", "updateOrderAction"]),
+    ...mapActions([
+      "getPurchaseOrderByOrderIdAction",
+      "updateOrderAction",
+      "addPurchaseOrderAction",
+      "updatePurchaseOrderAction",
+      "addBulkOrderAction",
+    ]),
     onResize() {
       if (parseInt(window.innerWidth) < 769) this.isMobile = true;
       else this.isMobile = false;
@@ -187,6 +314,116 @@ export default {
             item.qty = parseFloat(item.qty) + parseFloat(i.qty);
           }
         }
+      });
+    },
+    OnItemChange() {
+      this.getSortedItems();
+      this.selected = [];
+      this.localItems = [];
+      let currItem = this.items.find((i) => i.id === this.selectedItem);
+      let poByItem = this.purchaseOrders.filter(
+        (po) =>
+          po.itemId === this.selectedItem && parseInt(po.isCancelled) === 0
+      );
+
+      this.localUsers.forEach((lo) => {
+        let po = poByItem.find((pi) => pi.userId === lo.id);
+        if (po) {
+          this.localItems.push({
+            id: po.id,
+            orderId: this.getCurrentOrder.id,
+            itemId: this.selectedItem,
+            userId: lo.id,
+            qty: po.qty,
+            actQty: po.actQty,
+            suggestedQty: po.suggestedQty,
+            actPrice: 0,
+            isCancelled: 0,
+            userName: `${lo.firstname} ${lo.lastname}`,
+            defaultUnits: currItem.defaultUnits,
+          });
+          lo.qty = po.qty;
+          lo.poId = po.id;
+          this.selected.push(lo.id);
+        } else {
+          this.localItems.push({
+            id: 0,
+            orderId: this.getCurrentOrder.id,
+            itemId: this.selectedItem,
+            userId: lo.id,
+            qty: 0,
+            actQty: 0,
+            suggestedQty: 0,
+            actPrice: 0,
+            isCancelled: 0,
+            userName: `${lo.firstname} ${lo.lastname}`,
+            defaultUnits: currItem.defaultUnits,
+          });
+          lo.qty = 0;
+
+          lo.poId = 0;
+        }
+        lo.minQty = parseFloat(currItem.minQty).toFixed(2);
+        lo.maxQty = parseFloat(currItem.maxQty).toFixed(2);
+        lo.defaultUnits = currItem.defaultUnits;
+      });
+
+      this.validateForm();
+    },
+
+    getSortedItems() {
+      this.sortedItems = this.items
+        .filter((i) => parseInt(i.isActive) === 1)
+        .sort(function (a, b) {
+          if (a.name < b.name) {
+            return -1;
+          }
+          if (a.name > b.name) {
+            return 1;
+          }
+          return 0;
+        });
+    },
+    qtyRules(item) {
+      if (this.selected.find((u) => u === item.id)) {
+        let minQty = item.minQty;
+        let maxQty = item.maxQty;
+        let rules = [
+          (v) => !isNaN(v) || `Please enter a number`,
+          (v) =>
+            !(parseFloat(v) < parseFloat(minQty)) ||
+            `Min Qty ${item.minQty} ${item.defaultUnits}`,
+          (v) =>
+            maxQty !== 0
+              ? !(v > maxQty) || `Max Qty ${item.maxQty} ${item.defaultUnits}`
+              : true,
+        ];
+        return rules;
+      }
+      return [];
+    },
+    setSelectedItems() {
+      this.getPurchaseOrderByItem.forEach((po) => {
+        if (parseInt(po.isCancelled) === 0) {
+          this.selected.push(po.itemId);
+        }
+      });
+    },
+    validateForm() {
+      //console.log(this.selected);
+      //if (this.selected.length > 0) this.valid = true;
+      //else this.valid = false;
+
+      this.selected.forEach((s) => {
+        //console.log(this.valid);
+        var tmp = this.localUsers.find((lu) => lu.id === s);
+        //console.log(tmp);
+        if (
+          parseFloat(tmp.qty) < parseFloat(tmp.minQty) ||
+          parseFloat(tmp.qty) > parseFloat(tmp.maxQty)
+        ) {
+          this.valid = false;
+        } else this.valid = true;
       });
     },
     setOrderLock: function () {
@@ -250,7 +487,109 @@ export default {
       });
       doc.save(`OrderSummary_${this.getCurrentOrder.id}.pdf`);
     },
+
+    async saveItemPO() {
+      this.validateForm();
+      if (!this.selectedItem) {
+        this.snackMessage("Please select an Item ");
+      } else {
+        if (this.valid) {
+          var selList = [];
+          if (this.selected.length > 0) {
+            this.selected.forEach((a) => {
+              if (
+                selList.length === 0 ||
+                selList.find((sl) => parseInt(sl.userId) !== parseInt(a))
+              )
+                var userData = this.localUsers.find((lu) => lu.id === a);
+              var item = this.localItems.find(
+                (li) => parseInt(li.userId) === parseInt(a)
+              );
+              item.qty = userData.qty;
+              selList.push(item);
+            });
+          }
+          if ((await selList.length) > 0) {
+            await selList.forEach((item) => {
+              var pod = this.getPurchaseOrderByItem.find(
+                (po) =>
+                  po.orderId === this.getCurrentOrder.id &&
+                  //po.itemId === item.id &&
+                  po.userId === item.userId
+              );
+              if (pod) {
+                if (pod.id)
+                  this.tempPO = {
+                    id: pod.id,
+                    orderId: this.getCurrentOrder.id,
+                    itemId: this.selectedItem,
+                    userId: item.userId,
+                    qty: item.qty,
+                    actQty: pod.actQty,
+                    suggestedQty: pod.suggestedQty,
+                    actPrice: 0,
+                    isCancelled: 0,
+                    isPacked: pod.isPacked,
+                  };
+                this.updatePurchaseOrderAction(this.tempPO);
+              } else {
+                this.addPurchaseOrderAction({
+                  orderId: this.getCurrentOrder.id,
+                  itemId: this.selectedItem,
+                  qty: item.qty,
+                  actQty: 0,
+                  suggestedQty: 0,
+                  actPrice: 0,
+                  userId: item.userId,
+                  isCancelled: 0,
+                });
+                if (
+                  this.bulkOrders.length === 0 ||
+                  !this.bulkOrders.find(
+                    (bo) => parseInt(bo.itemId) === parseInt(this.selectedItem)
+                  )
+                ) {
+                  console.log(this.selectedItem);
+                  this.addBulkOrderAction({
+                    orderId: this.getCurrentOrder.id,
+                    itemId: this.selectedItem,
+                    actQty: 0,
+                    actPrice: 0,
+                    isCancelled: 0,
+                    totalPrice: 0,
+                  });
+                }
+              }
+            });
+          }
+
+          await this.getPurchaseOrderByItem.forEach((po) => {
+            if (!selList.find((item) => item.userId === po.userId)) {
+              if (po.id)
+                this.tempPO = {
+                  id: po.id,
+                  orderId: this.getCurrentOrder.id,
+                  itemId: this.selectedItem,
+                  userId: po.userId,
+                  qty: po.qty,
+                  actQty: po.actQty,
+                  actPrice: 0,
+                  isCancelled: 1,
+                };
+              this.updatePurchaseOrderAction(this.tempPO).then();
+            }
+          });
+
+          this.snackMessage(`Data Updated.`);
+          this.dialog = false;
+        }
+      }
+    },
+
     async getData() {
+      this.reportData = [];
+      this.reportHeader = [];
+      this.reportTotalRow = [];
       await this.getUsers();
       await this.getPurchaseOrderByOrderIdAction(this.getCurrentOrder.id);
       this.bulkOrders.forEach((bo) => {
@@ -297,7 +636,7 @@ export default {
         sortable: true,
         align: "start",
         class: "grey",
-        style: "background-color: grey"
+        style: "background-color: grey",
       });
 
       this.pdfColumns.unshift({
@@ -375,6 +714,8 @@ export default {
     async getUsers() {
       await dataService.getAllUsers().then((response) => {
         this.localUsers = response;
+        // TODO: to ignore test user accounts for now
+        this.localUsers = this.localUsers.filter((r) => parseInt(r.id) > 3);
       });
     },
     getPacker() {
@@ -391,6 +732,11 @@ export default {
   computed: {
     ...mapState(["purchaseOrders", "bulkOrders", "items", "user"]),
     ...mapGetters(["getCurrentOrder"]),
+    getPurchaseOrderByItem() {
+      return this.purchaseOrders.filter(
+        (po) => po.itemId === this.selectedItem
+      );
+    },
   },
 };
 </script>

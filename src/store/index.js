@@ -11,6 +11,7 @@ const getDefaultState = () => {
     orders: [],
     orderstatus: [],
     items: [],
+    packerSchedules: [],
     purchaseOrders: [],
     bulkOrders: [],
     isPounds: false,
@@ -77,6 +78,23 @@ const mutations = {
   },
   deleteItem(state, item) {
     state.items = [...state.items.filter((p) => p.id !== item.id)];
+  },
+  // Packer Schedule
+
+  getPackerSchedule(state, packerSchedule) {
+    state.packerSchedules = packerSchedule;
+  },
+  addPackerSchedule(state, packerSchedule) {
+    state.packerSchedules.unshift(...packerSchedule); // mutable addition
+  },
+  updatePackerSchedule(state, packerSchedule) {
+    const index = state.packerSchedules.findIndex((c) => c.id === packerSchedule.id);
+    //console.log(`packerSchedule index of ${packerSchedule.name} ; ${packerSchedule.id} --> ${index}`);
+    state.packerSchedules.splice(index, 1, packerSchedule);
+    state.packerSchedules = [...state.packerSchedules];
+  },
+  deletePackerSchedule(state, packerSchedule) {
+    state.packerSchedules = [...state.packerSchedules.filter((p) => p.id !== packerSchedule.id)];
   },
   //Purchase Order
   getPurchaseOrder(state, purchaseOrders) {
@@ -172,6 +190,25 @@ const actions = {
     const status = await dataService.deleteItem(item);
     if (status) commit("deleteItem", item);
   },
+
+  // PackerSchedule
+  async getPackerScheduleAction({ commit }, filter) {
+    const items = await dataService.getPackerSchedule(filter);
+    commit("getPackerSchedule", items);
+  },
+  async addPackerScheduleAction({ commit }, item) {
+    const addedPackerSchedule = await dataService.addPackerSchedule(item);
+    commit("addPackerSchedule", addedPackerSchedule);
+  },
+  async updatePackerScheduleAction({ commit }, item) {
+    const updatedPackerSchedule = await dataService.updatePackerSchedule(item);
+    commit("updatePackerSchedule", updatedPackerSchedule);
+  },
+  async deletePackerScheduleAction({ commit }, item) {
+    const status = await dataService.deletePackerSchedule(item);
+    if (status) commit("deletePackerSchedule", item);
+  },
+
   //PurchaseOrder
   async getPurchaseOrderAction({ commit }) {
     const purchaseOrder = await dataService.getPurchaseOrder();
@@ -236,8 +273,9 @@ const getters = {
   },
   isAdminUser: (state) => {
     if (state.user) {
-      return parseInt(state.user.isAdmin) === 1 ? true : false;
+      return parseInt(state.user.isAdmin) === 1;
     }
+    return false
   },
   getItemById: (state) => (id) =>
     state.items.find((v) => parseInt(v.id) === parseInt(id)),

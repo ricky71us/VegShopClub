@@ -12,48 +12,66 @@
                     <v-icon color="black" dark v-on="on" @click="initializeItem()">mdi-plus</v-icon>
                   </template>
                   <v-card>
-                    <v-card-title class="headline grey lighten-2" primary-title>Item Details</v-card-title>
-                    <v-card-text>
-                      <v-text-field
-                        v-model="updatedItem.name"
-                        :counter="100"
-                        :rules="nameRules"
-                        label="Item Name"
-                        required
-                      ></v-text-field>
+                    <v-form ref="form" v-model="valid">
+                      <v-card-title class="headline grey lighten-2" primary-title>Item Details</v-card-title>
+                      <v-card-text>
+                        <v-text-field
+                          v-model="updatedItem.name"
+                          :counter="100"
+                          label="Item Name"
+                          :rules="[rules.required]"
+                          required
+                        ></v-text-field>
 
-                      <v-text-field v-model="updatedItem.description" label="Description"></v-text-field>
-                      <v-text-field v-model="updatedItem.minQty" label="Minimum Quantity"></v-text-field>
-                      <v-text-field v-model="updatedItem.maxQty" label="Maximum Quantity"></v-text-field>
-                      <v-select
-                        v-model="updatedItem.defaultUnits"
-                        :items="units"
-                        label="Unit"
-                        required
-                      ></v-select>
-                      <v-text-field v-model="updatedItem.price" label="Price"></v-text-field>
+                        <v-text-field v-model="updatedItem.description" label="Description"></v-text-field>
+                        <v-text-field
+                          v-model="updatedItem.minQty"
+                          label="Minimum Quantity"
+                          :rules="[rules.required, rules.checkNumber]"
+                          required
+                        ></v-text-field>
+                        <v-text-field
+                          v-model="updatedItem.maxQty"
+                          label="Maximum Quantity"
+                          :rules="[rules.required, rules.checkNumber]"
+                          required
+                        ></v-text-field>
+                        <v-select
+                          v-model="updatedItem.defaultUnits"
+                          :items="units"
+                          label="Unit"
+                          :rules="[rules.required]"
+                          required
+                        ></v-select>
+                        <v-text-field
+                          v-model="updatedItem.price"
+                          label="Price"
+                          :rules="[rules.required, rules.checkNumber]"
+                          required
+                        ></v-text-field>
 
-                      <v-btn
-                        :disabled="!valid"
-                        color="success"
-                        class="mr-4"
-                        @click="addNewItem()"
-                        @click.stop="dialog = false"
-                      >Save</v-btn>
+                        <v-btn
+                          :disabled="!valid"
+                          color="success"
+                          class="mr-4"
+                          @click="addNewItem()"
+                          @click.stop="dialog = false"
+                        >Save</v-btn>
 
-                      <v-btn
-                        color="error"
-                        class="mr-4"
-                        @click="initializeItem()"
-                        @click.stop="dialog = false"
-                      >Cancel</v-btn>
-                    </v-card-text>
+                        <v-btn
+                          color="error"
+                          class="mr-4"
+                          @click="initializeItem()"
+                          @click.stop="dialog = false"
+                        >Cancel</v-btn>
+                      </v-card-text>
 
-                    <v-divider></v-divider>
+                      <v-divider></v-divider>
 
-                    <v-card-actions>
-                      <v-spacer></v-spacer>
-                    </v-card-actions>
+                      <v-card-actions>
+                        <v-spacer></v-spacer>
+                      </v-card-actions>
+                    </v-form>
                   </v-card>
                 </v-dialog>
               </v-col>
@@ -94,7 +112,7 @@
                         <v-text-field
                           v-model="tempItem.name"
                           :counter="100"
-                          :rules="nameRules"
+                          :rules="[rules.required]"
                           label="Item Name"
                           required
                           onclick="this.select();"
@@ -110,24 +128,28 @@
                           :value="parseFloat(tempItem.minQty).toFixed(2)"
                           label="Minimum Quantity"
                           onclick="this.select();"
+                          :rules="[rules.required, rules.checkNumber]"
                         ></v-text-field>
                         <v-text-field
                           v-model="tempItem.maxQty"
                           :value="parseFloat(tempItem.maxQty).toFixed(2)"
                           label="Maximum Quantity"
                           onclick="this.select();"
+                          :rules="[rules.required, rules.checkNumber]"
                         ></v-text-field>
 
                         <v-select
                           v-model="tempItem.defaultUnits"
                           :items="units"
                           label="Unit"
+                          :rules="[rules.required]"
                           required
                         ></v-select>
                         <v-text-field
                           v-model="tempItem.price"
                           label="Price"
                           onclick="this.select();"
+                          :rules="[rules.required, rules.checkNumber]"
                         ></v-text-field>
 
                         <v-btn
@@ -234,7 +256,10 @@ export default {
       },
       valid: false,
       name: "",
-      nameRules: [(v) => !!v || "Name is required"],
+      rules: {
+        required: (v) => !!v || "Name is required",
+        checkNumber: (v) => !isNaN(v) || "Please enter a number",
+      },
       dialog: false,
       dialogEdit: [],
       message: null,
@@ -300,7 +325,9 @@ export default {
       };
     },
     addNewItem: function () {
+      this.$refs.form.validate();
       if (this.$refs.form.validate()) {
+        console.log(this.valid);
         this.addItemAction(this.updatedItem);
         this.snackMessage(
           `Item "${this.updatedItem.name}" added successfully!`

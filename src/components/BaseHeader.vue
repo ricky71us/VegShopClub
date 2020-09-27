@@ -2,82 +2,36 @@
   <div>
     <v-card class="overflow-hidden mb-10">
       <v-app-bar color="blue-grey accent-4" elevate-on-scroll dense dark fixed>
-        <!-- <v-menu offset-y>
-          <template v-slot:activator="{ on }">
-            <v-btn v-on="on" dense small text>
-              <v-icon>mdi-hamburger</v-icon>
-            </v-btn>
-          </template>
-          <v-list>
-            <v-list-item v-for="(item, index) in getMenuItems()" :key="index" click>
-              <v-list-item-title>
-                <v-btn :to="item.path">{{ item.title }}</v-btn>
-              </v-list-item-title>
-            </v-list-item>
-          </v-list>
-
-          <v-list>
-          <v-list-tile v-for="(item, index) in items" :key="index" :to="item.path" router exact>
-            <v-list-tile-content>
-              <v-list-tile-title v-text="item.title" />
-            </v-list-tile-content>
-          </v-list-tile>
-          </v-list>
-        </v-menu>-->
-        <!-- <v-divider class="mx-2" inset vertical></v-divider>
-        <v-toolbar-title>
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on }">
-              <v-btn v-on="on" dense small text>
-                <v-icon v-if="!isPounds" @click="toggleGmsLbs">mdi-weight-gram</v-icon>
-                <v-icon v-if="isPounds" @click="toggleGmsLbs">mdi-weight-pound</v-icon>
-              </v-btn>
-            </template>
-            <span>lbs - gms</span>
-          </v-tooltip>
-        </v-toolbar-title>-->
-
         <div class="text-center">
-          <v-menu offset-y transition="expand-transition" close-on-click close-on-content-click>
+          <v-menu offset-y transition="expand-transition">
             <template v-slot:activator="{ on: menu }">
-              <!-- <v-btn color="primary" dark v-bind="attrs" v-on="on">Dropdown</v-btn> -->
-              <!-- <v-tooltip bottom>
-              <template v-slot:activator="{ on:tooltip  }">-->
               <v-btn v-on="{...menu}" dense small text>
                 <v-icon class="hidden-sm-and-down">mdi-dots-vertical</v-icon>
                 <v-icon small class="hidden-md-and-up">mdi-dots-vertical</v-icon>
-                <!-- <v-toolbar-title>VBC</v-toolbar-title> -->
                 <h3>VBC</h3>
               </v-btn>
             </template>
-            <!--  <span>Menu</span>
-               </v-tooltip>
-            </template>-->
+
             <v-list v-if="displayMenu">
               <v-list-item v-for="(item, index) in getMenuItems()" :key="index" :to="item.path">
                 <v-list-item-title>{{ item.title }}</v-list-item-title>
+                <!-- <v-list-item v-for="(item, index) in item.childRoutes" :key="index" :to="item.path">
+                  <v-list-item-content>
+                    <v-list-item-title>{{ item.title }}</v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item> -->
               </v-list-item>
+
               <v-list-item class="hidden-md-and-up" to="/profile">
                 <v-list-item-title>Profile</v-list-item-title>
               </v-list-item>
               <v-list-item class="hidden-md-and-up" to="/login" @click="resetState">
                 <v-list-item-title>Logout</v-list-item-title>
               </v-list-item>
+             
             </v-list>
           </v-menu>
         </div>
-        <!-- <v-toolbar-title>VBC</v-toolbar-title> -->
-        <!-- <v-divider v-if="displayAdminMenu" class="mx-2" inset vertical></v-divider>
-        <v-toolbar-title v-if="displayAdminMenu">
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on }">
-              <v-btn v-on="on" dense small text to="/manageitems">
-                <v-icon>mdi-plus-box</v-icon>
-              </v-btn>
-            </template>
-            <span>Manage Items</span>
-          </v-tooltip>
-        </v-toolbar-title>-->
 
         <v-divider v-if="displayMenu" class="mx-2 hidden-sm-and-down" inset vertical></v-divider>
         <v-toolbar-title v-if="displayMenu" class="hidden-sm-and-down">
@@ -85,7 +39,6 @@
             <template dense v-slot:activator="{ on }">
               <v-btn v-on="on" class="ma-2" text icon small to="/orderEntry">
                 <v-icon class="hidden-sm-and-down">mdi-cart-outline</v-icon>
-                <!-- <v-icon dense small class="ma-0 pr-0 hidden-md-and-up">mdi-cart-outline</v-icon> -->
               </v-btn>
             </template>
             <span class="hidden-sm-and-down">My Order</span>
@@ -109,7 +62,14 @@
           </v-tooltip>
         </v-toolbar-title>
 
-        <v-btn v-if="displayAdminMenu" class="ma-2 hidden-md-and-up" text icon small to="/orderReport">
+        <v-btn
+          v-if="displayAdminMenu"
+          class="ma-2 hidden-md-and-up"
+          text
+          icon
+          small
+          to="/orderReport"
+        >
           <v-icon small class="hidden-md-and-up">mdi-account-multiple</v-icon>
         </v-btn>
 
@@ -126,7 +86,14 @@
           </v-tooltip>
         </v-toolbar-title>
 
-        <v-btn v-if="displayAdminMenu" class="ma-2 hidden-md-and-up" text icon small to="/bulkOrder">
+        <v-btn
+          v-if="displayAdminMenu"
+          class="ma-2 hidden-md-and-up"
+          text
+          icon
+          small
+          to="/bulkOrder"
+        >
           <v-icon small class="hidden-md-and-up">mdi-receipt</v-icon>
         </v-btn>
 
@@ -163,95 +130,27 @@
         <v-btn class="ma-2 hidden-md-and-up" text icon small to="/allUserOrders">
           <v-icon small class="hidden-md-and-up">mdi-email-outline</v-icon>
         </v-btn>
-        <!-- <v-divider v-if="displayAdminMenu" class="mx-2" inset vertical></v-divider>
-        <v-toolbar-title v-if="displayAdminMenu">
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on }">
-              <v-btn v-on="on" dense small text to="/orderRecon">
-                <v-icon>mdi-ballot-recount</v-icon>
-              </v-btn>
-            </template>
-            <span>Reconcile Order</span>
-          </v-tooltip>
-        </v-toolbar-title>-->
-
-        <!-- <v-divider v-if="displayAdminMenu" class="mx-2" inset vertical></v-divider>
-        <v-toolbar-title v-if="displayAdminMenu">
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on }">
-              <v-btn v-on="on" dense small text>
-                <v-icon v-if="isOrderLocked" @click="toggleOrderLock">mdi-lock</v-icon>
-                <v-icon v-if="!isOrderLocked" @click="toggleOrderLock">mdi-lock-open</v-icon>
-              </v-btn>
-              <v-btn v-on="on" dense small text></v-btn>
-            </template>
-            <span>Lock/Unlock Order</span>
-          </v-tooltip>
-        </v-toolbar-title>-->
 
         <v-spacer></v-spacer>
-        <!-- <v-toolbar-title>
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on }">
-              <v-btn v-on="on" to="/profile" dense small text>
-                <v-icon dark>mdi-account-circle</v-icon>
-              </v-btn>
-            </template>
-            <span>{{getUserName}}</span>
-          </v-tooltip>
-        </v-toolbar-title>
-        <v-divider class="mx-2" inset vertical></v-divider>-->
+
         <div class="text-center hidden-sm-and-down" v-if="displayMenu">
           <v-menu offset-y open-on-hover transition="expand-transition">
             <template v-slot:activator="{ on: menu }">
-              <!-- <v-btn color="primary" dark v-bind="attrs" v-on="on">Dropdown</v-btn> -->
-              <!-- <v-tooltip bottom>
-              <template v-slot:activator="{ on:tooltip  }">-->
               <v-btn v-on="{...menu}" dense small text>
                 <v-icon dark class="hidden-sm-and-down">mdi-account-circle</v-icon>
-                <!-- <v-icon dark small class="hidden-md-and-up">mdi-account-circle</v-icon> -->
               </v-btn>
             </template>
-            <!-- <span>{{getUserName}}</span>
-              </v-tooltip>
-            </template>-->
             <v-list>
-              <!-- <template v-slot:activator="{ on: menuClick}"> -->
               <v-list-item v-for="(item, index) in profileItems" :key="index" :to="item.path">
                 <v-list-item-title>{{ item.title }}</v-list-item-title>
               </v-list-item>
               <v-list-item to="/login" @click="resetState">
                 <v-list-item-title>Logout</v-list-item-title>
               </v-list-item>
-              <!-- </template> -->
             </v-list>
           </v-menu>
         </div>
-        <!-- <v-tooltip bottom>
-          <template v-slot:activator="{ on }">
-            <v-btn v-on="on" v-if="!isUserSignedIn" to="/login" dense small text>
-              <v-icon v-on:click="signInUser">mdi-login</v-icon>
-            </v-btn>
-          </template>
-          <span>Login</span>
-        </v-tooltip>
-        <v-tooltip bottom>
-          <template v-slot:activator="{ on }">
-            <v-btn class="ma-2" text icon v-on="on" v-if="isUserSignedIn" @click="resetState" to="/login" dense small >
-                <v-icon dark class="hidden-sm-and-down">mdi-logout</v-icon>
-                <v-icon dark x-small class="hidden-md-and-up">mdi-logout</v-icon>
-            </v-btn>
-          </template>
-          <span>Logout</span>
-        </v-tooltip>-->
-        <!-- <v-toolbar-title>
-          <v-btn v-if="!isUserSignedIn" to="/login" dense small text>
-            <v-icon v-on:click="signInUser">mdi-login</v-icon>
-          </v-btn>
-          <v-btn v-if="isUserSignedIn" to="/login" dense small text>
-            <v-icon v-on:click="resetState">mdi-logout</v-icon>
-          </v-btn>
-        </v-toolbar-title>-->
+
         <v-menu left bottom></v-menu>
       </v-app-bar>
     </v-card>
@@ -266,23 +165,58 @@
 import { mapActions, mapState, mapGetters } from "vuex";
 export default {
   data: () => ({
+    admins: [
+      ["Management", "mdi-mail"],
+      ["Settings", "settings"],
+    ],
     menuItems: [
-      { title: "My Order", path: "/", admin: false },
-      { title: "Order Summary", path: "/OrderReport", admin: true },
-      { title: "Bulkorder Invoice", path: "/BulkOrder", admin: true },
+      // { title: "My Order", path: "/", admin: false },
+      // { title: "Order Summary", path: "/OrderReport", admin: true },
+      // { title: "Bulkorder Invoice", path: "/BulkOrder", admin: true },
       { title: "Pack Items", path: "/PackagingByItem", admin: false },
       { title: "Send Email", path: "/AllUserOrders", admin: false },
       { title: "Reconcile Order", path: "/OrderRecon", admin: true },
 
       // { title: "Add User", path: "/Register", admin: true },
+      // {
+      //   title: "Manage",
+      //   path: "",
+      //   admin: true,
+      //   childRoutes: [
+      //     {
+      //       title: "User",
+      //       path: "/ManageUsers",
+      //     },
+      //     { title: "Order", path: "/orders" },
+      //     { title: "Schedule", path: "/PackerSchedule" },
+      //     { title: "Items", path: "/ManageItems" },
+      //   ],
+      // },
       { title: "Manage Items", path: "/ManageItems", admin: true },
-      { title: "Manage Users", path: "/ManageUsers", admin: true }
+      { title: "Manage Users", path: "/ManageUsers", admin: true },
+      { title: "Manage Order", path: "/orders", admin: true },
+      { title: "Packer Schedule", path: "/PackerSchedule", admin: false },
+
       // { title: "FAQ", path: "/About", admin: false }
 
       //{ title: "Profile", path: "/profile", admin: false },
     ],
+    ManageMenu: {
+        title: "Manage",
+        path: "",
+        admin: true,
+        childRoutes: [
+          {
+            title: "User",
+            path: "/ManageUsers",
+          },
+          { title: "Order", path: "/orders" },
+          { title: "Schedule", path: "/PackerSchedule" },
+          { title: "Items", path: "/ManageItems" },
+        ],
+      },
     profileItems: [
-      { title: "Profile", path: "/profile", admin: false, onClick: "" }
+      { title: "Profile", path: "/profile", admin: false, onClick: "" },
     ],
     valid: false,
     snackbar: false,
@@ -291,7 +225,7 @@ export default {
     isValidUser: false,
     displayMenu: false,
     displayAdminMenu: false,
-    viewPortFlag: true
+    viewPortFlag: true,
   }),
   created() {
     this.items = [];
@@ -313,7 +247,7 @@ export default {
       },
       set(value) {
         this.$store.commit("togglePounds", value);
-      }
+      },
     },
     isOrderLocked: {
       get() {
@@ -321,17 +255,17 @@ export default {
       },
       set(value) {
         this.$store.commit("toggleOrderLocked", value);
-      }
-    }
+      },
+    },
   },
   methods: {
     ...mapActions([
       "resetStateAction",
       "updateOrderAction",
       "getOrderStatusAction",
-      "getOrdersAction"
+      "getOrdersAction",
     ]),
-    snackMessage: function(message) {
+    snackMessage: function (message) {
       this.message = message;
       this.snackbar = true;
     },
@@ -345,13 +279,12 @@ export default {
     },
     toggleGmsLbs() {
       this.isPounds = this.isPounds ? false : true;
-      console.log(this.isPounds);
     },
     getMenuItems() {
       if (this.isAdminUser) {
         return this.menuItems;
       } else {
-        return this.menuItems.filter(i => i.admin === false);
+        return this.menuItems.filter((i) => i.admin === false);
       }
     },
     async toggleOrderLock() {
@@ -361,18 +294,18 @@ export default {
         orderDt: this.getCurrentOrder.orderDt,
         cutOffDt: null,
         orderStatus: this.getCurrentOrder.orderStatus,
-        isLocked: this.isOrderLocked
+        isLocked: this.isOrderLocked,
       });
       if (parseInt(this.isOrderLocked) === 1)
         this.snackMessage("Order is Locked!");
     },
-    resetState: function() {
+    resetState: function () {
       this.resetStateAction();
       this.setDisplayMenu();
       this.$router.push({ path: "/login" });
     },
-    signInUser: function() {}
-  }
+    signInUser: function () {},
+  },
 };
 </script>
 <style lang="scss" scoped>

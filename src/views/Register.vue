@@ -7,14 +7,14 @@
       <v-card-text class="pt-5">
         <v-form ref="form" v-model="valid">
           <v-text-field
-            label="FirstName"
+            label="First Name"
             prepend-icon="mdi-account-circle"
             v-model="firstname"
             required
             :rules="reqRule"
           />
           <v-text-field
-            label="LastName"
+            label="Last Name"
             prepend-icon="mdi-account-circle"
             v-model="lastname"
             required

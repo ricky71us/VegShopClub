@@ -304,6 +304,7 @@ export default {
       }
     },
     calcItemPrice: function (itempo, item) {
+      
       if (parseFloat(itempo.actQtyConv) === 0 || itempo.actQtyConv === "") {
         itempo.isPacked = 0;
       }
@@ -317,7 +318,7 @@ export default {
       else itempo.actQty = itempo.actQtyConv;
 
       this.allQtyEntered = true;
-      if (parseInt(item.totalPrice) > 0 && parseInt(this.grandTotalAct) > 0) {
+      if (parseFloat(item.totalPrice) > 0 && parseFloat(this.grandTotalAct) > 0) {
         if (this.allQtyEntered) {
           this.itemUnitPrice = itempo.actPriceFinal = item.actPriceFinal =
             this.grandTotalAct > 0
@@ -542,8 +543,10 @@ export default {
 
       this.localItemPo.forEach((item) => {
         if (item) {
+
           if (this.allQtyEntered)
-            this.allQtyEntered = parseInt(item.actQty) === 0 ? false : true;
+            this.allQtyEntered = parseFloat(item.actQty) === 0 ? false : true;
+
           totalQty += item.actQty ? parseFloat(item.actQty) : null;
         }
       });
