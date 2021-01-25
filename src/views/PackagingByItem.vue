@@ -1,18 +1,39 @@
 <template>
   <div>
-    <v-card class="mx-auto mt-5" max-width="1100" color="orange" rounded>
+    <BaseNoActiveOrderMessage v-if="!getCurrentOrder" />
+
+    <v-card
+      class="mx-auto mt-5"
+      max-width="1100"
+      color="orange"
+      v-if="getCurrentOrder"
+      rounded
+    >
       <v-list-item dense>
         <v-list-item-content dens class="ma-0 pa-0">
           <v-container class="ma-0 pa-0">
             <v-row no-gutters>
-              <v-col cols="11" class="ma-0 pt-2 text-md-center hidden-sm-and-down">Pack Order</v-col>
-              <v-col cols="10" class="ma-0 pt-2 text-md-center hidden-md-and-up">Pack Order</v-col>
-              <v-col cols="1" class="ma-0 pa-0 text-md-start hidden-sm-and-down">
+              <v-col
+                cols="11"
+                class="ma-0 pt-2 text-md-center hidden-sm-and-down"
+                >Pack Order</v-col
+              >
+              <v-col cols="10" class="ma-0 pt-2 text-md-center hidden-md-and-up"
+                >Pack Order
+              </v-col>
+              <v-col
+                cols="1"
+                class="ma-0 pa-0 text-md-start hidden-sm-and-down"
+              >
                 <v-tooltip bottom>
                   <template v-slot:activator="{ on }">
                     <v-btn v-on="on" dense small text>
-                      <v-icon large v-if="!isPounds" @click="toggleGmsLbs">mdi-weight-kilogram</v-icon>
-                      <v-icon large v-if="isPounds" @click="toggleGmsLbs">mdi-weight-pound</v-icon>
+                      <v-icon large v-if="!isPounds" @click="toggleGmsLbs"
+                        >mdi-weight-kilogram</v-icon
+                      >
+                      <v-icon large v-if="isPounds" @click="toggleGmsLbs"
+                        >mdi-weight-pound</v-icon
+                      >
                     </v-btn>
                   </template>
                   <span>lbs - kgs</span>
@@ -20,8 +41,12 @@
               </v-col>
               <v-col cols="2" class="ma-0 pa-0 text-md-start hidden-md-and-up">
                 <v-btn dense small text>
-                  <v-icon v-if="!isPounds" @click="toggleGmsLbs">mdi-weight-kilogram</v-icon>
-                  <v-icon v-if="isPounds" @click="toggleGmsLbs">mdi-weight-pound</v-icon>
+                  <v-icon v-if="!isPounds" @click="toggleGmsLbs"
+                    >mdi-weight-kilogram</v-icon
+                  >
+                  <v-icon v-if="isPounds" @click="toggleGmsLbs"
+                    >mdi-weight-pound</v-icon
+                  >
                 </v-btn>
               </v-col>
             </v-row>
@@ -29,35 +54,66 @@
         </v-list-item-content>
       </v-list-item>
     </v-card>
+    <v-card class="mx-auto mt-2" max-width="1100" dense>
+      <v-progress-linear v-model="progress" color="brown lighten-2" height="20">
+        <template v-slot="{ value }">
+           <strong>{{ Math.ceil(value) }}%</strong>
+        </template></v-progress-linear
+      >
+    </v-card>
     <v-card class="mx-auto ma-3" max-width="1100" tile dense shaped>
       <v-expansion-panels accordion>
         <v-expansion-panel v-for="item in ordItems" :key="item.itemId">
-          <v-expansion-panel-header ripple @click="getItemPo(item)" color="#ECEFF1">
+          <v-expansion-panel-header
+            ripple
+            @click="getItemPo(item)"
+            color="#ECEFF1"
+          >
             <div
               v-if="parseFloat(item.actPriceFinal) > 0"
-              style="color:#1B5E20"
-            >{{item.itemName}} ({{item.userCount}})</div>
-            <div
-              v-if="parseFloat(item.actPriceFinal) === 0"
-              style="color:red"
-            >{{item.itemName}} ({{item.userCount}})</div>
+              style="color: #1b5e20"
+            >
+              {{ item.itemName }} ({{ item.userCount }})
+            </div>
+            <div v-if="parseFloat(item.actPriceFinal) === 0" style="color: red">
+              {{ item.itemName }} ({{ item.userCount }})
+            </div>
           </v-expansion-panel-header>
           <v-expansion-panel-content>
             <v-form v-model="valid">
-              <v-card class="ma-auto mt-3" max-width="1000" dense color="grey lighten-4">
+              <v-card
+                class="ma-auto mt-3"
+                max-width="1000"
+                dense
+                color="grey lighten-4"
+              >
                 <v-list-item dense>
                   <v-list-item-content dens class="ma-0 pa-0">
                     <v-container class="ma-0 pa-0">
                       <v-row>
                         <v-col
                           cols="12"
-                          class="text-md-center hidden-sm-and-down"                          
-                        >Total Quantity Ordered - <span style="font-weight:bold;color:#33691E">{{convertGmsToLbs(item.actQty, item.defaultUnits)}} {{getDefaultUnits(item.defaultUnits)}}</span></v-col>
+                          class="text-md-center hidden-sm-and-down"
+                          >Total Quantity Ordered -
+                          <span style="font-weight: bold; color: #33691e"
+                            >{{
+                              convertGmsToLbs(item.actQty, item.defaultUnits)
+                            }}
+                            {{ getDefaultUnits(item.defaultUnits) }}</span
+                          ></v-col
+                        >
                         <v-col
                           cols="12"
                           class="text-sm-center hidden-md-and-up"
-                          style="font-size:12px"
-                        >Total Quantity Ordered - <span style="font-weight:bold;color:#33691E">{{convertGmsToLbs(item.actQty, item.defaultUnits)}} {{getDefaultUnits(item.defaultUnits)}}</span></v-col>
+                          style="font-size: 12px"
+                          >Total Quantity Ordered -
+                          <span style="font-weight: bold; color: #33691e"
+                            >{{
+                              convertGmsToLbs(item.actQty, item.defaultUnits)
+                            }}
+                            {{ getDefaultUnits(item.defaultUnits) }}</span
+                          ></v-col
+                        >
                         <!-- <v-col
                           cols="6"
                           class="text-md-right hidden-sm-and-down"
@@ -79,20 +135,32 @@
                       <v-row>
                         <v-col cols="6" justify="centre"></v-col>
 
-                        <v-col cols="2" class="hidden-sm-and-down">Ordered Qty</v-col>
+                        <v-col cols="2" class="hidden-sm-and-down"
+                          >Ordered Qty</v-col
+                        >
 
-                        <v-col cols="2" class="hidden-sm-and-down">Approximate Qty</v-col>
+                        <v-col cols="2" class="hidden-sm-and-down"
+                          >Approximate Qty</v-col
+                        >
                         <v-col
                           cols="3"
                           class="hidden-md-and-up"
-                          style="font-size:12px"
-                        >Approx. Qty ({{getDefaultUnits(item.defaultUnits)}})</v-col>
-                        <v-col cols="2" class="hidden-sm-and-down">Actual Qty</v-col>
+                          style="font-size: 12px"
+                          >Approx. Qty ({{
+                            getDefaultUnits(item.defaultUnits)
+                          }})</v-col
+                        >
+                        <v-col cols="2" class="hidden-sm-and-down"
+                          >Actual Qty</v-col
+                        >
                         <v-col
                           cols="3"
                           class="hidden-md-and-up"
-                          style="font-size:12px"
-                        >Actual ({{getDefaultUnits(item.defaultUnits)}})</v-col>
+                          style="font-size: 12px"
+                          >Actual ({{
+                            getDefaultUnits(item.defaultUnits)
+                          }})</v-col
+                        >
                         <!-- <v-col cols="1">Packed</v-col> -->
                         <!-- <v-col cols="2">Unit Price</v-col>
                         <v-col cols="2">Total</v-col>-->
@@ -102,24 +170,35 @@
                 </v-list-item>
               </v-card>
               <v-card class="mx-auto mt-1" max-width="1000" dense>
-                <v-list-item v-for="itempo in localItemPo" :key="itempo.id" dense>
+                <v-list-item
+                  v-for="itempo in localItemPo"
+                  :key="itempo.id"
+                  dense
+                >
                   <v-list-item-content dens class="ma-0 pa-0">
                     <v-container class="ma-0 pa-0">
                       <v-row class="ma-0 pa-0">
-                        <v-col cols="6" class="mt-6 pb-0">{{itempo.buyer}}</v-col>
+                        <v-col cols="6" class="mt-6 pb-0">{{
+                          itempo.buyer
+                        }}</v-col>
                         <v-col
                           cols="2"
                           class="mt-4 pb-0 text-md-center hidden-sm-and-down"
-                        >{{itempo.qtyConv}} {{itempo.defaultUnitsConv}}</v-col>
+                          >{{ itempo.qtyConv }}
+                          {{ itempo.defaultUnitsConv }}</v-col
+                        >
                         <v-col
                           cols="2"
                           class="mt-4 pb-0 text-md-center hidden-sm-and-down"
-                        >{{itempo.suggestedQtyConv}} {{itempo.defaultUnitsConv}}</v-col>
+                          >{{ itempo.suggestedQtyConv }}
+                          {{ itempo.defaultUnitsConv }}</v-col
+                        >
                         <v-col
                           cols="3"
                           class="mt-6 pb-0 text-md-center hidden-md-and-up"
-                          style="font-size:14px"
-                        >{{itempo.suggestedQtyConv}}</v-col>
+                          style="font-size: 14px"
+                          >{{ itempo.suggestedQtyConv }}</v-col
+                        >
                         <v-col cols="2" class="mb-2 pb-0 hidden-sm-and-down">
                           <v-flex shrink class="text-xl-left">
                             <v-text-field
@@ -151,7 +230,14 @@
                             single-line
                             onclick="this.select();"
                             :rules="qtyRules"
-                            style="font-size:14px; border: 1px solid;border-radius:3px;display:block;text-decoration:none; text-align:center !default;"
+                            style="
+                              font-size: 14px;
+                              border: 1px solid;
+                              border-radius: 3px;
+                              display: block;
+                              text-decoration: none;
+                              text-align: center !default;
+                            "
                           ></v-text-field>
                         </v-col>
                         <!-- <v-col cols="1" class="mb-2 pl-8">
@@ -177,29 +263,39 @@
                       <v-row>
                         <v-col
                           cols="6"
-                          style="font-size:11px;font-style: italic;"
+                          style="font-size: 11px; font-style: italic"
                           class="mt-2 pb-0 hidden-sm-and-down"
-                        >Unit Price $ {{item.actPriceFinal}} / {{item.defaultUnits}}</v-col>
+                          >Unit Price $ {{ item.actPriceFinal }} /
+                          {{ item.defaultUnits }}</v-col
+                        >
                         <v-col
                           cols="6"
-                          style="font-size:11px;font-style: italic;"
+                          style="font-size: 11px; font-style: italic"
                           class="mt-2 pb-0 hidden-md-and-up"
-                        >Unit Price $ {{item.actPriceFinal}} / {{item.defaultUnits}}</v-col>
+                          >Unit Price $ {{ item.actPriceFinal }} /
+                          {{ item.defaultUnits }}</v-col
+                        >
                         <v-col
                           cols="4"
                           class="mt-2 pl-6 hidden-sm-and-down text-md-end"
-                        >Total Packed Qty:</v-col>
+                          >Total Packed Qty:</v-col
+                        >
 
                         <v-col
                           cols="2"
-                          style="font-weight:bold;color:#33691E"
-                          class="mt-2 pa-3 hidden-sm-and-down"                          
-                        >{{grandTotal}}</v-col>
+                          style="font-weight: bold; color: #33691e"
+                          class="mt-2 pa-3 hidden-sm-and-down"
+                          >{{ grandTotal }}</v-col
+                        >
                         <v-col
                           cols="6"
-                          style="font-size:12px; text-align:right;"
+                          style="font-size: 12px; text-align: right"
                           class="mt-2 pa-3 hidden-md-and-up"
-                        >Total Qty: <span style="color:#33691E;font-weight:bold;">{{grandTotal}}</span> </v-col>
+                          >Total Qty:
+                          <span style="color: #33691e; font-weight: bold">{{
+                            grandTotal
+                          }}</span>
+                        </v-col>
                       </v-row>
                       <v-row>
                         <v-col class="hidden-md-and-up">
@@ -209,7 +305,8 @@
                             :disabled="!valid"
                             class="float-right"
                             small
-                          >Save</v-btn>
+                            >Save</v-btn
+                          >
                         </v-col>
                         <v-col class="hidden-sm-and-down">
                           <v-btn
@@ -217,7 +314,8 @@
                             @click="savePo(item)"
                             :disabled="!valid"
                             class="float-right"
-                          >Save</v-btn>
+                            >Save</v-btn
+                          >
                         </v-col>
                       </v-row>
                     </v-container>
@@ -230,6 +328,7 @@
         </v-expansion-panel>
       </v-expansion-panels>
     </v-card>
+
     <v-snackbar v-model="snackbar" :multi-line="multiLine">
       {{ this.message }}
       <v-btn color="red" text @click="snackbar = false">Close</v-btn>
@@ -256,12 +355,13 @@ export default {
       allQtyEntered: true,
       qtyRules: [(v) => !isNaN(v) || `Please enter a number`],
       itemQty: [],
+      power: 25,
     };
   },
   async mounted() {
     await this.getItems();
   },
-  created() {    
+  created() {
     this.getQtyByItem();
     this.getUsers();
   },
@@ -304,7 +404,6 @@ export default {
       }
     },
     calcItemPrice: function (itempo, item) {
-      
       if (parseFloat(itempo.actQtyConv) === 0 || itempo.actQtyConv === "") {
         itempo.isPacked = 0;
       }
@@ -318,7 +417,10 @@ export default {
       else itempo.actQty = itempo.actQtyConv;
 
       this.allQtyEntered = true;
-      if (parseFloat(item.totalPrice) > 0 && parseFloat(this.grandTotalAct) > 0) {
+      if (
+        parseFloat(item.totalPrice) > 0 &&
+        parseFloat(this.grandTotalAct) > 0
+      ) {
         if (this.allQtyEntered) {
           this.itemUnitPrice = itempo.actPriceFinal = item.actPriceFinal =
             this.grandTotalAct > 0
@@ -363,6 +465,7 @@ export default {
       });
     },
     async getItems() {
+      if (!this.getCurrentOrder) return;
       await this.getPurchaseOrderByOrderIdAction(this.getCurrentOrder.id);
       await this.getBulkOrderByOrderIdAction(this.getCurrentOrder.id);
       await this.bulkOrders.forEach((bo) => {
@@ -526,7 +629,7 @@ export default {
       "purchaseOrders",
       "getActiveBulkOrders",
     ]),
-    ...mapGetters(["getCurrentOrder"]),
+    ...mapGetters(["getCurrentOrder", "noActiveOrder"]),
     grandTotal: function () {
       var totalQty = 0;
       this.localItemPo.forEach((item) => {
@@ -543,7 +646,6 @@ export default {
 
       this.localItemPo.forEach((item) => {
         if (item) {
-
           if (this.allQtyEntered)
             this.allQtyEntered = parseFloat(item.actQty) === 0 ? false : true;
 
@@ -560,6 +662,15 @@ export default {
       set(value) {
         this.$store.commit("togglePounds", value);
       },
+    },
+    progress() {
+      if (this.ordItems) {
+        let packedItems = this.ordItems.filter(
+          (item) => item.actPriceFinal > 0
+        );
+        if (packedItems.length === 0) return 0;
+        else return (packedItems.length / this.ordItems.length) * 100;
+      } else return 0;
     },
   },
 };

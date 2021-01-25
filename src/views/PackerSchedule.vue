@@ -5,7 +5,9 @@
         <v-list-item-content dens class="ma-0 pa-0">
           <v-container class="ma-0 pa-0">
             <v-row no-gutters>
-              <v-col cols="10" class="pt-1 text-md-center">Packer Schedule</v-col>
+              <v-col cols="10" class="pt-1 text-md-center"
+                >Packer Schedule</v-col
+              >
               <v-col v-if="isAdminUser" cols="2" class="text-md-center pl-2">
                 <v-dialog
                   v-model="dialog"
@@ -19,14 +21,16 @@
                       dark
                       v-on="on"
                       @click="initializePackerSchedule()"
-                    >mdi-plus</v-icon>
+                      >mdi-plus</v-icon
+                    >
                   </template>
                   <v-card>
                     <v-form ref="form" v-model="valid">
                       <v-card-title
                         class="headline grey lighten-2"
                         primary-title
-                      >Add a Packer Schedule</v-card-title>
+                        >Add a Packer Schedule</v-card-title
+                      >
                       <v-card-text>
                         <v-autocomplete
                           v-model="updatedPackerSchedule.userId"
@@ -45,14 +49,16 @@
                           offset-y
                           min-width="290px"
                         >
-                          <template v-slot:activator="{ on:addMenu, attrs: addAttrs }">
+                          <template
+                            v-slot:activator="{ on: addMenu, attrs: addAttrs }"
+                          >
                             <v-text-field
                               v-model="updatedPackerSchedule.date"
                               label="Packer Date"
                               prepend-icon="mdi-calendar"
                               readonly
-                              v-bind="{...addAttrs}"
-                              v-on="{...addMenu}"
+                              v-bind="{ ...addAttrs }"
+                              v-on="{ ...addMenu }"
                             ></v-text-field>
                           </template>
                           <v-date-picker
@@ -69,14 +75,16 @@
                           class="mr-4"
                           @click="addNewPackerSchedule()"
                           @click.stop="dialog = false"
-                        >Save</v-btn>
+                          >Save</v-btn
+                        >
 
                         <v-btn
                           color="error"
                           class="mr-4"
                           @click="initializePackerSchedule()"
                           @click.stop="dialog = false"
-                        >Cancel</v-btn>
+                          >Cancel</v-btn
+                        >
                       </v-card-text>
 
                       <v-divider></v-divider>
@@ -93,23 +101,152 @@
         </v-list-item-content>
       </v-list-item>
     </v-card>
+
+    <v-card class="mx-auto ma-3" max-width="1100" tile dense shaped>
+      <v-expansion-panels accordion v-model="panel">
+        <v-expansion-panel>
+          <v-expansion-panel-header color="grey lighten-1"
+            >Current</v-expansion-panel-header
+          >
+          <v-expansion-panel-content>
+            <v-form ref="form" v-model="valid">
+              <v-simple-table class="pt-3">
+                <template v-slot:default>
+                  <!-- <thead>
+                    <tr>
+                      <th class="text-left">User</th>
+                      <th class="text-left">Packing Date</th>
+                    </tr>
+                  </thead> -->
+                  <tbody>
+                    <tr v-for="item in packerSchedules" :key="item.id">
+                      <td>{{ getUserName(item.userId) }}</td>
+                      <td>{{ item.date }}</td>
+                      <td v-if="isAdminUser">
+                        <v-dialog
+                          v-model="dialogEdit[item.id]"
+                          width="500"
+                          :key="item.id"
+                          :id="item.id"
+                        >
+                          <template v-slot:activator="{ on: editTemplate }">
+                            <v-icon
+                              color="primary"
+                              :id="item.id"
+                              dark
+                              v-on="{ ...editTemplate }"
+                              @click="editPackerSchedule(item)"
+                              >mdi-pencil</v-icon
+                            >
+                          </template>
+                          <v-card>
+                            <v-card-title
+                              class="headline grey lighten-2"
+                              primary-title
+                              >Packer Schedule Details</v-card-title
+                            >
+
+                            <v-card-text>
+                              <v-autocomplete
+                                v-model="tempPackerSchedule.userId"
+                                item-value="id"
+                                item-text="firstname"
+                                :items="localUsers"
+                                label="User"
+                                required
+                              ></v-autocomplete>
+
+                              <v-menu
+                                v-model="editDateMenu[item.id]"
+                                :close-on-content-click="true"
+                                :nudge-right="40"
+                                transition="scale-transition"
+                                min-width="290px"
+                              >
+                                <template
+                                  v-slot:activator="{
+                                    on: editMenu,
+                                    attrs: editAttrs,
+                                  }"
+                                >
+                                  <v-text-field
+                                    v-model="tempPackerSchedule.date"
+                                    label="Packer Date"
+                                    prepend-icon="mdi-calendar"
+                                    readonly
+                                    v-bind="{ ...editAttrs }"
+                                    v-on="{ ...editMenu }"
+                                  ></v-text-field>
+                                </template>
+                                <v-date-picker
+                                  :return-value.sync="tempPackerSchedule.date"
+                                  v-model="tempPackerSchedule.date"
+                                  @input="editMenuFlag = false"
+                                  :min="nowDate"
+                                ></v-date-picker>
+                              </v-menu>
+
+                              <v-btn
+                                color="success"
+                                class="mr-4"
+                                @click="updatePackerSchedule()"
+                                @click.stop="$set(dialogEdit, item.id, false)"
+                                >Save</v-btn
+                              >
+
+                              <v-btn
+                                color="error"
+                                class="mr-4"
+                                @click="initializePackerSchedule()"
+                                @click.stop="$set(dialogEdit, item.id, false)"
+                                >Cancel</v-btn
+                              >
+                            </v-card-text>
+
+                            <v-divider></v-divider>
+
+                            <v-card-actions>
+                              <v-spacer></v-spacer>
+                            </v-card-actions>
+                          </v-card>
+                        </v-dialog>
+                      </td>
+                      <td>
+                        <v-icon
+                          v-if="isAdminUser"
+                          color="red"
+                          @click="deletePackerSchedule(item)"
+                          >mdi-delete</v-icon
+                        >
+                      </td>
+                    </tr>
+                  </tbody>
+                </template>
+              </v-simple-table>
+            </v-form>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+      </v-expansion-panels>
+    </v-card>
     <v-card class="mx-auto ma-3" max-width="1100" color="primary" elevation>
       <v-expansion-panels accordion>
         <v-expansion-panel>
-          <v-expansion-panel-header color="grey lighten-1">Past Schedule</v-expansion-panel-header>
+          <v-expansion-panel-header color="grey lighten-1"
+            >Past</v-expansion-panel-header
+          >
           <v-expansion-panel-content>
-            <v-simple-table>
+            <v-simple-table class="pt-3">
               <template v-slot:default>
-                <thead>
+                <!-- <thead>
                   <tr>
                     <th class="text-left">User</th>
                     <th class="text-left">Packing Date</th>
                   </tr>
-                </thead>
+                </thead> -->
                 <tbody>
                   <tr v-for="item in getPastPackerSchedule()" :key="item.id">
                     <td>{{ getUserName(item.userId) }}</td>
-                    <td>{{item.date}}</td>
+                    <td>{{ item.date }}</td>
                   </tr>
                 </tbody>
               </template>
@@ -117,105 +254,6 @@
           </v-expansion-panel-content>
         </v-expansion-panel>
       </v-expansion-panels>
-    </v-card>
-    <v-card class="mx-auto ma-3" max-width="1100" tile dense shaped>
-      <v-form ref="form" v-model="valid">
-        <v-simple-table>
-          <template v-slot:default>
-            <thead>
-              <tr>
-                <th class="text-left">User</th>
-                <th class="text-left">Packing Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="item in packerSchedules" :key="item.id">
-                <td>{{ getUserName(item.userId) }}</td>
-                <td>{{item.date}}</td>
-                <td v-if="isAdminUser">
-                  <v-dialog v-model="dialogEdit[item.id]" width="500" :key="item.id" :id="item.id">
-                    <template v-slot:activator="{ on:editTemplate }">
-                      <v-icon
-                        color="primary"
-                        :id="item.id"
-                        dark
-                        v-on="{...editTemplate}"
-                        @click="editPackerSchedule(item)"
-                      >mdi-pencil</v-icon>
-                    </template>
-                    <v-card>
-                      <v-card-title class="headline grey lighten-2" primary-title>Item Details</v-card-title>
-
-                      <v-card-text>
-                        <v-autocomplete
-                          v-model="tempPackerSchedule.userId"
-                          item-value="id"
-                          item-text="firstname"
-                          :items="localUsers"
-                          label="User"
-                          required
-                        ></v-autocomplete>
-
-                        <v-menu
-                          v-model="editDateMenu[item.id]"
-                          :close-on-content-click="true"
-                          :nudge-right="40"
-                          transition="scale-transition"
-                          min-width="290px"
-                        >
-                          <template v-slot:activator="{ on:editMenu, attrs:editAttrs }">
-                            <v-text-field
-                              v-model="tempPackerSchedule.date"
-                              label="Packer Date"
-                              prepend-icon="mdi-calendar"
-                              readonly
-                              v-bind="{...editAttrs}"
-                              v-on="{...editMenu}"
-                            ></v-text-field>
-                          </template>
-                          <v-date-picker
-                            :return-value.sync="tempPackerSchedule.date"
-                            v-model="tempPackerSchedule.date"
-                            @input="editMenuFlag = false"
-                            :min="nowDate"
-                          ></v-date-picker>
-                        </v-menu>
-
-                        <v-btn
-                          color="success"
-                          class="mr-4"
-                          @click="updatePackerSchedule()"
-                          @click.stop="$set(dialogEdit, item.id,  false)"
-                        >Save</v-btn>
-
-                        <v-btn
-                          color="error"
-                          class="mr-4"
-                          @click="initializePackerSchedule()"
-                          @click.stop="$set(dialogEdit, item.id,  false)"
-                        >Cancel</v-btn>
-                      </v-card-text>
-
-                      <v-divider></v-divider>
-
-                      <v-card-actions>
-                        <v-spacer></v-spacer>
-                      </v-card-actions>
-                    </v-card>
-                  </v-dialog>
-                </td>
-                <td>
-                  <v-icon
-                    v-if="isAdminUser"
-                    color="red"
-                    @click="deletePackerSchedule(item)"
-                  >mdi-delete</v-icon>
-                </td>
-              </tr>
-            </tbody>
-          </template>
-        </v-simple-table>
-      </v-form>
     </v-card>
     <v-snackbar v-model="snackbar" :multi-line="multiLine">
       {{ this.message }}
@@ -271,14 +309,16 @@ export default {
       addMenu: false,
       editMenuFlag: false,
       nowDate: new Date().toISOString().slice(0, 10),
+      panel: 0,
     };
   },
-  async created() {
-    await this.getUsers();
+  created() {
+    this.getUsers();
+    this.getPastPackerSchedule();
   },
   async mounted() {
     await this.getPackerScheduleAction("c");
-    await this.sortedData();
+    await this.sortedData(this.packerSchedules);
   },
 
   methods: {
@@ -297,6 +337,7 @@ export default {
       await dataService.getAllUsers().then((response) => {
         this.localUsers = response;
       });
+      this.getPastPackerSchedule();
     },
     deletePackerSchedule: function (schedule) {
       if (
@@ -318,8 +359,8 @@ export default {
       if (this.pastSchedule.length === 0 || !this.pastSchedule)
         dataService.getPackerSchedule("p").then((response) => {
           this.pastSchedule = response;
-        });
-      return this.pastSchedule;
+        });      
+        return this.pastSchedule;
     },
     editPackerSchedule: function (item) {
       this.valid = true;
@@ -365,15 +406,15 @@ export default {
         `Schedule for packer ${userName} updated successfully!`
       );
 
-      this.sortedData();
+      this.sortedData(this.packerSchedules);
     },
     validate() {
       if (this.$refs.form.validate()) {
         this.snackbar = true;
       }
     },
-    sortedData: function () {
-      return this.packerSchedules.sort(function (a, b) {
+    sortedData: function (ps) {
+      return ps.sort(function (a, b) {
         if (a.date < b.date) {
           return -1;
         }
@@ -383,6 +424,7 @@ export default {
         return 0;
       });
     },
+   
     getUserName(id) {
       let user = this.localUsers.find((u) => u.id === id);
       return user ? `${user.firstname} ${user.lastname}` : "User Not Found";

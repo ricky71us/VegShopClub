@@ -1,6 +1,12 @@
 <template>
   <div>
-    <v-card class="mx-auto mt-5" max-width="1100" color="orange" rounded>
+    <v-card
+      class="mx-auto mt-5"
+      max-width="1100"
+      color="orange"
+      rounded
+      v-if="getCurrentOrder"
+    >
       <v-list-item dense>
         <v-list-item-content dens class="ma-0 pb-0">
           <v-container class="ma-0 pa-0">
@@ -8,7 +14,11 @@
               <v-col cols="7" class="hidden-md-and-up pt-2 ma-0"
                 >Order Summary</v-col
               >
-              <v-col cols="5" class="hidden-md-and-up pt-1 ma-0">
+              <v-col
+                cols="5"
+                class="hidden-md-and-up pt-1 ma-0"
+                v-if="getCurrentOrder"
+              >
                 <v-btn
                   v-if="isOrderLocked"
                   @click="toggleOrderLock"
@@ -89,7 +99,7 @@
       </v-list-item>
     </v-card>
 
-    <v-card class="mx-auto pa-0 mt-3" max-width="1100">
+    <v-card class="mx-auto pa-0 mt-3" max-width="1100" v-if="getCurrentOrder">
       <v-row>
         <v-col cols="10">
           <v-sheet rounded class="ml-2" style="color: #006064"
@@ -203,7 +213,32 @@
       </v-row>
     </v-card>
 
-    <v-layout v-resize="onResize" class="mt-2" column style="padding-top: 7px">
+    <v-card class="mx-auto pl-3 mt-3" max-width="1100" v-if="getCurrentOrder">
+      <v-simple-table v-if="isMobile" dense>
+        <template v-slot:default>
+          <thead>
+            <tr>
+              <th class="text-left" style="background-color: #e0e0e0">
+                Users who have placed Order
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in chartUserItem.labels" :key="item">
+              <td style="background-color: #ffffff">{{ item }}</td>
+            </tr>
+          </tbody>
+        </template>
+      </v-simple-table>
+    </v-card>
+
+    <v-layout
+      v-resize="onResize"
+      class="mt-2"
+      column
+      style="padding-top: 7px"
+      v-if="getCurrentOrder"
+    >
       <v-data-table
         :headers="reportHeader"
         :items="reportData"
@@ -234,6 +269,62 @@
       </v-data-table>
     </v-layout>
 
+    <BaseNoActiveOrderMessage v-if="!getCurrentOrder" />
+    <template v-if="childDataLoaded">
+      <v-divider class="mx-4"></v-divider>
+      <!-- <v-simple-table v-if="childDataLoaded">
+      <tbody>
+        <tr>
+          <td cols="6"> -->
+      <v-lazy        
+        :options="{
+          threshold: 0.5,
+        }"
+        min-height="200"
+        transition="fab-transition"
+      >
+        <v-card class="mx-auto ma-3" max-width="1000" elevation shaped>
+          <BaseBarChart
+            v-bind:c-labels="[...chartData.labels]"
+            v-bind:c-values="[...chartData.value]"
+            v-bind:c-header="chartHeader[0]"
+          />
+        </v-card>
+      </v-lazy>
+      <v-divider class="mx-4"></v-divider>
+      <v-lazy        
+        :options="{
+          threshold: 0.5,
+        }"
+        min-height="200"
+        transition="fab-transition"
+      >
+        <v-card class="mx-auto ma-3" max-width="1000" elevation shaped>
+          <BaseBarChart
+            v-bind:c-labels="[...chartUserOrderItems.labels]"
+            v-bind:c-values="[...chartUserOrderItems.value]"
+            v-bind:c-header="chartHeader[1]"
+          />
+        </v-card>
+      </v-lazy>
+      <v-divider class="mx-4" inset></v-divider>
+      <v-lazy        
+        :options="{
+          threshold: 0.5,
+        }"
+        min-height="200"
+        transition="slide-x-transition"
+      >
+        <v-card class="mx-auto ma-3" max-width="600" elevation shaped>
+          <BaseBarChart
+            v-bind:c-labels="[...chartUserItem.labels]"
+            v-bind:c-values="[...chartUserItem.value]"
+            v-bind:c-header="chartHeader[2]"
+          />
+        </v-card>
+      </v-lazy>
+    </template>
+
     <v-snackbar id="header-snackbar" v-model="snackbar" :multi-line="multiLine">
       {{ this.message }}
       <v-btn color="red" text @click="snackbar = false">Close</v-btn>
@@ -250,6 +341,7 @@ import "jspdf-autotable";
 
 export default {
   name: "orderReport",
+
   data() {
     return {
       localUsers: [],
@@ -276,15 +368,25 @@ export default {
       localItems: [],
       dialog: false,
       sortedItems: [],
+      chartData: { labels: [], value: [] },
+      chartUserItem: { labels: [], value: [] },
+      childDataLoaded: false,
+      chartHeader: [],
+      chartUserOrderItems: { labels: [], value: [] },
+      isActive: false,
     };
   },
-  async created() {},
-  async mounted() {
+  async created() {
+    this.chartHeader.push(["Item Qty", "#B2DFDB"]);
+    this.chartHeader.push(["Item's in Order Qty", "#7CB342"]);
+    this.chartHeader.push(["User Qty", "#EF5350"]);
+
     await this.setOrderLock();
     await this.getQtyByItem();
     await this.getData();
-    this.getSortedItems();
+    await this.getSortedItems();
   },
+  mounted() {},
   methods: {
     ...mapActions([
       "getPurchaseOrderByOrderIdAction",
@@ -427,8 +529,9 @@ export default {
       });
     },
     setOrderLock: function () {
-      this.isOrderLocked =
-        parseInt(this.getCurrentOrder.isLocked) === 1 ? true : false;
+      if (this.getCurrentOrder)
+        this.isOrderLocked =
+          parseInt(this.getCurrentOrder.isLocked) === 1 ? true : false;
     },
     snackMessage: function (message) {
       this.message = message;
@@ -587,6 +690,8 @@ export default {
     },
 
     async getData() {
+      //if (!this.getCurrentOrder) return;
+      let itemCount = 0;
       this.reportData = [];
       this.reportHeader = [];
       this.reportTotalRow = [];
@@ -628,6 +733,12 @@ export default {
             dataKey: "i_" + item.id,
           });
         }
+        if (!this.chartUserOrderItems.labels.find((l) => l === ai.name)) {
+          this.chartUserOrderItems.labels.push(ai.name);
+          itemCount = this.purchaseOrders.filter((po) => po.itemId === ai.id)
+            .length;
+          this.chartUserOrderItems.value.push(itemCount);
+        }
       });
 
       this.reportHeader.unshift({
@@ -643,6 +754,7 @@ export default {
         title: "Buyer",
         dataKey: "userName",
       });
+
       this.localUsers
         .sort(function (a, b) {
           if (a.firstname < b.firstname) {
@@ -671,6 +783,11 @@ export default {
             }
           });
           //console.log(this.pdfRows);
+          if (this.userItemCount > 0) {
+            this.chartUserItem.labels.push(`${u.firstname} ${u.lastname}`);
+            this.chartUserItem.value.push(this.userItemCount);
+          }
+
           this.reportRow[
             "userName"
           ] = `${u.firstname} ${u.lastname} - (${this.userItemCount}) `;
@@ -692,6 +809,11 @@ export default {
         let tot = this.itemQty.find((iq) => iq.itemId === i.id);
         if (tot) {
           this.reportTotalRow.push(tot.qty);
+          if (tot.qty > 1) {
+            this.chartData.value.push(tot.qty);
+            this.chartData.labels.push(i.name);
+          }
+
           this.pdfTotalsRow["i_" + i.id] = tot.qty;
         } else {
           this.reportTotalRow.push("");
@@ -710,6 +832,8 @@ export default {
         this.pdfRows.push(this.pdfRow);
       });
       this.pdfRows.push(this.pdfTotalsRow);
+
+      this.childDataLoaded = true;
     },
     async getUsers() {
       await dataService.getAllUsers().then((response) => {
@@ -731,7 +855,7 @@ export default {
   },
   computed: {
     ...mapState(["purchaseOrders", "bulkOrders", "items", "user"]),
-    ...mapGetters(["getCurrentOrder"]),
+    ...mapGetters(["getCurrentOrder", "noActiveOrder"]),
     getPurchaseOrderByItem() {
       return this.purchaseOrders.filter(
         (po) => po.itemId === this.selectedItem
@@ -742,6 +866,11 @@ export default {
 </script>
 
 <style lang="css" >
+.v-sheet--offset {
+  top: -24px;
+  position: relative;
+}
+
 .mobile {
   color: #333;
 }

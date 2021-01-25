@@ -1,6 +1,13 @@
 <template>
   <div>
-    <v-card class="mx-auto mt-5" max-width="1100" color="orange" rounded>
+    <BaseNoActiveOrderMessage v-if="!getCurrentOrder" />
+    <v-card
+      class="mx-auto mt-5"
+      max-width="1100"
+      color="orange"
+      rounded
+      v-if="getCurrentOrder"
+    >
       <v-list-item dense>
         <v-list-item-content dens class="ma-0 pa-0">
           <v-container class="ma-0 pa-0">
@@ -8,34 +15,70 @@
               <v-col
                 cols="10"
                 class="ma-0 pt-2 text-md-center hidden-sm-and-down"
-              >Final Check & Email</v-col>
-              <v-col cols="10" class="ma-0 pt-2 text-sm-center hidden-md-and-up">Final Check & Email</v-col>
-              <v-col cols="1" class="ma-0 pt-1 text-md-center hidden-sm-and-down">
-                <v-btn class="ma-0" color="primary" small @click.stop="dialog = true;">
+                >Final Check & Email</v-col
+              >
+              <v-col cols="10" class="ma-0 pt-2 text-sm-center hidden-md-and-up"
+                >Final Check & Email</v-col
+              >
+              <v-col
+                cols="1"
+                class="ma-0 pt-1 text-md-center hidden-sm-and-down"
+              >
+                <v-btn
+                  class="ma-0"
+                  color="primary"
+                  small
+                  @click.stop="dialog = true"
+                >
                   <v-icon @click="setReadyToSendEmailFlag()">mdi-email</v-icon>
                 </v-btn>
                 <v-dialog v-model="dialog" max-width="290" modal>
                   <v-card>
                     <v-card-title class="headline" color="red">
-                      Send Email
+                      Send Email~
                       <v-spacer></v-spacer>
-                      <v-icon v-if="readyToSendEmail " color="green" large>mdi-email-alert</v-icon>
-                      <v-icon v-if="!readyToSendEmail" color="red" large>mdi-email-alert</v-icon>
+                      <v-icon v-if="readyToSendEmail" color="green" large
+                        >mdi-email-alert</v-icon
+                      >
+                      <v-icon v-if="!readyToSendEmail" color="red" large
+                        >mdi-email-alert</v-icon
+                      >
                     </v-card-title>
-                    <v-card-text v-if="readyToSendEmail ">"Are you ready to send email?"</v-card-text>
-                    <v-card-text
-                      v-if="!readyToSendEmail"
-                    >Looks like there are items that needs to be packed</v-card-text>
-                    <v-card-actions v-if="readyToSendEmail ">
+                    <v-card-text v-if="readyToSendEmail"
+                      >"Are you ready to send email?"</v-card-text
+                    >
+                    <v-card-text v-if="!readyToSendEmail"
+                      >Looks like there are items that needs to be
+                      packed</v-card-text
+                    >
+                    <v-card-actions v-if="readyToSendEmail">
                       <v-spacer></v-spacer>
-                      <v-btn color="green darken-1" text @click.stop="dialog = false">No</v-btn>
-                      <v-btn color="green darken-1" text @click="sendEmailAll(); dialog = false">Yes</v-btn>
+                      <v-btn
+                        color="green darken-1"
+                        text
+                        @click.stop="dialog = false"
+                        >No</v-btn
+                      >
+                      <v-btn
+                        color="green darken-1"
+                        text
+                        @click="
+                          sendEmailAll();
+                          dialog = false;
+                        "
+                        >Yes</v-btn
+                      >
                     </v-card-actions>
                   </v-card>
                 </v-dialog>
               </v-col>
               <v-col cols="2" class="ma-0 pt-0 text-sm-center hidden-md-and-up">
-                <v-btn class="ma-0" color="primary" small @click.stop="dialog = true;">
+                <v-btn
+                  class="ma-0"
+                  color="primary"
+                  small
+                  @click.stop="dialog = true"
+                >
                   <v-icon @click="setReadyToSendEmailFlag()">mdi-email</v-icon>
                 </v-btn>
                 <v-dialog v-model="dialog" max-width="290" modal>
@@ -43,17 +86,37 @@
                     <v-card-title class="headline" color="red">
                       Send Email
                       <v-spacer></v-spacer>
-                      <v-icon v-if="readyToSendEmail " color="green" large>mdi-email-alert</v-icon>
-                      <v-icon v-if="!readyToSendEmail" color="red" large>mdi-email-alert</v-icon>
+                      <v-icon v-if="readyToSendEmail" color="green" large
+                        >mdi-email-alert</v-icon
+                      >
+                      <v-icon v-if="!readyToSendEmail" color="red" large
+                        >mdi-email-alert</v-icon
+                      >
                     </v-card-title>
-                    <v-card-text v-if="readyToSendEmail ">"Are you ready to send email?"</v-card-text>
-                    <v-card-text
-                      v-if="!readyToSendEmail"
-                    >Looks like there are items that needs to be packed</v-card-text>
-                    <v-card-actions v-if="readyToSendEmail ">
+                    <v-card-text v-if="readyToSendEmail"
+                      >"Are you ready to send email?"</v-card-text
+                    >
+                    <v-card-text v-if="!readyToSendEmail"
+                      >Looks like there are items that needs to be
+                      packed</v-card-text
+                    >
+                    <v-card-actions v-if="readyToSendEmail">
                       <v-spacer></v-spacer>
-                      <v-btn color="green darken-1" text @click.stop="dialog = false">No</v-btn>
-                      <v-btn color="green darken-1" text @click="sendEmailAll(); dialog = false">Yes</v-btn>
+                      <v-btn
+                        color="green darken-1"
+                        text
+                        @click.stop="dialog = false"
+                        >No</v-btn
+                      >
+                      <v-btn
+                        color="green darken-1"
+                        text
+                        @click="
+                          sendEmailAll();
+                          dialog = false;
+                        "
+                        >Yes</v-btn
+                      >
                     </v-card-actions>
                   </v-card>
                 </v-dialog>
@@ -67,8 +130,11 @@
                         large
                         v-if="!isPounds"
                         @click="toggleGmsLbs"
-                      >mdi-weight-kilogram</v-icon>
-                      <v-icon large v-if="isPounds" @click="toggleGmsLbs">mdi-weight-pound</v-icon>
+                        >mdi-weight-kilogram</v-icon
+                      >
+                      <v-icon large v-if="isPounds" @click="toggleGmsLbs"
+                        >mdi-weight-pound</v-icon
+                      >
                     </v-btn>
                   </template>
                   <span>lbs - kgs</span>
@@ -91,18 +157,31 @@
         </v-list-item-content>
       </v-list-item>
     </v-card>
+    <v-card class="mx-auto mt-2" max-width="1100" dense>
+      <v-progress-linear
+        v-model="progress"
+        color="brown lighten-2"
+        height="20"        
+      >
+        <template v-slot="{ value }">
+          <strong>{{ Math.ceil(value) }}%</strong>
+        </template>
+      </v-progress-linear>
+    </v-card>
     <v-card class="mx-auto ma-3" max-width="1100" dense>
       <v-expansion-panels accordion>
         <v-expansion-panel v-for="user in localUsers" :key="user.id">
-          <v-expansion-panel-header ripple @click="getUserPo(user.id)" color="#ECEFF1">
-            <div
-              v-if="user.allPacked"
-              style="color:#1B5E20"
-            >{{user.firstname}} {{user.lastname}} ({{user.itemCount}})</div>
-            <div
-              v-if="!user.allPacked"
-              style="color:#DD2C00"
-            >{{user.firstname}} {{user.lastname}} ({{user.itemCount}})</div>
+          <v-expansion-panel-header
+            ripple
+            @click="getUserPo(user.id)"
+            color="#ECEFF1"
+          >
+            <div v-if="user.allPacked" style="color: #1b5e20">
+              {{ user.firstname }} {{ user.lastname }} ({{ user.itemCount }})
+            </div>
+            <div v-if="!user.allPacked" style="color: #dd2c00">
+              {{ user.firstname }} {{ user.lastname }} ({{ user.itemCount }})
+            </div>
           </v-expansion-panel-header>
           <v-expansion-panel-content>
             <v-form v-model="valid" v-if="displayItems">
@@ -111,19 +190,40 @@
                   <v-list-item-content dens class="ma-0 pa-0">
                     <v-container class="ma-0 pa-0">
                       <v-row no-gutters>
-                        <v-col class="ma-0 pa-0 align-centre hidden-sm-and-down" cols="4">Item</v-col>
-                        <v-col class="ma-0 pa-0 align-centre hidden-md-and-up" cols="9">Item</v-col>
+                        <v-col
+                          class="ma-0 pa-0 align-centre hidden-sm-and-down"
+                          cols="4"
+                          >Item</v-col
+                        >
+                        <v-col
+                          class="ma-0 pa-0 align-centre hidden-md-and-up"
+                          cols="9"
+                          >Item</v-col
+                        >
                         <!-- <v-col cols="2">Orderd Qty</v-col>
                         <v-col cols="2">Suggested Qty</v-col>-->
-                        <v-col class="pl-5 text-md-center hidden-sm-and-down" cols="2">Act Qty</v-col>
-                        <v-col cols="1" class="text-md-center hidden-sm-and-down">Verified</v-col>
-                        <v-col cols="3" class="text-sm-center hidden-md-and-up">Verified</v-col>
-                        <v-col class="text-md-end hidden-sm-and-down" cols="2">Unit Price</v-col>
                         <v-col
-                          style="text-align:right "
+                          class="pl-5 text-md-center hidden-sm-and-down"
+                          cols="2"
+                          >Act Qty</v-col
+                        >
+                        <v-col
+                          cols="1"
+                          class="text-md-center hidden-sm-and-down"
+                          >Verified</v-col
+                        >
+                        <v-col cols="3" class="text-sm-center hidden-md-and-up"
+                          >Verified</v-col
+                        >
+                        <v-col class="text-md-end hidden-sm-and-down" cols="2"
+                          >Unit Price</v-col
+                        >
+                        <v-col
+                          style="text-align: right"
                           class="pl-12 hidden-sm-and-down"
                           cols="3"
-                        >Total</v-col>
+                          >Total</v-col
+                        >
                       </v-row>
                     </v-container>
                   </v-list-item-content>
@@ -134,45 +234,63 @@
                   <v-list-item-content dens class="ma-0 pa-0">
                     <v-container class="ma-0 pa-0">
                       <v-row class="ma-0 pa-0">
-                        <v-col cols="4" class="mt-4 pb-0 hidden-sm-and-down">{{item.itemName}}</v-col>
-                        <v-col cols="9" class="mt-4 pb-0 hidden-md-and-up">{{item.itemName}}</v-col>
+                        <v-col cols="4" class="mt-4 pb-0 hidden-sm-and-down">{{
+                          item.itemName
+                        }}</v-col>
+                        <v-col cols="9" class="mt-4 pb-0 hidden-md-and-up">{{
+                          item.itemName
+                        }}</v-col>
 
                         <v-col
                           cols="2"
                           class="mt-4 pb-0 text-md-center hidden-sm-and-down"
-                        >{{item.actQtyConv}} {{item.defaultUnitsConv}}</v-col>
-                        <v-col cols="1" class="mt-2 pl-5 text-md-center hidden-sm-and-down">
+                          >{{ item.actQtyConv }}
+                          {{ item.defaultUnitsConv }}</v-col
+                        >
+                        <v-col
+                          cols="1"
+                          class="mt-2 pl-5 text-md-center hidden-sm-and-down"
+                        >
                           <v-icon
                             v-if="parseInt(item.isPacked) === 1"
-                            @click="itemPacked(item)"
+                            @click="itemPacked(item, user)"
                             color="green"
-                          >mdi-check</v-icon>
+                            >mdi-check</v-icon
+                          >
                           <v-icon
                             v-if="parseInt(item.isPacked) === 0"
-                            @click="itemPacked(item)"
+                            @click="itemPacked(item, user)"
                             color="red"
-                          >mdi-close</v-icon>
+                            >mdi-close</v-icon
+                          >
                         </v-col>
-                        <v-col cols="3" class="mt-2 pl-5 text-md-center hidden-md-and-up">
+                        <v-col
+                          cols="3"
+                          class="mt-2 pl-5 text-md-center hidden-md-and-up"
+                        >
                           <v-icon
                             v-if="parseInt(item.isPacked) === 1"
-                            @click="itemPacked(item)"
+                            @click="itemPacked(item, user)"
                             color="green"
-                          >mdi-check</v-icon>
+                            >mdi-check</v-icon
+                          >
                           <v-icon
                             v-if="parseInt(item.isPacked) === 0"
-                            @click="itemPacked(item)"
+                            @click="itemPacked(item, user)"
                             color="red"
-                          >mdi-close</v-icon>
+                            >mdi-close</v-icon
+                          >
                         </v-col>
                         <v-col
                           cols="2"
                           class="mt-4 pb-0 text-md-right hidden-sm-and-down"
-                        >$ {{parseFloat(item.actPrice).toFixed(2)}}</v-col>
+                          >$ {{ parseFloat(item.actPrice).toFixed(2) }}</v-col
+                        >
                         <v-col
                           cols="3"
                           class="mt-4 pb-0 text-md-right hidden-sm-and-down"
-                        >$ {{item.totalPrice}}</v-col>
+                          >$ {{ item.totalPrice }}</v-col
+                        >
                       </v-row>
                     </v-container>
                     <v-divider></v-divider>
@@ -187,9 +305,10 @@
 
                         <v-col
                           cols="3"
-                          style="font-weight:bold"
+                          style="font-weight: bold"
                           class="mt-4 pr-3 text-md-right hidden-sm-and-down"
-                        >$ {{grandTotal}}</v-col>
+                          >$ {{ grandTotal }}</v-col
+                        >
                       </v-row>
                     </v-container>
                   </v-list-item-content>
@@ -291,10 +410,12 @@ export default {
       actPriceList: [],
       displayItems: false,
       readyToSendEmail: true,
+      progressCount: [],
     };
   },
   async created() {},
   async mounted() {
+    if (!this.getCurrentOrder) return;
     await this.getPurchaseOrderByOrderIdAction(this.getCurrentOrder.id);
     await this.getBulkOrderByOrderIdAction(this.getCurrentOrder.id);
     await this.getUsers();
@@ -388,9 +509,13 @@ export default {
                 parseInt(po.isCancelled) === 0 &&
                 parseInt(po.suggestedQty) > 0
             );
-            if (user) this.localUsers.push(u);
+            if (user) {
+              this.localUsers.push(u);
+              this.progressCount.push({ userId: u.id, allPacked: true });
+            }
           });
       });
+
       let boItems = await this.bulkOrders.filter(
         (bo) => parseInt(bo.isCancelled) === 0 && parseFloat(bo.actQty) > 0
       );
@@ -401,7 +526,7 @@ export default {
             parseInt(po.isPacked) === 0 &&
             parseInt(po.isCancelled) === 0
         );
-
+        this.progressCount.find((u) => u.userId === lo.id).allPacked = true;        
         lo["allPacked"] = true;
         pos.forEach((po) => {
           if (
@@ -411,7 +536,12 @@ export default {
                 parseFloat(bo.actQty) > 0
             )
           ) {
-            if (lo["allPacked"]) lo["allPacked"] = false;
+            if (lo["allPacked"]) {
+              lo["allPacked"] = false;
+              this.progressCount.find(
+                (u) => u.userId === lo.id
+              ).allPacked = false;
+            }
             if (this.readyToSendEmail) this.readyToSendEmail = false;
           }
         });
@@ -522,12 +652,14 @@ export default {
       );
       if (user) {
         user.allPacked = unPackedItems ? false : true;
+        this.progressCount.find((u) => u.userId === userId).allPacked =
+          user.allPacked;
         user.nonePacked = packedItems ? false : true;
         this.setReadyToSendEmailFlag();
       }
     },
 
-    async itemPacked(itempo) {
+    async itemPacked(itempo, user) {
       let unitPriceNotSet = this.bulkOrders.find(
         (bo) =>
           bo.itemId === itempo.itemId && parseFloat(bo.actPriceFinal) === 0
@@ -536,6 +668,10 @@ export default {
         : false;
       if (!unitPriceNotSet) {
         itempo.allPacked = "true";
+        user.allPacked = "true";
+        this.progressCount.find(
+          (u) => u.userId === user.id
+        ).allPacked = true;
       }
       if (unitPriceNotSet) {
         this.snackMessage(
@@ -615,10 +751,15 @@ export default {
       this.setPackedFlags(this.localUserPo, id);
     },
   },
-
+  watch: {},
   computed: {
     ...mapState(["purchaseOrders", "items", "user", "bulkOrders"]),
-    ...mapGetters(["getCurrentOrder", "getActiveItems", "getActualPrice"]),
+    ...mapGetters([
+      "getCurrentOrder",
+      "getActiveItems",
+      "getActualPrice",
+      "noActiveOrder",
+    ]),
 
     grandTotal: function () {
       var total = 0;
@@ -639,6 +780,11 @@ export default {
       set(value) {
         this.$store.commit("togglePounds", value);
       },
+    },
+    progress() {
+      let packedItems = this.progressCount.filter((item) => item.allPacked);
+      if (packedItems.length === 0) return 0;
+      else return (packedItems.length / this.progressCount.length) * 100;
     },
   },
 };

@@ -88,13 +88,17 @@ const mutations = {
     state.packerSchedules.unshift(...packerSchedule); // mutable addition
   },
   updatePackerSchedule(state, packerSchedule) {
-    const index = state.packerSchedules.findIndex((c) => c.id === packerSchedule.id);
+    const index = state.packerSchedules.findIndex(
+      (c) => c.id === packerSchedule.id
+    );
     //console.log(`packerSchedule index of ${packerSchedule.name} ; ${packerSchedule.id} --> ${index}`);
     state.packerSchedules.splice(index, 1, packerSchedule);
     state.packerSchedules = [...state.packerSchedules];
   },
   deletePackerSchedule(state, packerSchedule) {
-    state.packerSchedules = [...state.packerSchedules.filter((p) => p.id !== packerSchedule.id)];
+    state.packerSchedules = [
+      ...state.packerSchedules.filter((p) => p.id !== packerSchedule.id),
+    ];
   },
   //Purchase Order
   getPurchaseOrder(state, purchaseOrders) {
@@ -275,7 +279,7 @@ const getters = {
     if (state.user) {
       return parseInt(state.user.isAdmin) === 1;
     }
-    return false
+    return false;
   },
   getItemById: (state) => (id) =>
     state.items.find((v) => parseInt(v.id) === parseInt(id)),
@@ -314,6 +318,9 @@ const getters = {
       }
     });
     return actualPricePerItem;
+  },
+  noActiveOrder: function(getters) {
+    return !getters.getCurrentOrder;
   },
 };
 

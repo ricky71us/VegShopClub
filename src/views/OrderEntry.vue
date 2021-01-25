@@ -1,12 +1,13 @@
 <template>
   <div>
+    <BaseNoActiveOrderMessage v-if="!getCurrentOrder" />
     <v-form v-if="pageLoaded" v-model="valid">
       <v-card class="mx-auto mt-4" max-width="1100" color="orange" rounded>
         <v-list-item dense>
           <v-list-item-content dens class="ma-0 pa-0">
             <!-- <v-container class="ma-0 pa-0"> -->
             <v-row>
-              <v-col cols="12" class="pt-2 text-md-center">My Order</v-col>
+              <v-col cols="12" class="pt-2 text-md-center"> My Order</v-col>
             </v-row>
             <!-- </v-container> -->
           </v-list-item-content>
@@ -14,14 +15,17 @@
       </v-card>
       <div class="text-center mx-auto mt-3" v-if="isOrderLocked">
         <v-sheet>
-          <div
-            style="color:red;"
-          >This order is now locked. We will let you know when we are ready for the next order.</div>
+          <div style="color: red">
+            This order is now locked. We will let you know when we are ready for
+            the next order.
+          </div>
         </v-sheet>
       </div>
       <div class="text-center mx-auto mt-3" v-if="isTestOrder">
         <v-sheet>
-          <div style="color:red;">This is a test order, do not place your order yet..</div>
+          <div style="color: red">
+            This is a test order, do not place your order yet..
+          </div>
         </v-sheet>
       </div>
       <v-card class="mx-auto mt-3" max-width="1100" tile dense shaped>
@@ -50,7 +54,7 @@
                     class="ma-0 pa-0"
                     @change="validateForm"
                     dense
-                    style="font-size:10px"
+                    style="font-size: 10px"
                   ></v-checkbox>
                 </v-col>
 
@@ -72,11 +76,16 @@
                     ></v-text-field>
                   </v-flex>
                 </v-col>
-                <v-col cols="3" class="mb-0 pt-6 text-sm-right hidden-md-and-up">{{item.totalPrice}}</v-col>
+                <v-col
+                  cols="3"
+                  class="mb-0 pt-6 text-sm-right hidden-md-and-up"
+                  >{{ item.totalPrice }}</v-col
+                >
                 <v-col
                   cols="3"
                   class="mb-0 pb-0 text-md-right hidden-sm-and-down"
-                >$ {{item.totalPrice}}</v-col>
+                  >$ {{ item.totalPrice }}</v-col
+                >
               </v-row>
             </v-container>
             <v-divider></v-divider>
@@ -91,8 +100,9 @@
                 <v-col
                   cols="12"
                   class="pr-9"
-                  style="font-weight:bold; text-align:right;"
-                >Approximate Total - ${{grandTotal}}</v-col>
+                  style="font-weight: bold; text-align: right"
+                  >Approximate Total - ${{ grandTotal }}</v-col
+                >
               </v-row>
             </v-container>
             <v-divider></v-divider>
@@ -179,8 +189,13 @@ export default {
       isTestOrder: false,
     };
   },
-  mounted() {
+  async mounted() {
     this.validateForm();
+    await this.getOrderStatusAction();
+    await this.getOrdersAction();
+    await this.getItemsAction();
+    await this.getPurchaseOrderByOrderIdAction(this.getCurrentOrder.id);
+    await this.getBulkOrderByOrderIdAction(this.getCurrentOrder.id);
     if (this.localItems.length === 0) this.getItems();
   },
   async created() {},
@@ -225,7 +240,7 @@ export default {
         }
       });
     },
-    validateForm() {      
+    validateForm() {
       let po = this.purchaseOrders.find(
         (po) => parseInt(po.isCancelled) === 0 && po.userId === this.user.id
       );
@@ -246,8 +261,9 @@ export default {
       });
     },
     setOrderLock: function () {
-      this.isOrderLocked =
-        parseInt(this.getCurrentOrder.isLocked) === 1 ? true : false;
+      if (this.getCurrentOrder)
+        this.isOrderLocked =
+          parseInt(this.getCurrentOrder.isLocked) === 1 ? true : false;
     },
     getItemPrice(qty, minQty, price, id) {
       if (this.selected.find((i) => i === id)) {
@@ -258,12 +274,13 @@ export default {
 
     /// Get purchase order
     async getItems() {
-      await this.getOrderStatusAction();
-      await this.getOrdersAction();
-      await this.getItemsAction();
+      if (!this.getCurrentOrder) return;
+      //await this.getOrderStatusAction();
+      //await this.getOrdersAction();
+      //await this.getItemsAction();
       await this.setOrderLock();
-      await this.getPurchaseOrderByOrderIdAction(this.getCurrentOrder.id);
-      await this.getBulkOrderByOrderIdAction(this.getCurrentOrder.id);
+      //await this.getPurchaseOrderByOrderIdAction(this.getCurrentOrder.id);
+      //await this.getBulkOrderByOrderIdAction(this.getCurrentOrder.id);
       this.setSelectedItems();
 
       let localPo = this.getPurchaseOrderByUser;
@@ -432,7 +449,12 @@ export default {
   },
   computed: {
     ...mapState(["items", "user", "purchaseOrders", "bulkOrders", "isPounds"]),
-    ...mapGetters(["getCurrentOrder", "getUserName", "getActiveItems"]),
+    ...mapGetters([
+      "getCurrentOrder",
+      "getUserName",
+      "getActiveItems",
+      "noActiveOrder",
+    ]),
     getPurchaseOrderByUser() {
       return this.purchaseOrders.filter((po) => po.userId === this.user.id);
     },

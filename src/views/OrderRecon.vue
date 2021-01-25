@@ -412,6 +412,7 @@ export default {
       });
     },
     async getData() {
+      if (!this.getCurrentOrder) return
       await this.getOrderStatusAction();
       await this.getOrdersAction();
       await this.getPurchaseOrderByOrderIdAction(this.getCurrentOrder.id);

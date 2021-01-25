@@ -1,9 +1,9 @@
 <template>
   <v-app>
     <BaseHeader v-if="isUserLoggedIn" />
-    <v-main>
+    <!-- <v-main> -->
       <router-view />
-    </v-main>
+    <!-- </v-main> -->
     <!-- <BaseFooter /> -->
   </v-app>
 </template>

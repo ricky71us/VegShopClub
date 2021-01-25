@@ -1,41 +1,53 @@
 <template>
   <div>
-    <v-form v-if="pageLoaded && parseInt(this.getCurrentOrder.isLocked) === 1" v-model="valid">
+    <BaseNoActiveOrderMessage v-if="!getCurrentOrder" />
+    <v-form v-if="pageLoaded && getIsPageLocked" v-model="valid">
       <v-divider></v-divider>
-      <v-card class="mx-auto mt-5" max-width="1100" dense color="orange" rounded>
+      <v-card
+        class="mx-auto mt-5"
+        max-width="1100"
+        dense
+        color="orange"
+        rounded
+      >
         <v-list-item dense>
           <v-list-item-content dens class="ma-0 pa-0">
             <v-container class="ma-0 pa-0">
               <v-row>
-                 <v-col cols="9" class="hidden-md-and-up pt-2 ma-0">Order Summary</v-col>
-              <v-col cols="3" class="hidden-md-and-up pt-1 ma-0">               
-                <v-btn
-                  @click="generatePdf"
-                  class="ma-0 pa-0 hidden-md-and-up"
-                  style="font-size:12px"
-                  text
-                  min-width="4"
-                  max-height="3"
+                <v-col cols="9" class="hidden-md-and-up pt-2 ma-0"
+                  >Order Summary</v-col
                 >
-                  <!-- <v-icon small left>mdi-file-pdf</v-icon> -->
-                  PDF
-                </v-btn>
-              </v-col>
-              <v-col cols="11" class="text-md-center hidden-sm-and-down">Order Summary</v-col>
-              <v-col
-                cols="1"
-                class="text-md-center hidden-sm-and-down ma-0 pa-0"
-                style="display: inline"
-              >
-                <span>                  
+                <v-col cols="3" class="hidden-md-and-up pt-1 ma-0">
                   <v-btn
                     @click="generatePdf"
-                    class="ma-0 pa-0 hidden-sm-and-down"
-                    style="font-size:11px"
+                    class="ma-0 pa-0 hidden-md-and-up"
+                    style="font-size: 12px"
                     text
-                  >PDF</v-btn>
-                </span>
-              </v-col>
+                    min-width="4"
+                    max-height="3"
+                  >
+                    <!-- <v-icon small left>mdi-file-pdf</v-icon> -->
+                    PDF
+                  </v-btn>
+                </v-col>
+                <v-col cols="11" class="text-md-center hidden-sm-and-down"
+                  >Order Summary</v-col
+                >
+                <v-col
+                  cols="1"
+                  class="text-md-center hidden-sm-and-down ma-0 pa-0"
+                  style="display: inline"
+                >
+                  <span>
+                    <v-btn
+                      @click="generatePdf"
+                      class="ma-0 pa-0 hidden-sm-and-down"
+                      style="font-size: 11px"
+                      text
+                      >PDF</v-btn
+                    >
+                  </span>
+                </v-col>
               </v-row>
             </v-container>
           </v-list-item-content>
@@ -46,26 +58,37 @@
           <v-list-item-content dens class="ma-0 pa-0">
             <v-container class="ma-0 pa-0">
               <v-row>
-                <v-col cols="4" class="hidden-md-and-up" style="font-size:12px">Item</v-col>
+                <v-col cols="4" class="hidden-md-and-up" style="font-size: 12px"
+                  >Item</v-col
+                >
                 <v-col cols="4" class="hidden-sm-and-down">Item</v-col>
-                <v-col class="text-md-center hidden-sm-and-down" cols="2">Ordered Qty</v-col>
+                <v-col class="text-md-center hidden-sm-and-down" cols="2"
+                  >Ordered Qty</v-col
+                >
                 <v-col
                   class="text-md-center hidden-md-and-up"
-                  style="font-size:12px"
+                  style="font-size: 12px"
                   cols="2"
-                >Ord Qty</v-col>
+                  >Ord Qty</v-col
+                >
                 <v-col
                   class="text-md-center hidden-md-and-up"
-                  style="font-size:12px"
+                  style="font-size: 12px"
                   cols="3"
-                >Act Qty</v-col>
-                <v-col class="text-md-center hidden-sm-and-down" cols="3">Act Qty</v-col>
-                <v-col class="text-md-center hidden-sm-and-down" cols="3">Total ($)</v-col>
+                  >Act Qty</v-col
+                >
+                <v-col class="text-md-center hidden-sm-and-down" cols="3"
+                  >Act Qty</v-col
+                >
+                <v-col class="text-md-center hidden-sm-and-down" cols="3"
+                  >Total ($)</v-col
+                >
                 <v-col
                   class="text-md-center hidden-md-and-up"
-                  style="font-size:12px"
+                  style="font-size: 12px"
                   cols="3"
-                >Total ($)</v-col>
+                  >Total ($)</v-col
+                >
                 <!-- <v-col cols="2">Unit Price</v-col> -->
               </v-row>
             </v-container>
@@ -77,24 +100,28 @@
           <v-list-item-content dens class="ma-0 pa-0">
             <v-container class="ma-0 pa-0">
               <v-row cols="4" class="ma-0 pa-0">
-                <v-col class="mt-2 hidden-md-and-up" style="font-size:12px">
+                <v-col class="mt-2 hidden-md-and-up" style="font-size: 12px">
                   <div class="tooltip">
-                    {{item.name.length > 15 ? item.name.substring(0,15) + '...' : item.name}}
-                    <span
-                      class="tooltiptext"
-                    >{{item.name}}</span>
+                    {{
+                      item.name.length > 15
+                        ? item.name.substring(0, 15) + "..."
+                        : item.name
+                    }}
+                    <span class="tooltiptext">{{ item.name }}</span>
                   </div>
                 </v-col>
-                <v-col class="mt-2 hidden-sm-and-down">{{item.name}}</v-col>
+                <v-col class="mt-2 hidden-sm-and-down">{{ item.name }}</v-col>
                 <v-col
                   cols="2"
                   class="mt-2 pb-0 text-md-center hidden-md-and-up"
-                  style="font-size:12px"
-                >{{item.qty}} {{item.defaultUnits}}</v-col>
+                  style="font-size: 12px"
+                  >{{ item.qty }} {{ item.defaultUnits }}</v-col
+                >
                 <v-col
                   cols="2"
                   class="mt-2 pb-0 text-md-center hidden-sm-and-down"
-                >{{item.qty}} {{item.defaultUnits}}</v-col>
+                  >{{ item.qty }} {{ item.defaultUnits }}</v-col
+                >
                 <v-col cols="3" class="mb-0 pb-2 hidden-sm-and-down">
                   <v-text-field
                     v-model="item.actQty"
@@ -120,14 +147,22 @@
                     background-color="grey lighten-4"
                     height="26"
                     onclick="this.select();"
-                    style="font-size:14px; border: 1px solid;border-radius:3px;text-align: end"
+                    style="
+                      font-size: 14px;
+                      border: 1px solid;
+                      border-radius: 3px;
+                      text-align: end;
+                    "
                     :rules="rules"
                   ></v-text-field>
                 </v-col>
-                <v-col cols="3" class="mb-0 pb-0 hidden-sm-and-down text-md-center">
+                <v-col
+                  cols="3"
+                  class="mb-0 pb-0 hidden-sm-and-down text-md-center"
+                >
                   <div
                     class="mb-0 pb-0 hidden-sm-and-down text-md-center"
-                    style="text-align:center"
+                    style="text-align: center"
                   >
                     <v-text-field
                       v-model="item.totalPrice"
@@ -156,7 +191,14 @@
                     background-color="grey lighten-4"
                     single-line
                     onclick="this.select();"
-                    style="font-size:14px; border: 1px solid;border-radius:3px;display:block;text-decoration:none; text-align:center !default;"
+                    style="
+                      font-size: 14px;
+                      border: 1px solid;
+                      border-radius: 3px;
+                      display: block;
+                      text-decoration: none;
+                      text-align: center !default;
+                    "
                     :rules="rules"
                   ></v-text-field>
                 </v-col>
@@ -170,7 +212,9 @@
           <v-list-item-content dens class="ma-0 pa-0">
             <v-container class="ma-0 pa-0">
               <v-row>
-                <v-col cols="12" style="font-weight:bold; text-align:right;">Total - ${{grandTotal}}</v-col>
+                <v-col cols="12" style="font-weight: bold; text-align: right"
+                  >Total - ${{ grandTotal }}</v-col
+                >
               </v-row>
             </v-container>
             <v-divider></v-divider>
@@ -202,7 +246,8 @@
                     @click="saveBo()"
                     :disabled="!valid"
                     class="float-right"
-                  >Save</v-btn>
+                    >Save</v-btn
+                  >
                 </v-col>
               </v-row>
             </v-container>
@@ -211,15 +256,25 @@
         </v-list-item>
       </v-card>
     </v-form>
-    <v-form v-if="parseInt(this.getCurrentOrder.isLocked) === 0" v-model="valid">
-      <v-card class="mx-auto mt-4" max-width="344" outlined>
+    <v-form v-if="!this.getIsPageLocked" v-model="valid">
+      <v-card
+        class="mx-auto mt-4"
+        max-width="344"
+        outlined
+        v-if="getCurrentOrder"
+      >
         <v-list-item three-line>
           <v-list-item-content>
-            <v-list-item-title class="headline mb-1">Order is Not Locked</v-list-item-title>
-            <v-list-item-subtitle>Please lock the order from Order Summary page before accessing this page.</v-list-item-subtitle>
+            <v-list-item-title class="headline mb-1"
+              >Order is Not Locked</v-list-item-title
+            >
+            <v-list-item-subtitle
+              >Please lock the order from Order Summary page before accessing
+              this page.</v-list-item-subtitle
+            >
           </v-list-item-content>
         </v-list-item>
-      </v-card>
+      </v-card>     
     </v-form>
     <v-snackbar v-model="snackbar" :multi-line="multiLine">
       {{ this.message }}
@@ -236,6 +291,7 @@ export default {
   name: "BulkOrder",
   data() {
     return {
+      isPageLocked: false,
       valid: false,
       localItems: [],
       itemQty: [],
@@ -379,6 +435,7 @@ export default {
       doc.save(`OrderSummary_${this.getCurrentOrder.id}.pdf`);
     },
     async getItems() {
+      //if (!this.getCurrentOrder) return
       await this.getOrderStatusAction();
       await this.getOrdersAction();
       await this.getPurchaseOrderByOrderIdAction(this.getCurrentOrder.id);
@@ -470,7 +527,18 @@ export default {
   },
   computed: {
     ...mapState(["bulkOrders", "items", "purchaseOrders"]),
-    ...mapGetters(["getCurrentOrder", "getActiveItems", "getActiveBulkOrders"]),
+    ...mapGetters([
+      "getCurrentOrder",
+      "getActiveItems",
+      "getActiveBulkOrders",
+      "noActiveOrder",
+    ]),
+    getIsPageLocked: function () {
+      if (!this.getCurrentOrder) {
+        return false;
+      } else if (parseInt(this.getCurrentOrder.isLocked) === 1) return true;
+      return false;
+    },
     grandTotal: function () {
       var total = 0;
       this.localItems.forEach((item) => {

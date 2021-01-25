@@ -4,11 +4,11 @@
       <v-app-bar color="blue-grey accent-4" elevate-on-scroll dense dark fixed>
         <div class="text-center">
           <v-menu offset-y transition="expand-transition">
-            <template v-slot:activator="{ on: menu }">
-              <v-btn v-on="{...menu}" dense small text>
-                <v-icon class="hidden-sm-and-down">mdi-dots-vertical</v-icon>
-                <v-icon small class="hidden-md-and-up">mdi-dots-vertical</v-icon>
-                <h3>VBC</h3>
+            <template v-slot:activator="{ on: menu }" >
+              <v-btn v-on="{...menu}" dense small text fab> 
+                <v-icon fab class="hidden-sm-and-down">mdi-dots-vertical</v-icon>
+                <v-icon fab small class="hidden-md-and-up">mdi-dots-vertical</v-icon>
+                vbc
               </v-btn>
             </template>
 

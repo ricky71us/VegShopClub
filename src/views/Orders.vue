@@ -50,7 +50,7 @@
                           ></v-date-picker>
                         </v-menu>
 
-                        <v-menu
+                        <!-- <v-menu
                           v-model="addCutOffDtMenu"
                           :close-on-content-click="true"
                           :nudge-right="40"
@@ -74,7 +74,7 @@
                             @input="addMenuCutOff = false"
                             :min="nowDate"
                           ></v-date-picker>
-                        </v-menu>
+                        </v-menu> -->
 
                         <v-btn
                           :disabled="!valid"
@@ -116,7 +116,7 @@
               <tr>
                 <th class="text-left">Order Id</th>
                 <th class="text-left">Order Date</th>
-                <th class="text-left">Cut Off Date</th>
+                <!-- <th class="text-left">Cut Off Date</th> -->
                 <th class="text-left">Status</th>
               </tr>
             </thead>
@@ -124,7 +124,7 @@
               <tr v-for="activeOrder in activeOrders" :key="activeOrder.id">
                 <td>{{activeOrder.id }}</td>
                 <td>{{activeOrder.orderDt}}</td>
-                <td>{{activeOrder.cutOffDt}}</td>
+                <!-- <td>{{activeOrder.cutOffDt}}</td> -->
                 <td>
                   <!-- <v-icon
                     :color="getStatusName(activeOrder.orderStatus).color"
@@ -185,7 +185,7 @@
                           ></v-date-picker>
                         </v-menu>
 
-                        <v-menu
+                        <!-- <v-menu
                           v-model="editDateMenu[activeOrder.id]"
                           :close-on-content-click="true"
                           :nudge-right="40"
@@ -208,7 +208,7 @@
                             @input="editMenuFlag = false"
                             :min="nowDate"
                           ></v-date-picker>
-                        </v-menu>
+                        </v-menu> -->
 
                         <v-btn
                           color="success"
@@ -251,7 +251,7 @@
                     <th class="text-left">Id</th>
                     <th class="text-left">Status</th>
                     <th class="text-left">Order Date</th>
-                    <th class="text-left">Cut off Date</th>
+                    <!-- <th class="text-left">Cut off Date</th> -->
                   </tr>
                 </thead>
                 <tbody>
@@ -264,7 +264,8 @@
                        {{getOrderStatus(item.orderStatus).status}}
                     </td>
                     <td>{{item.orderDt}}</td>
-                    <td>{{item.cutOffDt}}</td>
+                    <!-- <td>{{item.cutOffDt}}</td> -->
+                    
                   </tr>
                 </tbody>
               </template>
@@ -339,8 +340,7 @@ export default {
   async mounted() {
     this.getOrderStatusAction();
     this.getOrdersAction();
-    this.activeOrders.push(this.getCurrentOrder);
-    console.log(this.activeOrders);
+    this.activeOrders.push(this.getCurrentOrder);    
   },
 
   methods: {
