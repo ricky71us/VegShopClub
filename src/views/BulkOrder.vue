@@ -274,7 +274,7 @@
             >
           </v-list-item-content>
         </v-list-item>
-      </v-card>     
+      </v-card>
     </v-form>
     <v-snackbar v-model="snackbar" :multi-line="multiLine">
       {{ this.message }}
@@ -328,7 +328,7 @@ export default {
   mounted() {
     this.getQtyByItem();
     this.getItemsAction();
-    this.getItems();
+    if (this.getCurrentOrder !== undefined) this.getItems();
   },
   created() {
     //console.log("created");

@@ -1,8 +1,8 @@
 <script>
-import { Bar } from "vue-chartjs";
+import { Line } from "vue-chartjs";
 
 export default {
-  extends: Bar,
+  extends: Line,
   props: ["cLabels", "cValues", "cHeader", "cLabels1", "cValues1", "cHeader1"],
   data() {
     return {
@@ -13,14 +13,14 @@ export default {
             label: this.cHeader[0],
             //backgroundColor: "rgb(255, 99, 132)",
             backgroundColor: this.cHeader[1],
-            borderColor: "rgb(255, 99, 132)",
+            //borderColor: "rgb(255, 99, 132)",
             data: this.cValues,
           },
           {
             label: this.cHeader1 ? this.cHeader1[0] : "",
             //backgroundColor: "rgb(255, 99, 132)",
             backgroundColor: this.cHeader1 ? this.cHeader1[1] : "white",
-            borderColor: "rgb(255, 99, 132)",
+            //borderColor: "rgb(255, 99, 132)",
             data: this.cValues1,
           },
         ],
@@ -42,6 +42,8 @@ export default {
     };
   },
   mounted() {
+    console.log(this.cValues);
+
     this.renderChart(
       this.cHeader1 ? this.chartdata.datasets.pop() : this.chartdata,
       this.options
@@ -59,13 +61,13 @@ export default {
       },
     },
   },
-  watch: {
-    loaded: function (chartDataloaded) {
-      if (chartDataloaded) {
-        this.renderChart(this.chartdata, this.options);
-      }
-    },
-  },
+  // watch: {
+  //   loaded: function (chartDataloaded) {
+  //     if (chartDataloaded) {
+  //       //this.renderChart(this.chartdata, this.options);
+  //     }
+  //   },
+  // },
 };
 </script>
 

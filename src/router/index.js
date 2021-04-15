@@ -2,6 +2,8 @@ import Vue from "vue";
 import VueRouter from "vue-router";
 import Login from "../views/Login.vue";
 import Dashboard from "../views/Dashboard.vue";
+import DashboardU from "../views/DashboardUser.vue";
+import Report from "../views/Report.vue";
 import Register from "../views/Register.vue";
 import About from "../views/About.vue";
 import ManageItems from "../views/ManageItems.vue";
@@ -16,7 +18,7 @@ import PackagingByItem from "../views/PackagingByItem.vue";
 import Profile from "../views/Profile.vue";
 import AccessDenied from "../views/AccessDenied.vue";
 import OrderReport from "../views/OrderReport.vue";
-import PackerSchedule from "../views/PackerSchedule.vue"
+import PackerSchedule from "../views/PackerSchedule.vue";
 import TestPage from "../views/TestPage.vue";
 
 import VueAnalytics from "vue-analytics";
@@ -40,12 +42,24 @@ const routes = [
     name: "TestPage",
     component: TestPage,
     meta: { requiresAuth: true, adminOnly: true },
-  },  
+  },
   {
     path: "/dashboard",
     name: "dashboard",
     component: Dashboard,
+    meta: { requiresAuth: true, adminOnly: true },
+  },
+  {
+    path: "/dashboardU",
+    name: "dashboardU",
+    component: DashboardU,
     meta: { requiresAuth: true, adminOnly: false },
+  },
+  {
+    path: "/report",
+    name: "report",
+    component: Report,
+    meta: { requiresAuth: true, adminOnly: true },
   },
   {
     path: "/profile",
@@ -81,7 +95,7 @@ const routes = [
     path: "/allUserOrders",
     name: "allUserOrders",
     component: AllUserOrders,
-    meta: { requiresAuth: true , packerOnly: true},
+    meta: { requiresAuth: true, packerOnly: true },
   },
   {
     path: "/bulkOrder",
@@ -127,15 +141,14 @@ const routes = [
     name: "ManageUsers",
     component: ManageUsers,
     meta: { requiresAuth: true, adminOnly: true },
-  },  
+  },
   {
     path: "/packerSchedule",
     name: "PackerSchedule",
     component: PackerSchedule,
     meta: { requiresAuth: true, adminOnly: false },
-  },  
+  },
 ];
-
 
 const router = new VueRouter({
   //mode: "history",
@@ -144,13 +157,30 @@ const router = new VueRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  Vue.$ga.set('userId', `${store.state.user.firstname} ${store.state.user.lastname}`)
+  console.log(store.state.user.lastlogindate);
+  var timeSinceLastLogin =
+    Date.now() - new Date(store.state.user.lastlogindate);
+  console.log(timeSinceLastLogin);
+  var HoursSinceLastLogin = Math.abs(timeSinceLastLogin / 36e5);
+  console.log(HoursSinceLastLogin);
+  if (HoursSinceLastLogin > 4 && from.name !== "login") {
+    //|| store.state.user.lastlogindate === null
+    //|| isNaN(HoursSinceLastLogin)
+    //console.log(timeSinceLastLogin);
+    //console.log(Math.floor((timeSinceLastLogin / (1000 * 60 * 60)) % 24))
+    store.state.user = "";
+    store.state.isUserLoggedIn = false;
+  }
+  Vue.$ga.set(
+    "userId",
+    `${store.state.user.firstname} ${store.state.user.lastname}`
+  );
   if (to.matched.some((record) => record.meta.requiresAuth)) {
     // console.log(to.name);
     // console.log(store.state.isUserLoggedIn);
     if (to.name !== "login" && !store.state.isUserLoggedIn) {
-      // console.log("test1111");
-      // console.log(from);
+      //  console.log("test1111");
+      //  console.log(from);
       next({ name: "login" });
     } else if (
       to.matched.some(
@@ -160,16 +190,14 @@ router.beforeEach((to, from, next) => {
       )
     ) {
       next({ name: "accessDenied" });
-    } 
-    else if (
+    } else if (
       to.matched.some(
         (record) =>
           record.meta.packerOnly &&
-          (parseInt(store.state.user.isPacker) === parseInt(0) &&
-          parseInt(store.state.user.isAdmin) === parseInt(0))
-          
+          parseInt(store.state.user.isPacker) === parseInt(0) &&
+          parseInt(store.state.user.isAdmin) === parseInt(0)
       )
-    ) {    
+    ) {
       next({ name: "accessDenied" });
     } else {
       // console.log("Inside Else")
@@ -183,6 +211,20 @@ router.beforeEach((to, from, next) => {
     next(); // does not require auth, make sure to always call next()!
   }
 });
+
+// router.afterEach(() => {
+//   console.log(store.state.user.lastlogindate);
+//   var timeSinceLastLogin = Date.now() - new Date(store.state.user.lastlogindate);
+//   console.log(timeSinceLastLogin);
+//   var minutesSinceLastLogin = Math.floor((timeSinceLastLogin / (1000 * 60)) % 60);
+//   console.log(minutesSinceLastLogin);
+//   if(minutesSinceLastLogin > 1 || store.state.user.lastlogindate === null){
+//     //console.log(timeSinceLastLogin);
+//     //console.log(Math.floor((timeSinceLastLogin / (1000 * 60 * 60)) % 24))
+//     store.state.user = "";
+//     store.state.isUserLoggedIn = false;
+//   }
+// })
 
 Vue.use(VueAnalytics, {
   id: "UA-163162436-2",

@@ -131,6 +131,24 @@
           <v-icon small class="hidden-md-and-up">mdi-email-outline</v-icon>
         </v-btn>
 
+         <v-divider v-if="displayAdminMenu" class="mx-2 hidden-sm-and-down" inset vertical></v-divider>
+        <v-toolbar-title v-if="displayAdminMenu" class="hidden-sm-and-down">
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-btn v-on="on" class="ma-2" text icon small to="/report">
+                <v-icon class="hidden-sm-and-down">mdi-chart-bar</v-icon>
+                <!-- <v-icon small class="hidden-md-and-up">mdi-email-outline</v-icon> -->
+              </v-btn>
+            </template>
+            <span>Report</span>
+          </v-tooltip>
+        </v-toolbar-title>
+
+        <v-btn v-if="displayAdminMenu" class="ma-2 hidden-md-and-up" text icon small to="/report">
+          <v-icon small class="hidden-md-and-up">mdi-chart-bar</v-icon>
+        </v-btn>
+
+
         <v-spacer></v-spacer>
 
         <div class="text-center hidden-sm-and-down" v-if="displayMenu">
@@ -227,7 +245,11 @@ export default {
     displayAdminMenu: false,
     viewPortFlag: true,
   }),
+  beforeCreate(){
+    //this.resetStateAction();
+  },
   created() {
+    
     this.items = [];
     this.setDisplayMenu();
   },

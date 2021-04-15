@@ -1,68 +1,96 @@
 <template>
-  <v-card
-    class="mt-12 mx-auto"
-    max-width="400"
-  >
-    <v-sheet
-      class="v-sheet--offset mx-auto"
-      color="cyan"
-      elevation="12"
-      max-width="calc(100% - 32px)"
-    >
-      <v-sparkline
-        :labels="labels"
-        :value="value"
-        color="white"
-        line-width="2"
-        padding="16"
-      ></v-sparkline>
-    </v-sheet>
-
-    <v-card-text class="pt-0">
-      <div class="title font-weight-light mb-2">User Registrations</div>
-      <div class="subheading font-weight-light grey--text">Last Campaign Performance</div>
-      <v-divider class="my-2"></v-divider>
-      <v-icon
-        class="mr-2"
-        small
+  <v-card class="mt-12 mx-auto" max-width="1800">
+    <v-layout v-resize="onResize" class="mt-2" column style="padding-top: 7px">
+      <v-data-table
+        :headers="headers"
+        :items="itemPrice"
+        hide-default-footer
+        :items-per-page="100"
+        class="elevation-1 mt-8; text-align:right; pa-0"
+        :hide-default-header="false"
+        :class="{ mobile: isMobile }"
+        :mobile="isMobile"
+        :disable-sort="isMobile"
+        :disable-filtering="isMobile"
+        :disable-pagination="isMobile"
       >
-        mdi-clock
-      </v-icon>
-      <span class="caption grey--text font-weight-light">last registration 26 minutes ago</span>
-    </v-card-text>
+      </v-data-table>
+    </v-layout>
   </v-card>
 </template>
 
 <script>
-  export default {
-    data: () => ({
-      labels: [
-        '12am',
-        '3am',
-        '6am',
-        '9am',
-        '12pm',
-        '3pm',
-        '6pm',
-        '9pm',
+import { mapActions, mapState } from "vuex";
+import { dataService } from "../shared";
+export default {
+  data() {
+    return {
+      headers: [
+        {
+          text: "Item Name",
+          align: "start",
+          //sortable: false,
+          value: "itemName",
+        },
       ],
-      value: [
-        200,
-        675,
-        410,
-        390,
-        310,
-        460,
-        250,
-        240,
-      ],
-    }),
-  }
+      itemPrice: [],
+      reportRow: [],
+      isMobile: false,
+    };
+  },
+  created() {
+    this.getItemPrice();
+  },
+  mounted() {
+    //console.log(this.itemPrice);
+  },
+  onResize() {
+    if (parseInt(window.innerWidth) < 769) this.isMobile = true;
+    else this.isMobile = false;
+  },
+  methods: {
+    ...mapActions(["getItemsAction"]),
+    onResize() {
+      if (parseInt(window.innerWidth) < 769) this.isMobile = true;
+      else this.isMobile = false;
+    },
+    async getItemPrice() {
+      this.reportRow = {};
+
+      await dataService.getOrders().then((response) => {
+       
+        response.forEach((o) => {
+          
+          this.headers.push({ text: o.orderDt, value: o.id, align: "center" });
+        });
+      });
+
+      this.items.forEach((i) => {
+        if (i.isActive === "1") {
+          dataService.getItemPrice(i.id).then((response) => {
+            this.reportRow["itemName"] = i.name + " (" + i.defaultUnits + ")";
+            if (response && response.length > 0)
+              response.forEach((u) => {
+                this.reportRow[u.orderid] = `$ ${parseFloat(
+                  u.actPriceFinal
+                ).toFixed(2)}`;
+              });
+            this.itemPrice.push(this.reportRow);
+            this.reportRow = {};
+          });
+        }
+      });
+    },
+  },
+  computed: {
+    ...mapState(["items"]),
+  },
+};
 </script>
 
 <style>
-  .v-sheet--offset {
-    top: -24px;
-    position: relative;
-  }
+.v-sheet--offset {
+  top: -24px;
+  position: relative;
+}
 </style>

@@ -6,6 +6,7 @@ const signIn = async function(user) {
   try {
     const response = await axios.post(`${API}/authentication/login`, user);
     const userInfo = parseItem(response, 200);
+    //console.log(userInfo.data);
     return userInfo.data;
   } catch (error) {
     console.error(error);
@@ -353,6 +354,47 @@ const getBulkOrderByOrderId = async function(orderId) {
   }
 };
 
+const getItemPrice = async function(itemId) {
+  try {
+    const response = await axios.get(`${API}/itempricebyorder/${itemId}`);
+    let data = parseList(response);
+    return data;
+  } catch (error) {
+    return [];
+  }
+};
+
+const getPriceByOrder = async function(orderId) {
+  try {
+    const response = await axios.get(`${API}/getPriceByOrder/${orderId}`);
+    let data = parseList(response);
+    return data;
+  } catch (error) {
+    return [];
+  }
+};
+
+const getItemPriceHistory = async function(itemId) {
+  try {
+    const response = await axios.get(`${API}/getItemPriceHistory/${itemId}`);
+    let data = parseList(response);
+    return data;
+  } catch (error) {
+    return [];
+  }
+};
+
+const getUserOrder = async function(userId) {
+  try {
+    const response = await axios.get(`${API}/getUserOrder/${userId}`);
+    let data = parseList(response);
+    return data;
+  } catch (error) {
+    return [];
+  }
+};
+
+
 const addBulkOrder = async function(bulkOrder) {
   try {
     console.log(bulkOrder);
@@ -449,4 +491,8 @@ export const dataService = {
   addBulkOrder,
   updateBulkOrder,
   deleteBulkOrder,
+  getItemPrice,
+  getPriceByOrder,
+  getUserOrder,
+  getItemPriceHistory
 };

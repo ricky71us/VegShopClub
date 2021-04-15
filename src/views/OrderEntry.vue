@@ -194,8 +194,10 @@ export default {
     await this.getOrderStatusAction();
     await this.getOrdersAction();
     await this.getItemsAction();
-    await this.getPurchaseOrderByOrderIdAction(this.getCurrentOrder.id);
-    await this.getBulkOrderByOrderIdAction(this.getCurrentOrder.id);
+    if (this.getCurrentOrder !== undefined) {     
+      await this.getPurchaseOrderByOrderIdAction(this.getCurrentOrder.id);
+      await this.getBulkOrderByOrderIdAction(this.getCurrentOrder.id);
+    }
     if (this.localItems.length === 0) this.getItems();
   },
   async created() {},

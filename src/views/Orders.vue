@@ -7,13 +7,28 @@
             <v-row no-gutters>
               <v-col cols="10" class="pt-1 text-md-center">Manage Orders</v-col>
               <v-col v-if="isAdminUser" cols="2" class="text-md-center pl-2">
-                <v-dialog v-model="dialog" width="500" :key="localOrder.id" :id="localOrder.id">
+                <v-dialog
+                  v-model="dialog"
+                  width="500"
+                  :key="localOrder.id"
+                  :id="localOrder.id"
+                >
                   <template v-slot:activator="{ on }">
-                    <v-icon color="black" dark v-on="on" @click="initializeOrder()">mdi-plus</v-icon>
+                    <v-icon
+                      color="black"
+                      dark
+                      v-on="on"
+                      @click="initializeOrder()"
+                      >mdi-plus</v-icon
+                    >
                   </template>
                   <v-card>
                     <v-form ref="form" v-model="valid">
-                      <v-card-title class="headline grey lighten-2" primary-title>New Order</v-card-title>
+                      <v-card-title
+                        class="headline grey lighten-2"
+                        primary-title
+                        >New Order</v-card-title
+                      >
                       <v-card-text>
                         <v-autocomplete
                           v-model="updatedOrder.orderStatus"
@@ -32,14 +47,16 @@
                           offset-y
                           min-width="290px"
                         >
-                          <template v-slot:activator="{ on:addMenu, attrs: addAttrs }">
+                          <template
+                            v-slot:activator="{ on: addMenu, attrs: addAttrs }"
+                          >
                             <v-text-field
                               v-model="updatedOrder.orderDt"
                               label="Order Date"
                               prepend-icon="mdi-calendar"
                               readonly
-                              v-bind="{...addAttrs}"
-                              v-on="{...addMenu}"
+                              v-bind="{ ...addAttrs }"
+                              v-on="{ ...addMenu }"
                             ></v-text-field>
                           </template>
                           <v-date-picker
@@ -82,14 +99,16 @@
                           class="mr-4"
                           @click="addNewOrder()"
                           @click.stop="dialog = false"
-                        >Save</v-btn>
+                          >Save</v-btn
+                        >
 
                         <v-btn
                           color="error"
                           class="mr-4"
                           @click="initializeOrder()"
                           @click.stop="dialog = false"
-                        >Cancel</v-btn>
+                          >Cancel</v-btn
+                        >
                       </v-card-text>
 
                       <v-divider></v-divider>
@@ -107,7 +126,14 @@
       </v-list-item>
     </v-card>
 
-    <v-card class="mx-auto ma-3" max-width="1100" tile dense shaped v-if="this.getCurrentOrder">
+    <v-card
+      class="mx-auto ma-3"
+      max-width="1100"
+      tile
+      dense
+      shaped
+      v-if="this.getCurrentOrder"
+    >
       <v-subheader light>Current Order</v-subheader>
       <v-form ref="form" v-model="valid">
         <v-simple-table>
@@ -115,21 +141,21 @@
             <thead>
               <tr>
                 <th class="text-left">Order Id</th>
-                <th class="text-left">Order Date</th>
+                <th class="text-left">Packing Date</th>
                 <!-- <th class="text-left">Cut Off Date</th> -->
                 <th class="text-left">Status</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="activeOrder in activeOrders" :key="activeOrder.id">
-                <td>{{activeOrder.id }}</td>
-                <td>{{activeOrder.orderDt}}</td>
+                <td>{{ activeOrder.id }}</td>
+                <td>{{ activeOrder.orderDt }}</td>
                 <!-- <td>{{activeOrder.cutOffDt}}</td> -->
                 <td>
                   <!-- <v-icon
                     :color="getStatusName(activeOrder.orderStatus).color"
                   >{{getStatusName(activeOrder.orderStatus).icon}}</v-icon> -->
-                  {{getOrderStatus(activeOrder.orderStatus).status}}
+                  {{ getOrderStatus(activeOrder.orderStatus).status }}
                 </td>
                 <td v-if="isAdminUser">
                   <v-dialog
@@ -138,17 +164,22 @@
                     :key="activeOrder.id"
                     :id="activeOrder.id"
                   >
-                    <template v-slot:activator="{ on:editTemplate }">
+                    <template v-slot:activator="{ on: editTemplate }">
                       <v-icon
                         color="primary"
                         :id="activeOrder.id"
                         dark
-                        v-on="{...editTemplate}"
+                        v-on="{ ...editTemplate }"
                         @click="editOrder(activeOrder)"
-                      >mdi-pencil</v-icon>
+                        >mdi-pencil</v-icon
+                      >
                     </template>
                     <v-card>
-                      <v-card-title class="headline grey lighten-2" primary-title>Order Details</v-card-title>
+                      <v-card-title
+                        class="headline grey lighten-2"
+                        primary-title
+                        >Order Details</v-card-title
+                      >
 
                       <v-card-text>
                         <v-autocomplete
@@ -167,21 +198,25 @@
                           transition="scale-transition"
                           min-width="290px"
                         >
-                          <template v-slot:activator="{ on:editMenu, attrs:editAttrs }">
+                          <template
+                            v-slot:activator="{
+                              on: editMenu,
+                              attrs: editAttrs,
+                            }"
+                          >
                             <v-text-field
                               v-model="tempOrder.orderDt"
                               label="Order Date"
                               prepend-icon="mdi-calendar"
                               readonly
-                              v-bind="{...editAttrs}"
-                              v-on="{...editMenu}"
+                              v-bind="{ ...editAttrs }"
+                              v-on="{ ...editMenu }"
                             ></v-text-field>
                           </template>
                           <v-date-picker
                             :return-value.sync="tempOrder.orderDt"
                             v-model="tempOrder.orderDt"
                             @input="editMenuFlag = false"
-                            :min="nowDate"
                           ></v-date-picker>
                         </v-menu>
 
@@ -214,15 +249,17 @@
                           color="success"
                           class="mr-4"
                           @click="updateOrder()"
-                          @click.stop="$set(dialogEdit, activeOrder.id,  false)"
-                        >Save</v-btn>
+                          @click.stop="$set(dialogEdit, activeOrder.id, false)"
+                          >Save</v-btn
+                        >
 
                         <v-btn
                           color="error"
                           class="mr-4"
                           @click="initializeOrder()"
-                          @click.stop="$set(dialogEdit, activeOrder.id,  false)"
-                        >Cancel</v-btn>
+                          @click.stop="$set(dialogEdit, activeOrder.id, false)"
+                          >Cancel</v-btn
+                        >
                       </v-card-text>
 
                       <v-divider></v-divider>
@@ -242,7 +279,9 @@
     <v-card class="mx-auto ma-3" max-width="1100" color="primary" elevation>
       <v-expansion-panels accordion>
         <v-expansion-panel>
-          <v-expansion-panel-header color="grey lighten-1">Past Orders</v-expansion-panel-header>
+          <v-expansion-panel-header color="grey lighten-1"
+            >Past Orders</v-expansion-panel-header
+          >
           <v-expansion-panel-content>
             <v-simple-table>
               <template v-slot:default>
@@ -256,16 +295,107 @@
                 </thead>
                 <tbody>
                   <tr v-for="item in getPastOrder()" :key="item.id">
-                    <td>{{item.id}}</td>
+                    <td>{{ item.id }}</td>
                     <td>
                       <!-- <v-icon
                         :color="getStatusName(item.orderStatus).color"
                       >{{ getStatusName(item.orderStatus).icon }}</v-icon> -->
-                       {{getOrderStatus(item.orderStatus).status}}
+                      {{ getOrderStatus(item.orderStatus).status }}
                     </td>
-                    <td>{{item.orderDt}}</td>
+                    <td>{{ item.orderDt }}</td>
                     <!-- <td>{{item.cutOffDt}}</td> -->
-                    
+                    <td v-if="isAdminUser">
+                      <v-dialog
+                        v-model="dialogEdit[item.id]"
+                        width="500"
+                        :key="item.id"
+                        :id="item.id"
+                      >
+                        <template v-slot:activator="{ on: editTemplate }">
+                          <v-icon
+                            color="primary"
+                            :id="item.id"
+                            dark
+                            v-on="{ ...editTemplate }"
+                            @click="editOrder(item)"
+                            >mdi-pencil</v-icon
+                          >
+                        </template>
+                        <v-card>
+                          <v-card-title
+                            class="headline grey lighten-2"
+                            primary-title
+                            >Order Details</v-card-title
+                          >
+
+                          <v-card-text>
+                            <v-autocomplete
+                              v-model="tempOrder.orderStatus"
+                              item-value="id"
+                              item-text="status"
+                              :items="orderstatus"
+                              label="Order Status"
+                              required
+                            ></v-autocomplete>
+
+                            <v-menu
+                              v-model="editDateMenu[item.id]"
+                              :close-on-content-click="true"
+                              :nudge-right="40"
+                              transition="scale-transition"
+                              min-width="290px"
+                            >
+                              <template
+                                v-slot:activator="{
+                                  on: editMenu,
+                                  attrs: editAttrs,
+                                }"
+                              >
+                                <v-text-field
+                                  v-model="tempOrder.orderDt"
+                                  label="Order Date"
+                                  prepend-icon="mdi-calendar"
+                                  readonly
+                                  v-bind="{ ...editAttrs }"
+                                  v-on="{ ...editMenu }"
+                                ></v-text-field>
+                              </template>
+                              <v-date-picker
+                                :return-value.sync="tempOrder.orderDt"
+                                v-model="tempOrder.orderDt"
+                                @input="editMenuFlag = false"
+                              ></v-date-picker>
+                            </v-menu>
+
+                            <v-btn
+                              color="success"
+                              class="mr-4"
+                              @click="updateOrder()"
+                              @click.stop="
+                                $set(dialogEdit, item.id, false)
+                              "
+                              >Save</v-btn
+                            >
+
+                            <v-btn
+                              color="error"
+                              class="mr-4"
+                              @click="initializeOrder()"
+                              @click.stop="
+                                $set(dialogEdit, item.id, false)
+                              "
+                              >Cancel</v-btn
+                            >
+                          </v-card-text>
+
+                          <v-divider></v-divider>
+
+                          <v-card-actions>
+                            <v-spacer></v-spacer>
+                          </v-card-actions>
+                        </v-card>
+                      </v-dialog>
+                    </td>
                   </tr>
                 </tbody>
               </template>
@@ -340,7 +470,7 @@ export default {
   async mounted() {
     this.getOrderStatusAction();
     this.getOrdersAction();
-    this.activeOrders.push(this.getCurrentOrder);    
+    this.activeOrders.push(this.getCurrentOrder);
   },
 
   methods: {
@@ -378,18 +508,20 @@ export default {
         orderDt: null,
         cutOffDt: null,
         orderStatus: 3,
-        isLocked: 0
+        isLocked: 0,
       };
     },
     getPastOrder() {
-      return this.orders.filter((po) => parseInt(po.orderStatus) === 6).sort(function (a, b) {
-        if (a.id < b.id) {
-          return -1;
-        }
-        if (a.id > b.id) {
-          return 1;
-        }
-      });
+      return this.orders
+        .filter((po) => parseInt(po.orderStatus) === 6)
+        .sort(function (a, b) {
+          if (a.id < b.id) {
+            return -1;
+          }
+          if (a.id > b.id) {
+            return 1;
+          }
+        });
     },
     addNewOrder: function () {
       if (this.$refs.form.validate()) {
@@ -440,9 +572,9 @@ export default {
         return { icon: "mdi-check", color: "blue", status: "Active" };
       else return { icon: "mdi-clock", color: "black", status: "Not Found" };
     },
-    getOrderStatus: function(id){
+    getOrderStatus: function (id) {
       return this.orderstatus.find((o) => o.id === id);
-    }
+    },
   },
   computed: {
     ...mapState(["orders", "orderstatus"]),
@@ -450,7 +582,6 @@ export default {
     sortedItems: function () {
       return 0;
     },
-    
   },
 };
 </script>

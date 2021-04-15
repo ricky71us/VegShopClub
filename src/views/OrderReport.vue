@@ -252,7 +252,7 @@
         :disable-pagination="isMobile"
         :hide-default-header="false"
       >
-        <template v-slot:item.userName="{ item }">
+        <template v-slot:[`item.userName`]="{ item }">
           <v-chip label ripple>{{ item.userName }}</v-chip>
         </template>
         <template slot="body.append">
@@ -276,7 +276,7 @@
       <tbody>
         <tr>
           <td cols="6"> -->
-      <v-lazy        
+      <v-lazy
         :options="{
           threshold: 0.5,
         }"
@@ -292,7 +292,7 @@
         </v-card>
       </v-lazy>
       <v-divider class="mx-4"></v-divider>
-      <v-lazy        
+      <v-lazy
         :options="{
           threshold: 0.5,
         }"
@@ -308,7 +308,7 @@
         </v-card>
       </v-lazy>
       <v-divider class="mx-4" inset></v-divider>
-      <v-lazy        
+      <v-lazy
         :options="{
           threshold: 0.5,
         }"
@@ -383,7 +383,7 @@ export default {
 
     await this.setOrderLock();
     await this.getQtyByItem();
-    await this.getData();
+    if (this.getCurrentOrder !== undefined) await this.getData();
     await this.getSortedItems();
   },
   mounted() {},
@@ -696,7 +696,8 @@ export default {
       this.reportHeader = [];
       this.reportTotalRow = [];
       await this.getUsers();
-      await this.getPurchaseOrderByOrderIdAction(this.getCurrentOrder.id);
+      if (this.getCurrentOrder !== undefined)
+        await this.getPurchaseOrderByOrderIdAction(this.getCurrentOrder.id);
       this.bulkOrders.forEach((bo) => {
         //if (bo.qty > 0) {
         let item = this.items.find(

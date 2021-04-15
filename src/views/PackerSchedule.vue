@@ -41,6 +41,15 @@
                           required
                         ></v-autocomplete>
 
+                        <v-autocomplete
+                          v-model="tempPackerSchedule.orderId"
+                          item-value="id"
+                          item-text= "orderDt"
+                          :items="orders"
+                          label="Order Date"
+                          required
+                        ></v-autocomplete>
+
                         <v-menu
                           v-model="addDateMenu"
                           :close-on-content-click="true"
@@ -64,8 +73,7 @@
                           <v-date-picker
                             :return-value.sync="updatedPackerSchedule.date"
                             v-model="updatedPackerSchedule.date"
-                            @input="addMenu = false"
-                            :min="nowDate"
+                            @input="addMenu = false"                            
                           ></v-date-picker>
                         </v-menu>
 
@@ -156,6 +164,15 @@
                                 required
                               ></v-autocomplete>
 
+                              <v-autocomplete
+                                v-model="tempPackerSchedule.orderId"
+                                item-value="id"
+                                item-text="orderDt"
+                                :items="orders"
+                                label="Order Date"
+                                required
+                              ></v-autocomplete>
+
                               <v-menu
                                 v-model="editDateMenu[item.id]"
                                 :close-on-content-click="true"
@@ -182,7 +199,6 @@
                                   :return-value.sync="tempPackerSchedule.date"
                                   v-model="tempPackerSchedule.date"
                                   @input="editMenuFlag = false"
-                                  :min="nowDate"
                                 ></v-date-picker>
                               </v-menu>
 
@@ -247,6 +263,104 @@
                   <tr v-for="item in getPastPackerSchedule()" :key="item.id">
                     <td>{{ getUserName(item.userId) }}</td>
                     <td>{{ item.date }}</td>
+                    <td>{{ item.orderId }}</td>
+                    <td v-if="isAdminUser">
+                        <v-dialog
+                          v-model="dialogEdit[item.id]"
+                          width="500"
+                          :key="item.id"
+                          :id="item.id"
+                        >
+                          <template v-slot:activator="{ on: editTemplate }">
+                            <v-icon
+                              color="primary"
+                              :id="item.id"
+                              dark
+                              v-on="{ ...editTemplate }"
+                              @click="editPackerSchedule(item)"
+                              >mdi-pencil</v-icon
+                            >
+                          </template>
+                          <v-card>
+                            <v-card-title
+                              class="headline grey lighten-2"
+                              primary-title
+                              >Packer Schedule Details</v-card-title
+                            >
+
+                            <v-card-text>
+                              <v-autocomplete
+                                v-model="tempPackerSchedule.userId"
+                                item-value="id"
+                                item-text="firstname"
+                                :items="localUsers"
+                                label="User"
+                                required
+                              ></v-autocomplete>
+
+                              <v-autocomplete
+                                v-model="tempPackerSchedule.orderId"
+                                item-value="id"
+                                item-text="orderDt"
+                                :items="orders"
+                                label="Order Date"
+                                required
+                              ></v-autocomplete>
+
+                              <v-menu
+                                v-model="editDateMenu[item.id]"
+                                :close-on-content-click="true"
+                                :nudge-right="40"
+                                transition="scale-transition"
+                                min-width="290px"
+                              >
+                                <template
+                                  v-slot:activator="{
+                                    on: editMenu,
+                                    attrs: editAttrs,
+                                  }"
+                                >
+                                  <v-text-field
+                                    v-model="tempPackerSchedule.date"
+                                    label="Packer Date"
+                                    prepend-icon="mdi-calendar"
+                                    readonly
+                                    v-bind="{ ...editAttrs }"
+                                    v-on="{ ...editMenu }"
+                                  ></v-text-field>
+                                </template>
+                                <v-date-picker
+                                  :return-value.sync="tempPackerSchedule.date"
+                                  v-model="tempPackerSchedule.date"
+                                  @input="editMenuFlag = false"
+                                ></v-date-picker>
+                              </v-menu>
+
+                              <v-btn
+                                color="success"
+                                class="mr-4"
+                                @click="updatePackerSchedule()"
+                                @click.stop="$set(dialogEdit, item.id, false)"
+                                >Save</v-btn
+                              >
+
+                              <v-btn
+                                color="error"
+                                class="mr-4"
+                                @click="initializePackerSchedule()"
+                                @click.stop="$set(dialogEdit, item.id, false)"
+                                >Cancel</v-btn
+                              >
+                            </v-card-text>
+
+                            <v-divider></v-divider>
+
+                            <v-card-actions>
+                              <v-spacer></v-spacer>
+                            </v-card-actions>
+                          </v-card>
+                        </v-dialog>
+                      </td>
                   </tr>
                 </tbody>
               </template>
@@ -287,6 +401,7 @@ export default {
         id: 0,
         userId: null,
         date: null,
+        orderId: null,
         isActive: true,
       },
       valid: false,
@@ -301,7 +416,7 @@ export default {
       multiLine: true,
       snackbar: false,
       selected: [],
-      localUsers: [],
+      localUsers: [],      
       selectedUser: null,
       addDateMenu: null,
       editDateMenu: [],
@@ -323,6 +438,7 @@ export default {
 
   methods: {
     ...mapActions([
+      "getOrdersAction",
       "getPackerScheduleAction",
       "addPackerScheduleAction",
       "deletePackerScheduleAction",
@@ -359,8 +475,8 @@ export default {
       if (this.pastSchedule.length === 0 || !this.pastSchedule)
         dataService.getPackerSchedule("p").then((response) => {
           this.pastSchedule = response;
-        });      
-        return this.pastSchedule;
+        });
+      return this.pastSchedule;
     },
     editPackerSchedule: function (item) {
       this.valid = true;
@@ -369,6 +485,7 @@ export default {
         id: item.id,
         userId: item.userId,
         date: item.date,
+        orderId: item.orderId,
         active: true,
       };
     },
@@ -399,6 +516,7 @@ export default {
         id: this.tempPackerSchedule.id,
         userId: this.tempPackerSchedule.userId,
         date: this.tempPackerSchedule.date,
+        orderId: this.tempPackerSchedule.orderId,
         active: true,
       });
       let userName = this.getUserName(this.tempPackerSchedule.userId);
@@ -424,14 +542,14 @@ export default {
         return 0;
       });
     },
-   
+
     getUserName(id) {
       let user = this.localUsers.find((u) => u.id === id);
       return user ? `${user.firstname} ${user.lastname}` : "User Not Found";
     },
   },
   computed: {
-    ...mapState(["packerSchedules"]),
+    ...mapState(["packerSchedules", "orders"]),
     ...mapGetters(["isAdminUser"]),
     sortedItems: function () {
       return 0;

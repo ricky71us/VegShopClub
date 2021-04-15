@@ -7,7 +7,7 @@ Vue.use(Vuex);
 
 const getDefaultState = () => {
   return {
-    user: { id: 0, email: "", firstname: "", lastname: "", phone: "" },
+    user: { id: 0, email: "", firstname: "", lastname: "", phone: "", lastlogindate:"" },
     orders: [],
     orderstatus: [],
     items: [],
@@ -144,8 +144,8 @@ const actions = {
   async resetStateAction({ commit }) {
     commit("resetState");
   },
-  async signInAction({ commit }, user) {
-    const signInUser = await dataService.signIn(user);
+  async signInAction({ commit }, user) {    
+    const signInUser = await dataService.signIn(user);    
     //.then(() => {
     //localStorage.setItem("userId", signInUser.id);
     //});
@@ -205,6 +205,7 @@ const actions = {
     commit("addPackerSchedule", addedPackerSchedule);
   },
   async updatePackerScheduleAction({ commit }, item) {
+    console.log(item);
     const updatedPackerSchedule = await dataService.updatePackerSchedule(item);
     commit("updatePackerSchedule", updatedPackerSchedule);
   },
